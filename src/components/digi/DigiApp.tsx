@@ -740,6 +740,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         }}>
           <div style={{
             width: 300, height: 300,
+            aspectRatio: "1 / 1",
             maxHeight: "100%",
             marginLeft: -30,
             background: "rgba(16, 21, 28, 0.4)",
