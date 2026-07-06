@@ -615,14 +615,10 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
         })}
 
         {/* Business Modules - Collapsible */}
-        <div style={{ padding: "10px 14px 5px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ padding: "10px 14px 5px" }}>
           <Mono>Business Modules</Mono>
-          <button onClick={() => { playUISound('soft-click'); setShowModules(!showModules); }}
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: 4, cursor: "pointer", transition: "all 0.2s" }}>
-            <ChevronDown size={11} style={{ color: "#5C616B", transform: showModules ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
-          </button>
         </div>
-        {showModules && MODULES.map((mod, i) => (
+        {MODULES.map((mod, i) => (
           <button key={i} className="group glass-btn"
             onClick={() => playUISound('click')}
             onMouseEnter={() => playUISound('hover')}
