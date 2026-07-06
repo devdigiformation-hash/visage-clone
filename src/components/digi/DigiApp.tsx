@@ -649,7 +649,10 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   // Computed height of the node-map section
   const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
   // Keep the layout height tied to the cards so the huge globe doesn't push the UI down
-  const nodeMapH = Math.max(baseNodeMapH, 460);
+  const nodeMapH = Math.max(baseNodeMapH, 490);
+  const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
+  const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
+  const nodeCardsTop = Math.round(globeCenterY - nodeCardsTotalH / 2);
 
   return (
     <div style={{
@@ -700,7 +703,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           display: "flex", flexDirection: "column", gap: C_CARD_GAP,
           position: "relative", zIndex: 10,
           width: C_CARD_W, flexShrink: 0,
-          justifyContent: "center",
+          marginTop: nodeCardsTop,
         }}>
           {NODES.map(n => {
             const lit = activeNode === n.id;
@@ -728,22 +731,18 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           })}
         </div>
 
-        {/* Spacer — connector lines travel through here */}
-        <div style={{ flex: 1, minWidth: 0 }} />
-
-        {/* Orb column — globe centered horizontally, right-side control rail flush right */}
+        {/* True-center globe composition + aligned right controls */}
         <div style={{
-          width: C_ORB_AREA, flexShrink: 0,
-          position: "relative", zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          alignSelf: "stretch",
-          paddingRight: 48, // reserve room for right control rail
+          position: "absolute", inset: C_PAD,
+          zIndex: 10,
+          pointerEvents: "none",
         }}>
-          {/* Right control rail — vertically centered, flush right inside orb column */}
+          {/* Right control rail — vertically centered to the globe hub */}
           <div style={{
-            position: "absolute", top: "50%", right: 6,
+            position: "absolute", top: globeCenterY - C_PAD, left: `calc(50% + ${Math.round(C_ORB_SIZE / 2 + 24)}px)`,
             transform: "translateY(-50%)",
             display: "flex", flexDirection: "column", gap: 10, zIndex: 30,
+            pointerEvents: "auto",
           }}>
             <button
               onClick={toggleCamera}
@@ -793,7 +792,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 
           {/* Live media previews (top-left) */}
           {(cameraOn || screenShareOn) && (
-            <div style={{ position: "absolute", top: 8, left: 8, display: "flex", flexDirection: "column", gap: 6, zIndex: 30 }}>
+            <div style={{ position: "absolute", top: globeCenterY - C_PAD - 188, left: "calc(50% - 210px)", display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto" }}>
               {cameraOn && (
                 <video ref={cameraVideoRef} autoPlay playsInline muted
                   style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
@@ -827,12 +826,15 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             }
           `}</style>
 
-          {/* Center stack: globe + Start AI button, horizontally centered in the remaining space */}
+          {/* Center stack: globe + Start AI button, fixed on the composition center axis */}
           <div style={{
+            position: "absolute", left: "50%", top: globeCenterY - C_PAD - C_ORB_SIZE / 2,
+            transform: "translateX(-50%)",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            gap: 14, marginTop: -22,
+            gap: 13,
+            pointerEvents: "auto",
           }}>
-            <div style={{ position: "relative", width: 300, height: 300 }}>
+            <div style={{ position: "relative", width: C_ORB_SIZE, height: C_ORB_SIZE }}>
               {/* Silver firefly sparkles — only visible in standby */}
               {!aiActive && (
                 <>
