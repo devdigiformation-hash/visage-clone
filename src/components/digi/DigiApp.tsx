@@ -7,7 +7,7 @@ import {
   Wallet, RotateCcw, PanelRightClose, PanelRightOpen,
   PanelLeftClose, PanelLeftOpen, Paperclip, Image as ImageIcon,
   Volume2, TrendingUp, BarChart2, Folder, FileText, Copy, Check,
-  Workflow
+  Workflow, Wrench
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
@@ -194,7 +194,7 @@ const ACTIONS = [
   { id: "camera",   label: "Camera",       Icon: Camera,   color: RIGHT_WIRES[0].color, bg: "rgba(196,181,253,0.12)", glow: RIGHT_WIRES[0].glow },
   { id: "screen",   label: "Screen Share", Icon: Monitor,  color: RIGHT_WIRES[1].color, bg: "rgba(245,166,35,0.12)",  glow: RIGHT_WIRES[1].glow },
   { id: "agent",    label: "Agent",        Icon: Bot,      color: RIGHT_WIRES[2].color, bg: "rgba(244,114,182,0.12)", glow: RIGHT_WIRES[2].glow },
-  { id: "workflow", label: "Workflow",     Icon: Workflow, color: RIGHT_WIRES[3].color, bg: "rgba(125,211,252,0.12)", glow: RIGHT_WIRES[3].glow },
+  { id: "tools",    label: "Tools",        Icon: Wrench,   color: RIGHT_WIRES[3].color, bg: "rgba(125,211,252,0.12)", glow: RIGHT_WIRES[3].glow },
 ];
 const PLANET_R   = 700;
 
