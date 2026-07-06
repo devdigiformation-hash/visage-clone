@@ -1280,7 +1280,12 @@ function StartupScreen({ onComplete }: { onComplete: () => void }) {
     setStarted(true);
     playUISound('tech');
     if (videoRef.current) {
-      videoRef.current.play().catch(e => console.error("Video play error:", e));
+      videoRef.current.play().catch(e => {
+        console.warn("Video play error, skipping:", e);
+        onComplete();
+      });
+    } else {
+      onComplete();
     }
   };
 
