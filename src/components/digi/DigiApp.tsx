@@ -310,8 +310,10 @@ function ConnectorSVG({ active, W, H }: { active: boolean; W: number; H: number 
   // The 3D projection divides by a fov of 2.85, so the visual radius is smaller.
   const visualPlanetR = PLANET_R / 2.85;
   // Offset adjusted to perfectly meet the planet edge
-  // Globe inner container sits at orbContainerLeft + (-30 marginLeft), width 300, so globe center = orbContainerLeft + 120
-  const orbEdgeX = orbContainerLeft + 120 - visualPlanetR;
+  // Globe is centered horizontally inside the orb column (minus the ~48px right control rail)
+  const rightRailW = 48;
+  const globeCenterX = orbContainerLeft + (C_ORB_AREA - rightRailW) / 2;
+  const orbEdgeX = globeCenterX - visualPlanetR;
   const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.75); // Multiplier changed to push junction right
   const midY  = Math.round(H / 2);
   const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
