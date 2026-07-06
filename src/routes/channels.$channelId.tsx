@@ -14,10 +14,13 @@ type Tab = "overview" | "setup" | "webhooks" | "automation" | "logs";
 function ChannelDetail() {
   const { channelId } = Route.useParams();
   const nav = useNavigate();
-  const [ch, setCh] = useState<Channel | undefined>(() => channelsRepo.get(channelId));
+  const [ch, setCh] = useState<Channel | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<Tab>("setup");
 
   useEffect(() => {
+    setCh(channelsRepo.get(channelId));
+    setLoaded(true);
     const unsub = channelsRepo.subscribe(() => setCh(channelsRepo.get(channelId)));
     return () => { unsub(); };
   }, [channelId]);
@@ -26,7 +29,7 @@ function ChannelDetail() {
     return (
       <div style={{ maxWidth: 520 }}>
         <Link to="/channels" style={{ ...btnGhost, marginBottom: 16 }}><ArrowLeft size={13}/> All channels</Link>
-        <div style={{ padding: 20, borderRadius: 10, border: "1px dashed #1F232C", color: "#8A909C" }}>Channel not found.</div>
+        <div style={{ padding: 20, borderRadius: 10, border: "1px dashed #1F232C", color: "#8A909C" }}>{loaded ? "Channel not found." : "Loading…"}</div>
       </div>
     );
   }
