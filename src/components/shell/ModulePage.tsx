@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Plus, Search, X, Trash2, Edit3 } from "lucide-react";
+import { Plus, Search, X, Trash2, Edit3, Upload } from "lucide-react";
 import type { Entity, createRepo } from "@/lib/repo";
 import { useRepo } from "@/lib/repo";
 
@@ -27,6 +27,7 @@ export function ModulePage<T extends Entity>({
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<T | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
 
   const filtered = items.filter((it) =>
     !q || JSON.stringify(it).toLowerCase().includes(q.toLowerCase())
@@ -62,6 +63,9 @@ export function ModulePage<T extends Entity>({
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {extraActions}
+          <button onClick={() => setShowBulk(true)} style={btnGhost} title="Bulk import JSON">
+            <Upload size={12} /> Import
+          </button>
           <button onClick={openCreate} style={btnPrimary(accent)}>
             <Plus size={13} /> New
           </button>
@@ -128,6 +132,74 @@ export function ModulePage<T extends Entity>({
           onSave={save}
         />
       )}
+      {showBulk && (
+        <BulkImport
+          accent={accent}
+          title={title}
+          fields={fields}
+          onCancel={() => setShowBulk(false)}
+          onImport={(rows) => { repo.bulkImport(rows as any); setShowBulk(false); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function BulkImport({ title, accent, fields, onCancel, onImport }: {
+  title: string; accent: string; fields: Field[];
+  onCancel: () => void; onImport: (rows: any[]) => void;
+}) {
+  const [text, setText] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const sample = JSON.stringify(
+    [Object.fromEntries(fields.map((f) => [f.key, f.type === "toggle" ? true : f.type === "number" ? 0 : ""]))],
+    null, 2,
+  );
+
+  const submit = () => {
+    try {
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) throw new Error("Expected a JSON array of objects.");
+      onImport(parsed);
+    } catch (e: any) { setErr(e.message ?? "Invalid JSON"); }
+  };
+
+  return (
+    <div onClick={onCancel} style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
+      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+    }}>
+      <div onClick={(e) => e.stopPropagation()} style={{
+        width: 620, maxHeight: "85vh", overflow: "auto",
+        background: "#0D1017", border: "1px solid #1A1D24", borderRadius: 12,
+        boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${accent}20`,
+      }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid #1A1D24", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: "#F5F6F8", margin: 0 }}>Bulk import · {title}</h2>
+          <button onClick={onCancel} style={iconBtn}><X size={14} /></button>
+        </div>
+        <div style={{ padding: 18 }}>
+          <div style={{ fontSize: 11, color: "#7A8090", marginBottom: 6 }}>
+            Paste a JSON array. Each object becomes one item. Unknown fields are stored but ignored by columns.
+          </div>
+          <textarea
+            value={text}
+            onChange={(e) => { setText(e.target.value); setErr(null); }}
+            placeholder={sample}
+            rows={14}
+            style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace", fontSize: 11.5 }}
+          />
+          {err && <div style={{ fontSize: 11, color: "#FF5C5C", marginTop: 6 }}>{err}</div>}
+          <details style={{ marginTop: 8, fontSize: 11, color: "#7A8090" }}>
+            <summary style={{ cursor: "pointer" }}>Show schema sample</summary>
+            <pre style={{ background: "#08090C", border: "1px solid #1A1D24", padding: 10, borderRadius: 6, marginTop: 6, color: "#D2D6E0", fontSize: 11, overflow: "auto" }}>{sample}</pre>
+          </details>
+        </div>
+        <div style={{ padding: "12px 18px", borderTop: "1px solid #1A1D24", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button onClick={onCancel} style={btnGhost}>Cancel</button>
+          <button onClick={submit} style={btnPrimary(accent)}>Import</button>
+        </div>
+      </div>
     </div>
   );
 }

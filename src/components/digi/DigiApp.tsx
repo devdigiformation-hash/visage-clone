@@ -15,6 +15,7 @@ import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
 import { VoiceAIPage } from "./VoiceAIPage";
+import { CommandCenterOverlay } from "@/components/orchestrator/CommandCenterOverlay";
 import { useNavigate } from "@tanstack/react-router";
 
 import startupVideoAsset from '@/assets/digi-startup.mp4.asset.json';
@@ -818,6 +819,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const [agentTab, setAgentTab] = useState("town");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
+  const [commandCenterOpen, setCommandCenterOpen] = useState(false);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
   const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -1094,7 +1096,11 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           zIndex: 20,
           pointerEvents: "auto",
         }}>
-          <div style={{ position: "relative", width: globeSize, height: globeSize }}>
+          <div
+            style={{ position: "relative", width: globeSize, height: globeSize, cursor: "pointer" }}
+            onClick={() => setCommandCenterOpen(true)}
+            title="Open Command Center"
+          >
             <div className={aiActive ? "orb-breathe" : ""}
               style={{
                 position: "absolute", width: "100%", height: "100%",
@@ -1193,6 +1199,8 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         <input placeholder="Add new objective..."
           style={{ fontSize: 11, background: "transparent", outline: "none", color: "#5C616B", width: 155 }} />
       </div>
+
+      <CommandCenterOverlay open={commandCenterOpen} onClose={() => setCommandCenterOpen(false)} />
     </div>
   );
 }
