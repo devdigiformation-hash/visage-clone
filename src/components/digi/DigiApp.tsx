@@ -1096,7 +1096,11 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           zIndex: 20,
           pointerEvents: "auto",
         }}>
-          <div style={{ position: "relative", width: globeSize, height: globeSize }}>
+          <div
+            style={{ position: "relative", width: globeSize, height: globeSize, cursor: "pointer" }}
+            onClick={() => setCommandCenterOpen(true)}
+            title="Open Command Center"
+          >
             <div className={aiActive ? "orb-breathe" : ""}
               style={{
                 position: "absolute", width: "100%", height: "100%",
