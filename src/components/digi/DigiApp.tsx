@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
+import { TaskStrip } from "@/components/analytics/TaskStrip";
 import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
