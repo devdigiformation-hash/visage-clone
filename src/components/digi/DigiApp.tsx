@@ -343,13 +343,17 @@ function ParticleOrb({ active }: { active: boolean }) {
 
 // ─── Connector SVG ────────────────────────────────────────────────────────────
 // Geometry constants MUST stay in sync with OperationsPanel layout.
-function ConnectorSVG({ active, W, H, globeSize, globeCenterX }: { active: boolean; W: number; H: number; globeSize: number; globeCenterX: number }) {
+function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rightButtonYs }: { active: boolean; W: number; H: number; globeSize: number; globeCenterX: number; rightActionX: number; rightButtonYs: number[] }) {
   const nodeX = C_LEFT_STACK_X + C_CARD_W;                    // right edge of card column
   // Globe is now the true center hub of the Operations Status composition.
   const visualPlanetR = Math.round(globeSize * 0.43);
   const orbEdgeX = globeCenterX - visualPlanetR;
+  const orbRightEdgeX = globeCenterX + visualPlanetR;
   const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.70);
   const midY  = Math.round(H * C_GLOBE_Y_RATIO);
+  // Right-side junction — mirror of the left junction
+  const rMidX = Math.round(orbRightEdgeX + (rightActionX - orbRightEdgeX) * 0.30);
+  const rMidY = midY;
   const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
   const startY = midY - nodeCardsTotalH / 2;
   const ys    = NODES.map((_, i) => startY + i * (C_CARD_H + C_CARD_GAP) + Math.round(C_CARD_H / 2));
