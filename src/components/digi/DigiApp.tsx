@@ -426,9 +426,73 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rig
         );
       })()}
 
-      {/* Orb entry dot */}
+      {/* Orb entry dot (left) */}
       <circle cx={orbEdgeX} cy={midY} r="3.5" fill="#0D0F14" stroke="#2FE0C8" strokeWidth="1.5" opacity="0.85" />
       <circle cx={orbEdgeX} cy={midY} r="1.6" fill="#2FE0C8" opacity={active ? "0.9" : "0.5"} />
+
+      {/* ─── Right-side wires: globe → right junction → 4 action buttons ─── */}
+      <defs>
+        {RIGHT_WIRES.map((_, i) => (
+          <filter key={`rf-${i}`} id={`rcf${i}`} x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        ))}
+        <radialGradient id="rjunc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#C4B5FD" stopOpacity={active ? "0.85" : "0.35"} />
+          <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Orb → right junction */}
+      {(() => {
+        const d3 = `M ${orbRightEdgeX} ${midY} C ${orbRightEdgeX + Math.round((rMidX-orbRightEdgeX)*0.4)} ${midY}, ${rMidX - Math.round((rMidX-orbRightEdgeX)*0.2)} ${rMidY}, ${rMidX} ${rMidY}`;
+        return (
+          <g>
+            <path d={d3} fill="none" stroke="#C4B5FD" strokeWidth="2.5" opacity="0.06" />
+            <path id="rncmain" d={d3} fill="none" stroke="#C4B5FD" strokeWidth="1.5"
+              opacity={active ? 0.6 : 0.22} filter="url(#cfmain)" />
+            <circle r="2.5" fill="#C4B5FD" opacity={active ? "1" : "0.55"}>
+              <animateMotion dur="1.7s" repeatCount="indefinite">
+                <mpath href="#rncmain" />
+              </animateMotion>
+            </circle>
+          </g>
+        );
+      })()}
+
+      {/* Right junction node */}
+      <circle cx={rMidX} cy={rMidY} r="10" fill="url(#rjunc)" opacity={active ? "0.5" : "0.18"} />
+      <circle cx={rMidX} cy={rMidY} r="5.5" fill="#0D0F14" stroke="#22252D" strokeWidth="1.5" />
+      <circle cx={rMidX} cy={rMidY} r="2.5" fill="#C4B5FD" opacity={active ? "0.95" : "0.5"}>
+        <animate attributeName="r" values={active ? "2;3.5;2" : "1.8;2.8;1.8"} dur="2s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Right junction → 4 buttons */}
+      {rightButtonYs.map((by, i) => {
+        const col = RIGHT_WIRES[i].color;
+        const pid = `rnc${i}`;
+        const btnX = rightActionX - 6;
+        const c1x = Math.round(rMidX + (btnX - rMidX) * 0.26);
+        const c2x = Math.round(rMidX + (btnX - rMidX) * 0.62);
+        const d   = `M ${rMidX} ${rMidY} C ${c1x} ${rMidY}, ${c2x} ${by}, ${btnX} ${by}`;
+        return (
+          <g key={`rw-${i}`}>
+            <path d={d} fill="none" stroke={col} strokeWidth="2.5" opacity={active ? "0.18" : "0.05"} />
+            <path id={pid} d={d} fill="none" stroke={col} strokeWidth={active ? "1.6" : "1.1"}
+              opacity={active ? 0.8 : 0.22} filter={`url(#rcf${i})`} />
+            <circle cx={btnX} cy={by} r={active ? "4" : "3"} fill="#0D0F14" stroke={col} strokeWidth="1.4" opacity="0.85" />
+            <circle cx={btnX} cy={by} r={active ? "2.2" : "1.5"} fill={col} opacity={active ? "1" : "0.55"}>
+              <animate attributeName="opacity" values={active ? "0.8;1;0.8" : "0.3;0.6;0.3"} dur="1.1s" repeatCount="indefinite" />
+            </circle>
+            <circle r={active ? "2.6" : "1.8"} fill={col} opacity={active ? "0.95" : "0.45"}>
+              <animateMotion dur={`${2.8 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.5}s`}>
+                <mpath href={`#${pid}`} />
+              </animateMotion>
+            </circle>
+          </g>
+        );
+      })}
     </svg>
   );
 }
