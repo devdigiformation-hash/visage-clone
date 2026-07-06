@@ -29,6 +29,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChannelsNewRouteImport } from './routes/channels.new'
+import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 
 const WorkspacesRoute = WorkspacesRouteImport.update({
   id: '/workspaces',
@@ -130,6 +131,11 @@ const ChannelsNewRoute = ChannelsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => ChannelsRoute,
 } as any)
+const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
+  id: '/$channelId',
+  path: '/$channelId',
+  getParentRoute: () => ChannelsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/town': typeof TownRoute
   '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
 }
 export interface FileRoutesByTo {
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/town': typeof TownRoute
   '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
 }
 export interface FileRoutesById {
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/town': typeof TownRoute
   '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
 }
 export interface FileRouteTypes {
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/channels/$channelId'
     | '/channels/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/channels/$channelId'
     | '/channels/new'
   id:
     | '__root__'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/channels/$channelId'
     | '/channels/new'
   fileRoutesById: FileRoutesById
 }
@@ -431,14 +443,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsNewRouteImport
       parentRoute: typeof ChannelsRoute
     }
+    '/channels/$channelId': {
+      id: '/channels/$channelId'
+      path: '/$channelId'
+      fullPath: '/channels/$channelId'
+      preLoaderRoute: typeof ChannelsChannelIdRouteImport
+      parentRoute: typeof ChannelsRoute
+    }
   }
 }
 
 interface ChannelsRouteChildren {
+  ChannelsChannelIdRoute: typeof ChannelsChannelIdRoute
   ChannelsNewRoute: typeof ChannelsNewRoute
 }
 
 const ChannelsRouteChildren: ChannelsRouteChildren = {
+  ChannelsChannelIdRoute: ChannelsChannelIdRoute,
   ChannelsNewRoute: ChannelsNewRoute,
 }
 
