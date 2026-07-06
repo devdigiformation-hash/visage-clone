@@ -806,7 +806,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         marginBottom: 0,
         marginTop: 0,
       }}>
-        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} globeSize={globeSize} globeCenterX={globeCenterX} />
+        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} globeSize={globeSize} globeCenterX={globeCenterX} rightActionX={rightActionStackX} rightButtonYs={[0,1,2,3].map(i => Math.round((globeCenterY - 8) - 77 + 15.5 + i * 41))} />
 
         {/* Node cards column */}
         <div style={{
