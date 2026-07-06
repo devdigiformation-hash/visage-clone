@@ -799,6 +799,8 @@ function TrackingBoard({ filter }: { filter: string }) {
 
 // ─── Operations Panel ─────────────────────────────────────────────────────────
 function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
+  const navigate = useNavigate();
+
   const [activeNode, setActiveNode] = useState<string | null>("soul");
   const [agentTab, setAgentTab] = useState("town");
   const [cameraOn, setCameraOn] = useState(false);
