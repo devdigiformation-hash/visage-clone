@@ -742,16 +742,17 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   }, []);
 
   // Computed height of the node-map section
-  const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
+  const baseNodeMapH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP + C_PAD * 2;
   const availableCompositionH = Math.max(baseNodeMapH + 220, dims.h - 36 - 32);
   const nodeMapH = Math.max(baseNodeMapH + 220, Math.round(availableCompositionH * 0.80));
   const globeSize = Math.min(390, Math.max(330, Math.round(Math.min(dims.w * 0.47, nodeMapH * 0.58))));
   const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
-  const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
+  const nodeCardsTotalH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP;
   const nodeCardsTop = Math.round(globeCenterY - nodeCardsTotalH / 2);
-  const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - 33);
+  const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - C_CARD_W);
   const globeCenterX = Math.round((C_LEFT_STACK_X + C_CARD_W + rightActionStackX) / 2);
-  const agentTownMinH = Math.max(118, Math.round(availableCompositionH * 0.18));
+  const cardCenterYs = [0, 1, 2, 3].map(i => nodeCardsTop + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
+  const agentTownMinH = Math.max(160, Math.round(availableCompositionH * 0.20));
 
   return (
     <div ref={panelRef} style={{
