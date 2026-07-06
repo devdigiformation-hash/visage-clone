@@ -615,9 +615,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
         })}
 
         {/* Business Modules */}
-        <div style={{ padding: "10px 14px 5px" }}>
-          <Mono>Business Modules</Mono>
-        </div>
+        <div style={{ height: 10 }} />
         {MODULES.map((mod, i) => {
           const hideable = i >= MODULES.length - 3;
           if (hideable && !showModules) return null;
