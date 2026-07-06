@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Plus, Search, X, Trash2, Edit3 } from "lucide-react";
+import { Plus, Search, X, Trash2, Edit3, Upload } from "lucide-react";
 import type { Entity, createRepo } from "@/lib/repo";
 import { useRepo } from "@/lib/repo";
 
