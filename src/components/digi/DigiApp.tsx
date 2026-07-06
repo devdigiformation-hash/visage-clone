@@ -576,6 +576,65 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const [agentTab, setAgentTab] = useState("town");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
+  const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
+  const screenVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const toggleCamera = useCallback(async () => {
+    playUISound('click');
+    if (cameraOn) {
+      cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+      cameraStreamRef.current = null;
+      setCameraOn(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      cameraStreamRef.current = stream;
+      setCameraOn(true);
+    } catch (err) {
+      console.error('Camera access denied', err);
+      alert('Camera access denied or unavailable.');
+    }
+  }, [cameraOn]);
+
+  const toggleScreenShare = useCallback(async () => {
+    playUISound('click');
+    if (screenShareOn) {
+      screenStreamRef.current?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current = null;
+      setScreenShareOn(false);
+      return;
+    }
+    try {
+      const stream = await (navigator.mediaDevices as any).getDisplayMedia({ video: true, audio: false });
+      screenStreamRef.current = stream;
+      stream.getVideoTracks()[0].addEventListener('ended', () => {
+        screenStreamRef.current = null;
+        setScreenShareOn(false);
+      });
+      setScreenShareOn(true);
+    } catch (err) {
+      console.error('Screen share denied', err);
+    }
+  }, [screenShareOn]);
+
+  useEffect(() => {
+    if (cameraVideoRef.current && cameraStreamRef.current) {
+      cameraVideoRef.current.srcObject = cameraStreamRef.current;
+    }
+  }, [cameraOn]);
+  useEffect(() => {
+    if (screenVideoRef.current && screenStreamRef.current) {
+      screenVideoRef.current.srcObject = screenStreamRef.current;
+    }
+  }, [screenShareOn]);
+  useEffect(() => () => {
+    cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
+
   const wrapRef = useRef<HTMLDivElement>(null);
   const [dims,  setDims]  = useState({ w: 600 });
 
@@ -692,8 +751,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             {/* Action Icons Top Right */}
             <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "column", gap: 8, zIndex: 30 }}>
               <button 
-                onClick={() => { playUISound('click'); setCameraOn(!cameraOn); }}
+                onClick={toggleCamera}
                 onMouseEnter={() => playUISound('hover')}
+                title={cameraOn ? "Turn off camera" : "Turn on laptop camera"}
                 className="glass-btn" 
                 style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: cameraOn ? "#2FE0C8" : "#5C616B", background: cameraOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: cameraOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
                 onMouseOver={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
@@ -702,7 +762,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                 <Camera size={15} />
               </button>
               <button 
-                onClick={() => { playUISound('click'); setScreenShareOn(!screenShareOn); }}
+                onClick={toggleScreenShare}
                 onMouseEnter={() => playUISound('hover')}
                 className="glass-btn" 
                 style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
@@ -712,6 +772,31 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                 <Monitor size={15} />
               </button>
             </div>
+
+            {/* Live media previews (top-left inside box) */}
+            {(cameraOn || screenShareOn) && (
+              <div style={{ position: "absolute", top: 12, left: 12, display: "flex", flexDirection: "column", gap: 6, zIndex: 30 }}>
+                {cameraOn && (
+                  <video
+                    ref={cameraVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }}
+                  />
+                )}
+                {screenShareOn && (
+                  <video
+                    ref={screenVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }}
+                  />
+                )}
+              </div>
+            )}
+
 
             <style>{`
               @keyframes shake-orb {
