@@ -142,6 +142,12 @@ export const memoryRepo = createRepo<MemoryItem>("memory", [
 export const knowledgeRepo = createRepo<KnowledgePack>("knowledge", [
   { name: "Product docs", source: "upload", itemCount: 0 },
 ]);
+export const workspacesRepo = createRepo<Workspace>("workspaces", [
+  { name: "Digi Business OS", path: "~/projects/digi-os", category: "repo", tags: "primary", active: true },
+  { name: "Skills Library", path: "~/skills", category: "skills", active: true },
+]);
+export const commandRunsRepo = createRepo<CommandRun>("commandRuns", []);
+export const fileOpsRepo = createRepo<FileOp>("fileOps", []);
 
 // ─── React hook ─────────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";
