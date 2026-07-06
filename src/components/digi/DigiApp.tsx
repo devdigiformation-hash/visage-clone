@@ -15,6 +15,7 @@ import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
 import { VoiceAIPage } from "./VoiceAIPage";
+import { CommandCenterOverlay } from "@/components/orchestrator/CommandCenterOverlay";
 import { useNavigate } from "@tanstack/react-router";
 
 import startupVideoAsset from '@/assets/digi-startup.mp4.asset.json';
