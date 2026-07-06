@@ -799,6 +799,8 @@ function TrackingBoard({ filter }: { filter: string }) {
 
 // ─── Operations Panel ─────────────────────────────────────────────────────────
 function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
+  const navigate = useNavigate();
+
   const [activeNode, setActiveNode] = useState<string | null>("soul");
   const [agentTab, setAgentTab] = useState("town");
   const [cameraOn, setCameraOn] = useState(false);
@@ -996,8 +998,10 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           const onClick =
             isCam ? toggleCamera :
             isScr ? toggleScreenShare :
-            a.id === "agent" ? () => { playUISound('click'); onOpenModal('skills'); } :
+            a.id === "agent" ? () => { playUISound('click'); navigate({ to: "/agents" }); } :
+            a.id === "tools" ? () => { playUISound('click'); navigate({ to: "/tools" }); } :
                                () => { playUISound('click'); };
+
           return (
             <div key={a.id} style={{
               position: "absolute",

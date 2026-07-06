@@ -440,7 +440,14 @@ export function setSystemSettings(patch: Partial<SystemSettings>) {
 // ─── React hook ─────────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";
 export function useRepo<T extends Entity>(repo: ReturnType<typeof createRepo<T>>) {
-  const [items, setItems] = useState<T[]>(() => repo.list());
-  useEffect(() => { const unsub = repo.subscribe(() => setItems(repo.list())); return () => { unsub(); }; }, [repo]);
+  // Start empty so SSR and the first client render agree; hydrate from
+  // localStorage after mount to avoid hydration mismatches.
+  const [items, setItems] = useState<T[]>([]);
+  useEffect(() => {
+    setItems(repo.list());
+    const unsub = repo.subscribe(() => setItems(repo.list()));
+    return () => { unsub(); };
+  }, [repo]);
   return items;
 }
+
