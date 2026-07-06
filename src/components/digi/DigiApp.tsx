@@ -889,7 +889,11 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
   const nodeCardsTotalH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP;
   const nodeCardsTop = Math.round(globeCenterY - nodeCardsTotalH / 2);
-  const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - C_CARD_W);
+  // Right stack is a strict mirror of the left stack so both sides sit at
+  // identical distances from the globe center and share the same wire geometry.
+  const rightContainerLeft = Math.max(C_LEFT_STACK_X + C_CARD_W + 260 - 84, dims.w - C_LEFT_STACK_X - 84);
+  const rightWireEndX = rightContainerLeft + 84 - C_LEFT_STACK_X - C_CARD_W + C_LEFT_STACK_X; // = rightContainerLeft + 84 - C_CARD_W? keep explicit
+  const rightActionStackX = dims.w - C_LEFT_STACK_X - C_CARD_W; // mirror of (C_LEFT_STACK_X + C_CARD_W)
   const globeCenterX = Math.round((C_LEFT_STACK_X + C_CARD_W + rightActionStackX) / 2);
   const cardCenterYs = [0, 1, 2, 3].map(i => nodeCardsTop + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
   const agentTownMinH = Math.max(160, Math.round(availableCompositionH * 0.20));
