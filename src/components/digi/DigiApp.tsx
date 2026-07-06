@@ -737,10 +737,11 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           position: "relative", zIndex: 10,
           display: "flex", alignItems: "center", justifyContent: "flex-start",
           alignSelf: "stretch",
-          overflow: "hidden",
         }}>
           <div style={{
-            width: 260, height: 260,
+            width: 300, height: 300,
+            aspectRatio: "1 / 1",
+            maxHeight: "100%",
             marginLeft: -30,
             background: "rgba(16, 21, 28, 0.4)",
             border: "1px solid rgba(47, 224, 200, 0.25)",
