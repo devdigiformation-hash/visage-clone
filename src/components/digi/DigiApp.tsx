@@ -833,7 +833,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             `}</style>
             
             {/* Orb container shifted slightly up to make room for bottom elements */}
-            <div style={{ position: "relative", width: 180, height: 180 }}>
+            <div style={{ position: "relative", width: 220, height: 220 }}>
               <div className={aiActive ? "orb-breathe" : ""}
                 style={{ 
                   position: "absolute", width: "100%", height: "100%", 
