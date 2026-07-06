@@ -514,22 +514,22 @@ export function SettingsDialog({ open, onOpenChange, defaultTab = "voice" }: { o
               <div className="p-8 pb-20 space-y-6 animate-in fade-in duration-300">
                 <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-[#1A1A1A] bg-[#0D0D0D]">
                   <div className="w-14 h-14 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[#F59E0B] text-xl font-bold mb-3">
-                    T
+                    {(fullName || 'D').charAt(0).toUpperCase()}
                   </div>
-                  <div className="text-sm font-medium text-white mb-1">testing@digibusinessos.com</div>
-                  <div className="text-[9px] font-mono tracking-wider text-[#666] uppercase">LOGGED-IN USER</div>
+                  <div className="text-sm font-medium text-white mb-1">{fullName || 'Not signed in'}</div>
+                  <div className="text-[9px] font-mono tracking-wider text-[#666] uppercase">LOCAL WORKSPACE</div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-[#112417] bg-[#0A170E] flex items-center justify-between">
+                <div className="p-4 rounded-xl border border-[#1A1A1A] bg-[#0D0D0D] flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Shield size={16} className="text-[#22C55E]" />
+                    <Shield size={16} className="text-[#8A909C]" />
                     <div>
-                      <div className="text-xs font-semibold text-white">Access Whitelist Status</div>
-                      <div className="text-[10px] text-[#22C55E]/70">Your email is verified and approved on the DIGI cloud</div>
+                      <div className="text-xs font-semibold text-white">Cloud Sync</div>
+                      <div className="text-[10px] text-[#7A8090]">Not configured — running in local-only mode</div>
                     </div>
                   </div>
-                  <div className="bg-[#22C55E]/10 border border-[#22C55E]/20 px-2 py-1 rounded text-[9px] font-bold text-[#22C55E] tracking-wider flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" /> APPROVED
+                  <div className="bg-[#1A1D24] border border-[#2A2D34] px-2 py-1 rounded text-[9px] font-bold text-[#8A909C] tracking-wider">
+                    OFFLINE
                   </div>
                 </div>
 
