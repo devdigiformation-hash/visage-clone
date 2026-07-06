@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import {
   Settings as SettingsIcon, Globe, Cpu, Bot, Wrench, Zap, Workflow,
   MessageSquare, Plug, Database, Shield, Activity, Clock, Download,
+  X, ArrowLeft,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { reportError, reportSuccess, safeJsonParse } from "@/lib/safe";
