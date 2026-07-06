@@ -1283,10 +1283,17 @@ const ACTIVE_MODEL_KEY = "digi.chat.activeModelId";
 const ACTIVE_AGENT_KEY = "digi.chat.activeAgentId";
 
 function ChatSessionBar() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const models = useRepo(modelsRepo);
   const agents = useRepo(agentsRepo);
-  const [modelId, setModelId] = useState<string>(() => (typeof window !== "undefined" && localStorage.getItem(ACTIVE_MODEL_KEY)) || "");
-  const [agentId, setAgentId] = useState<string>(() => (typeof window !== "undefined" && localStorage.getItem(ACTIVE_AGENT_KEY)) || "");
+  const [modelId, setModelId] = useState<string>("");
+  const [agentId, setAgentId] = useState<string>("");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setModelId(localStorage.getItem(ACTIVE_MODEL_KEY) || "");
+    setAgentId(localStorage.getItem(ACTIVE_AGENT_KEY) || "");
+  }, []);
 
   useEffect(() => {
     if (!modelId && models.length) {
