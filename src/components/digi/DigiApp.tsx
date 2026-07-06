@@ -235,43 +235,20 @@ function ParticleOrb({ active }: { active: boolean }) {
         g.addColorStop(1, "transparent");
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       } else {
+        // Standby: soft controlled ambient glow — visible but not bright.
         const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
-        g.addColorStop(0, "rgba(16,185,129,0.09)");
-        g.addColorStop(0.5, "rgba(4,120,87,0.04)");
+        g.addColorStop(0, "rgba(16,185,129,0.13)");
+        g.addColorStop(0.5, "rgba(4,120,87,0.06)");
         g.addColorStop(1, "transparent");
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       }
 
-      // Darker holographic Jupiter-core mass with restrained horizontal banding.
-      cx.save();
-      cx.translate(W / 2, H / 2);
-      const body = cx.createRadialGradient(0, -18, 12, 0, 0, PLANET_R * 0.36);
-      if (active) {
-        body.addColorStop(0, "rgba(21, 94, 117, 0.28)");
-        body.addColorStop(0.55, "rgba(6, 78, 91, 0.18)");
-      } else {
-        body.addColorStop(0, "rgba(6, 78, 59, 0.20)");
-        body.addColorStop(0.58, "rgba(3, 45, 40, 0.16)");
-      }
-      body.addColorStop(1, "rgba(2, 8, 12, 0)");
-      cx.beginPath();
-      cx.ellipse(0, 0, PLANET_R * 0.34, PLANET_R * 0.245, 0, 0, Math.PI * 2);
-      cx.fillStyle = body;
-      cx.fill();
+      // NOTE: The former filled inner ellipse + clipped horizontal bands were
+      // removed — they created a visible "globe inside a globe" behind the
+      // projected particle sphere. The particle sphere itself IS the globe,
+      // and the surrounding ring particles provide the single Jupiter-style
+      // outer atmospheric band layer.
 
-      cx.clip();
-      [-84, -56, -28, 0, 28, 56, 84].forEach((y, idx) => {
-        const edge = Math.abs(y) / 84;
-        cx.beginPath();
-        cx.ellipse(0, y, PLANET_R * (0.30 - edge * 0.035), 7 + edge * 4, 0, 0, Math.PI * 2);
-        cx.strokeStyle = active
-          ? `rgba(170, 255, 244, ${0.06 + (idx % 2) * 0.035})`
-          : `rgba(167, 243, 208, ${0.075 + (idx % 2) * 0.04})`;
-        cx.lineWidth = idx === 3 ? 2.1 : 1.25;
-        cx.stroke();
-      });
-      cx.restore();
-      // Outer glow circle removed as requested by user
 
       const sorted = pts.map(p => {
         const x1 = p.bx * cY + p.bz * sY;
@@ -285,7 +262,7 @@ function ParticleOrb({ active }: { active: boolean }) {
       sorted.forEach(({ px, py, d, by, isRing, rad }) => {
         const sx = W/2 + px, sy = H/2 + py;
         const sz = Math.max(0.1, active ? 0.6 + d * 1.8 : 0.5 + d * 1.2);
-        let op = active ? 0.2 + d * 0.8 : 0.18 + d * 0.35;
+        let op = active ? 0.2 + d * 0.8 : 0.28 + d * 0.55;
         op = Math.max(0.1, Math.min(1, op)); // Clamp opacity to prevent negative values on the back side
         
         let cr=47, cg=224, cb=200;
@@ -322,7 +299,7 @@ function ParticleOrb({ active }: { active: boolean }) {
 
         cx.beginPath();
         cx.arc(sx, sy, sz, 0, Math.PI * 2);
-        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.55})`;
+        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.85})`;
         cx.fill();
         
         if (active && d > 0.82 && !isRing) {
@@ -944,7 +921,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                     : "drop-shadow(0 0 16px rgba(47,224,200,0.18)) drop-shadow(0 0 6px rgba(210,225,240,0.10))",
                   pointerEvents: "none",
                   transition: "filter 0.5s ease",
-                  opacity: aiActive ? 1 : 0.82,
+                  opacity: 1,
                 }}>
                 <ParticleOrb active={aiActive} />
               </div>
