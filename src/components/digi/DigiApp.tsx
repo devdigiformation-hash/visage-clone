@@ -174,7 +174,16 @@ const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
 const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
-const C_GLOBE_Y_RATIO = 0.35; // raised vertical axis inside the top 80% zone
+const C_GLOBE_Y_RATIO = 0.30; // raised vertical axis inside the top 80% zone (shifted up)
+
+// Right-side outgoing wires — separate palette from the left input modules.
+// Kept premium/subtle within the dark theme.
+const RIGHT_WIRES = [
+  { color: "#C4B5FD", glow: "rgba(196,181,253,0.55)" }, // violet — Camera
+  { color: "#F5A623", glow: "rgba(245,166,35,0.55)"  }, // amber  — Screen Share
+  { color: "#F472B6", glow: "rgba(244,114,182,0.55)" }, // rose   — Agent
+  { color: "#7DD3FC", glow: "rgba(125,211,252,0.55)" }, // sky    — Workflow
+];
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
