@@ -1316,6 +1316,7 @@ function ChatSessionBar() {
       display: "flex", gap: 6, padding: "8px 12px",
       borderBottom: "1px solid #1A1D24", background: "rgba(10,12,18,0.5)",
     }}>
+      {!mounted ? (<div style={{ height: 22 }} />) : (<>
       <select value={modelId} onChange={(e) => setModelId(e.target.value)} style={selectStyle} title="Active model">
         {models.length === 0 && <option value="">No models</option>}
         {(models as any[]).map((m) => (
