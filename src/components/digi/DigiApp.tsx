@@ -652,18 +652,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
       <div style={{ flexShrink: 0, padding: "6px 14px 0px", display: "flex", flexDirection: "column", gap: 4 }}>
         <UpdaterWidget />
       </div>
-      <div style={{ flexShrink: 0, padding: "6px 14px 10px", borderTop: "1px solid #1A1D24" }}>
-        <button className="glass-btn" 
-          onClick={() => { playUISound('click'); onOpenSettings(); }}
-          onMouseEnter={() => playUISound('hover')}
-          style={{
-            width: "100%", display: "flex", alignItems: "center", gap: 8,
-            padding: "7px 14px", borderRadius: 8, cursor: "pointer"
-          }}>
-          <Settings size={13} style={{ color: "#4A5066" }} />
-          <span style={{ fontSize: 11.5, color: "#7A8090" }}>Settings</span>
-        </button>
-      </div>
+      {/* Settings lives once, inside the unified MODULES list above — no duplicate pinned button. */}
     </div>
   );
 }
