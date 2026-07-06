@@ -147,9 +147,19 @@ export const integrationsRepo = createRepo<Integration>("integrations", [
   { name: "Slack", category: "Communication", status: "disconnected" },
   { name: "Google Sheets", category: "Data", status: "disconnected" },
 ]);
+const D = 24 * 3600 * 1000;
+const _now = Date.now();
 export const jobsRepo = createRepo<Job>("jobs", [
-  { title: "Q3 Sales Report", agent: "Sales Agent", status: "running", step: 2, totalSteps: 5 },
-  { title: "Instagram Campaign", agent: "Marketing Agent", status: "review", step: 3, totalSteps: 4 },
+  { title: "Q3 Sales Report", agent: "Sales Agent", type: "report", module: "sales", status: "running", step: 2, totalSteps: 5, startedAt: _now - 2 * 3600 * 1000 },
+  { title: "Instagram Campaign", agent: "Marketing Agent", type: "campaign", module: "marketing", status: "review", step: 3, totalSteps: 4, startedAt: _now - 5 * 3600 * 1000 },
+  { title: "Onboard Acme Corp", agent: "Support Agent", type: "onboarding", module: "ops", status: "completed", step: 4, totalSteps: 4, startedAt: _now - 1 * D, completedAt: _now - 22 * 3600 * 1000, durationMs: 2 * 3600 * 1000 },
+  { title: "Reconcile May Invoices", agent: "Finance Agent", type: "reconciliation", module: "finance", status: "completed", step: 6, totalSteps: 6, startedAt: _now - 2 * D, completedAt: _now - 2 * D + 3 * 3600 * 1000, durationMs: 3 * 3600 * 1000 },
+  { title: "Weekly SEO Digest", agent: "Marketing Agent", type: "report", module: "marketing", status: "failed", step: 2, totalSteps: 5, startedAt: _now - 3 * D, notes: "API rate limit" },
+  { title: "Lead Qualification Batch", agent: "Sales Agent", type: "batch", module: "sales", status: "queued", step: 0, totalSteps: 3 },
+  { title: "Vendor KYC Verify", agent: "Support Agent", type: "verification", module: "ops", status: "blocked", step: 1, totalSteps: 4, notes: "Awaiting documents" },
+  { title: "Customer Refund #4821", agent: "Finance Agent", type: "refund", module: "finance", status: "approved", step: 3, totalSteps: 3, startedAt: _now - 6 * 3600 * 1000, completedAt: _now - 30 * 60 * 1000, durationMs: 5.5 * 3600 * 1000 },
+  { title: "Support Ticket Triage", agent: "Support Agent", type: "triage", module: "ops", status: "completed", step: 2, totalSteps: 2, startedAt: _now - 4 * D, completedAt: _now - 4 * D + 45 * 60 * 1000, durationMs: 45 * 60 * 1000 },
+  { title: "Landing Page A/B Test", agent: "Marketing Agent", type: "experiment", module: "marketing", status: "pending", step: 0, totalSteps: 5 },
 ]);
 export const memoryRepo = createRepo<MemoryItem>("memory", [
   { title: "Brand voice", scope: "system", content: "Confident, warm, precise.", tags: "brand" },
