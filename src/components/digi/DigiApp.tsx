@@ -175,7 +175,7 @@ const C_LABEL_GAP = 4;
 const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // 62 — card + label
 const C_ITEM_GAP = 10;                                  // gap between full items
 const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // 72 — one full row
-const C_LEFT_STACK_X = 46;
+const C_LEFT_STACK_X = 18;
 const C_GLOBE_Y_RATIO = 0.30;
 
 // Right-side outgoing wires — separate palette from left input modules.
