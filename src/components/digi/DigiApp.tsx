@@ -649,7 +649,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   // Computed height of the node-map section
   const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
   // Keep the layout height tied to the cards so the huge globe doesn't push the UI down
-  const nodeMapH = baseNodeMapH;
+  const nodeMapH = Math.max(baseNodeMapH, 380);
 
   return (
     <div style={{
