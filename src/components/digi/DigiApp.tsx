@@ -1,489 +1,1594 @@
 // @ts-nocheck
-import React, { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  LayoutDashboard,
-  Terminal,
-  Users,
-  MessageCircle,
-  BrainCircuit,
-  FolderKanban,
-  UserCog,
-  CreditCard,
-  ScrollText,
-  Settings,
-  Brain,
-  Heart,
-  Zap,
-  Mic,
-  Send,
-  Circle,
+  Brain, Heart, Settings, Zap, RefreshCw, Globe,
+  MessageSquare, Layers, ArrowUp, Search, Mic, Camera,
+  ChevronDown, Monitor, LayoutDashboard, Bot, Users,
+  Wallet, RotateCcw, PanelRightClose, PanelRightOpen,
+  PanelLeftClose, PanelLeftOpen, Paperclip, Image as ImageIcon,
+  Volume2, TrendingUp, BarChart2, Folder, FileText, Copy, Check
 } from "lucide-react";
+
+import { SettingsDialog } from "./SettingsDialog";
 import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
-import { SettingsDialog } from "./SettingsDialog";
+import { VoiceAIPage } from "./VoiceAIPage";
 
-/* ---------------- Sidebar ---------------- */
+import startupVideoAsset from '@/assets/digi-startup.mp4.asset.json';
+const startupVideoUrl = startupVideoAsset.url;
+import logoUrl from '@/assets/digi-logo.png';
 
-const NAV_CORE = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "command", label: "AI Command Center", icon: Terminal },
-  { id: "agents", label: "Agent Town", icon: Users },
-  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
-  { id: "brain", label: "Brain", icon: BrainCircuit },
+// ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
+const G = `
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.28; transform: scale(0.85); }
+  }
+  @keyframes breatheOrb {
+    0%, 100% { transform: scale(1);     filter: brightness(1); }
+    50%       { transform: scale(1.028); filter: brightness(1.12); }
+  }
+  @keyframes floatBlob {
+    0%, 100% { transform: translate(0,0)    scale(1); }
+    33%       { transform: translate(32px,-22px) scale(1.05); }
+    66%       { transform: translate(-22px,16px) scale(0.95); }
+  }
+  @keyframes thinkDot {
+    0%, 20%   { opacity: 0.2; transform: translateY(0); }
+    50%        { opacity: 1;   transform: translateY(-4px); }
+    80%, 100% { opacity: 0.2; transform: translateY(0); }
+  }
+  @keyframes orbRing {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes orbRingReverse {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+  }
+  @keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes barGrow {
+    from { width: 0%; }
+    to   { width: var(--w); }
+  }
+
+  .dot-pulse  { animation: pulseDot 1.5s ease-in-out infinite; }
+  .orb-breathe{ animation: breatheOrb 4s ease-in-out infinite; }
+  .blob-float { animation: floatBlob 16s ease-in-out infinite; }
+  .spin       { animation: spin 1.5s linear infinite; }
+
+  .custom-scroll::-webkit-scrollbar       { width: 3px; }
+  .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+  .custom-scroll::-webkit-scrollbar-thumb { background: #22252D; border-radius: 2px; }
+  .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(47,224,200,0.45); }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .soon-badge {
+    font-size: 8.5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #34D399;
+    background: rgba(52,211,153,0.1);
+    border: 1px solid rgba(52,211,153,0.2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .glass-btn {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    transition: all 0.25s ease-in-out !important;
+  }
+  .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  .glass-btn-active {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(47, 224, 200, 0.12) !important;
+    border: 1px solid rgba(47, 224, 200, 0.25) !important;
+    box-shadow: 0 0 16px rgba(47, 224, 200, 0.2) !important;
+  }
+`;
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface Msg { id: number; role: "ai" | "user"; text: string; }
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const NODES = [
+  { id: "memory",   label: "Memory",   Icon: Brain,    color: "#8B7CF6", bg: "rgba(139,124,246,0.12)", glow: "rgba(139,124,246,0.22)", badge: "HIGH" },
+  { id: "soul",     label: "Soul",     Icon: Heart,    color: "#2FE0C8", bg: "rgba(47,224,200,0.12)",  glow: "rgba(47,224,200,0.22)",  badge: "HIGH" },
+  { id: "skills",   label: "Skills",   Icon: Zap,      color: "#3B82F6", bg: "rgba(59,130,246,0.12)",  glow: "rgba(59,130,246,0.22)",  badge: "MED"  },
+  { id: "settings", label: "Settings", Icon: Settings, color: "#EF4444", bg: "rgba(239,68,68,0.08)",   glow: "rgba(239,68,68,0.15)",   badge: "LOW"  },
 ];
 
-const NAV_MODULES = [
-  { id: "projects", label: "Projects", icon: FolderKanban },
-  { id: "users", label: "Users", icon: UserCog },
-  { id: "billing", label: "Billing", icon: CreditCard },
-  { id: "logs", label: "Logs", icon: ScrollText },
+const NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6" }, // Blue
+  { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8" }, // Cyan
+  { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E" }, // Rose
+  { id: "whatsapp",  label: "WhatsApp",          Icon: MessageSquare,   color: "#22C55E" }, // Green
+  { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B" }, // Amber
 ];
 
-function LeftSidebar({ active, onSelect, onOpenSettings }) {
-  const Item = ({ item }) => {
-    const Icon = item.icon;
-    const isActive = active === item.id;
-    return (
-      <button
-        onClick={() => onSelect(item.id)}
-        className={`group relative w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-          isActive
-            ? "bg-white/[0.04] text-white"
-            : "text-white/50 hover:text-white hover:bg-white/[0.03]"
-        }`}
-      >
-        {isActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-r bg-[#2FE0C8] shadow-[0_0_8px_#2FE0C8]" />
-        )}
-        <Icon size={16} className={isActive ? "text-[#2FE0C8]" : ""} />
-        <span className="font-medium tracking-wide">{item.label}</span>
-      </button>
-    );
-  };
+const MODULES = [
+  { label: "CRM",        Icon: Users,       color: "#6366F1" }, // Indigo
+  { label: "Sales",      Icon: TrendingUp,  color: "#10B981" }, // Emerald
+  { label: "Marketing",  Icon: BarChart2,   color: "#EC4899" }, // Pink
+  { label: "Finance",    Icon: Wallet,      color: "#EAB308" }, // Yellow
+  { label: "HR",         Icon: Users,       color: "#F43F5E" }, // Rose
+  { label: "Projects",   Icon: Folder,      color: "#3B82F6" }, // Blue
+  { label: "Automation", Icon: RefreshCw,   color: "#8B5CF6" }, // Violet
+  { label: "Files",      Icon: FileText,    color: "#14B8A6" }, // Teal
+  { label: "Analytics",  Icon: BarChart2,   color: "#06B6D4" }, // Cyan
+  { label: "Reports",    Icon: FileText,    color: "#F97316" }, // Orange
+];
+
+const MSGS_INIT: Msg[] = [
+  { id: 1, role: "ai", text: "I'm analyzing the conversation style. Considering the user's 'Hello' in English, I am determining the best response. Given the context, I will decide whether to offer a warm Urdu greeting, or a transition to English. This is important to ensure a smooth interaction with the user." },
+  { id: 2, role: "ai", text: "**Responding to User Input**\n\nI'm now writing a response. The system had previously transitioned to Urdu in the conversation. However, the user simply said 'Hello'. I'm now deciding on a response, I am drafting my answer, considering the user's Input of 'Hello', to determine the best approach. My initial draft response is a warm Urdu greeting, and I'm currently assessing its appropriateness in this context." },
+  { id: 3, role: "user", text: "ہیلو مسٹر باقر! کیسے مدد کر سکتا ہوں؟ آپ کی مدد کریں گے؟" },
+];
+
+const AGENTS = [
+  { label: "Sales Agent (Elite)",     dot: "#34D399" },
+  { label: "Support Agent (Active)",  dot: "#34D399" },
+  { label: "Marketing Agent (Elite)", dot: "#34D399" },
+  { label: "Finance Agent (Syncing)", dot: "#F5A623" },
+  { label: "HR Agent (Idle)",         dot: "#5C616B" },
+];
+
+const ACTIVITIES = [
+  { label: "New Order #12590",    time: "2m ago" },
+  { label: "WhatsApp Message",    time: "3m ago" },
+  { label: "AI Report Generated", time: "5m ago" },
+  { label: "User Login: Admin",   time: "7m ago" },
+  { label: "Project Updated",     time: "10m ago" },
+];
+
+const METRICS = [
+  { label: "CPU USAGE",  pct: 24, color: "#34D399" },
+  { label: "RAM USAGE",  pct: 48, color: "#34D399" },
+  { label: "NETWORK",    pct: 60, color: "#F5A623" },
+  { label: "DISK USAGE", pct: 55, color: "#F5A623" },
+];
+
+// ─── Layout constants (must be identical across ConnectorSVG & OperationsPanel)
+const C_PAD      = 12;   // padding inside the node-map wrapper
+const C_CARD_W   = 34;  // width of the node-cards column
+const C_CARD_H   = 44;   // height of each node card
+const C_CARD_GAP = 12;   // gap between cards
+const C_ORB_AREA = 220;  // width reserved for the orb (decreased to push it absolutely right)
+const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
+
+// ─── Particle Orb ─────────────────────────────────────────────────────────────
+function ParticleOrb({ active }: { active: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const S = 1000; // Increased canvas size to prevent clipping
+
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const cx = c.getContext("2d"); if (!cx) return;
+    const W = c.width, H = c.height;
+
+    // Sphere points
+    const N = 500, φ = Math.PI * (3 - Math.sqrt(5));
+    const spherePts = Array.from({ length: N }, (_, i) => {
+      const y = 1 - (i / (N - 1)) * 2;
+      const r = Math.sqrt(Math.max(0, 1 - y * y));
+      const t = φ * i;
+      return { bx: Math.cos(t) * r, by: y, bz: Math.sin(t) * r, isRing: false };
+    });
+
+    // Ring points
+    const numRingPts = 900;
+    const ringPts = Array.from({ length: numRingPts }, (_, i) => {
+      let r = 1.15 + Math.random() * 0.65; // 1.15 to 1.8
+      // Cassini division
+      if (r > 1.45 && r < 1.55) {
+         if (Math.random() > 0.1) r += 0.1;
+      }
+      const t = Math.random() * Math.PI * 2;
+      return { bx: Math.cos(t) * r, by: (Math.random() - 0.5) * 0.015, bz: Math.sin(t) * r, isRing: true, rad: r };
+    });
+
+    const pts = [...spherePts, ...ringPts];
+
+    let ay = 0, id: number;
+
+    function frame() {
+      cx.clearRect(0, 0, W, H);
+      ay += active ? 0.006 : 0.0015;
+      const cY = Math.cos(ay), sY = Math.sin(ay);
+      const cX = Math.cos(0.35), sX = Math.sin(0.35); // Fixed tilt for Saturn look
+
+      if (active) {
+        const hue = (ay * 150) % 360;
+        const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
+        g.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.2)`);
+        g.addColorStop(0.5, `hsla(${hue}, 100%, 65%, 0.08)`);
+        g.addColorStop(1, "transparent");
+        cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+      } else {
+        const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
+        g.addColorStop(0, "rgba(52,211,153,0.15)");
+        g.addColorStop(0.5, "rgba(52,211,153,0.05)");
+        g.addColorStop(1, "transparent");
+        cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+      }
+      // Outer glow circle removed as requested by user
+
+      const sorted = pts.map(p => {
+        const x1 = p.bx * cY + p.bz * sY;
+        const z1 = -p.bx * sY + p.bz * cY;
+        const y2 = p.by * cX - z1 * sX;
+        const z2 = p.by * sX + z1 * cX;
+        const fov = 2.85, pz = z2 + fov;
+        return { px: (x1 / pz) * PLANET_R, py: (y2 / pz) * PLANET_R, d: (z2 + 1) / 2, by: p.by, isRing: p.isRing, rad: (p as any).rad };
+      }).sort((a, b) => a.d - b.d);
+
+      sorted.forEach(({ px, py, d, by, isRing, rad }) => {
+        const sx = W/2 + px, sy = H/2 + py;
+        const sz = Math.max(0.1, active ? 0.6 + d * 1.8 : 0.5 + d * 1.2);
+        let op = active ? 0.2 + d * 0.8 : 0.3 + d * 0.5;
+        op = Math.max(0.1, Math.min(1, op)); // Clamp opacity to prevent negative values on the back side
+        
+        let cr=47, cg=224, cb=200;
+        
+        if (!active) {
+          // Theme Green for standby
+          cr=52; cg=211; cb=153;
+        }
+
+        if (isRing) {
+          if (active) {
+            cr=180; cg=255; cb=245;
+          } else {
+            cr=110; cg=230; cb=180; // Softer green for ring in standby
+          }
+          op *= 0.9; // Made much more prominent (was 0.5)
+          if (rad > 1.45 && rad < 1.55) op *= 0.3; // Cassini division
+        } else {
+          if (active) {
+            const band = Math.sin(by * 15) + Math.cos(by * 35) * 0.5;
+            if (band > 0.8) { cr=180; cg=255; cb=245; }
+            else if (band > 0.2) { cr=30; cg=150; cb=180; }
+            else if (band > -0.5) { cr=47; cg=224; cb=200; }
+            else if (band > -1.2) { cr=20; cg=100; cb=140; }
+          } else {
+            // Standby bands in shades of green
+            const band = Math.sin(by * 15) + Math.cos(by * 35) * 0.5;
+            if (band > 0.8) { cr=167; cg=243; cb=208; } // #A7F3D0
+            else if (band > 0.2) { cr=52; cg=211; cb=153; } // #34D399
+            else if (band > -0.5) { cr=16; cg=185; cb=129; } // #10B981
+            else if (band > -1.2) { cr=4; cg=120; cb=87; } // #047857
+          }
+        }
+
+        cx.beginPath();
+        cx.arc(sx, sy, sz, 0, Math.PI * 2);
+        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.8})`;
+        cx.fill();
+        
+        if (active && d > 0.82 && !isRing) {
+          cx.beginPath();
+          cx.arc(sx, sy, Math.max(0.1, sz * 0.5), 0, Math.PI * 2);
+          cx.fillStyle = `rgba(180,255,245,${(d - 0.82) * 2.0})`;
+          cx.fill();
+        }
+      });
+      id = requestAnimationFrame(frame);
+    }
+    frame();
+    return () => cancelAnimationFrame(id);
+  }, [active]);
+
+  return <canvas ref={ref} width={S} height={S} style={{ display: "block", position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%" }} />;
+}
+
+// ─── Connector SVG ────────────────────────────────────────────────────────────
+// Geometry constants MUST stay in sync with OperationsPanel layout.
+function ConnectorSVG({ active, W, H }: { active: boolean; W: number; H: number }) {
+  const nodeX = C_PAD + C_CARD_W;                    // right edge of card column
+  const orbContainerLeft = W - C_PAD - C_ORB_AREA;
+  // Connect exactly to the left edge of the visual sphere inside the container
+  // The 3D projection divides by a fov of 2.85, so the visual radius is smaller.
+  const visualPlanetR = PLANET_R / 2.85;
+  // Offset adjusted to perfectly meet the planet edge
+  const orbEdgeX = orbContainerLeft + (C_ORB_AREA / 2) - visualPlanetR + 130;
+  const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.75); // Multiplier changed to push junction right
+  const midY  = Math.round(H / 2);
+  const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
+  const startY = (H - nodeCardsTotalH) / 2;
+  const ys    = NODES.map((_, i) => startY + i * (C_CARD_H + C_CARD_GAP) + Math.round(C_CARD_H / 2));
 
   return (
-    <aside className="w-[240px] shrink-0 h-full flex flex-col border-r border-white/[0.06] bg-[#0A0B0F]/80 backdrop-blur-xl">
-      {/* Brand */}
-      <div className="px-4 py-4 border-b border-white/[0.06] flex items-center gap-3">
-        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#2FE0C8]/30 to-[#8B7CF6]/30 border border-white/10 flex items-center justify-center">
-          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#2FE0C8] to-[#8B7CF6] shadow-[0_0_16px_rgba(47,224,200,0.7)]" />
-        </div>
-        <div className="leading-tight">
-          <div className="text-white font-semibold text-sm tracking-wider">DIGI</div>
-          <div className="text-[10px] text-white/40 uppercase tracking-[0.2em]">Business OS</div>
-        </div>
-      </div>
+    <svg width="100%" height="100%"
+      style={{ position: "absolute", inset: 0, pointerEvents: "none", display: "block", overflow: "visible" }}>
+      <defs>
+        {NODES.map((_, i) => (
+          <filter key={i} id={`cf${i}`} x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        ))}
+        <filter id="cfmain" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b" />
+          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <radialGradient id="cjunc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#2FE0C8" stopOpacity={active ? "0.9" : "0.4"} />
+          <stop offset="100%" stopColor="#2FE0C8" stopOpacity="0" />
+        </radialGradient>
+      </defs>
 
-      {/* Scroll content */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-        <div>
-          <div className="px-3 mb-2 text-[10px] uppercase tracking-[0.2em] text-white/30">
-            Core Apps
-          </div>
-          <div className="space-y-1">
-            {NAV_CORE.map((i) => <Item key={i.id} item={i} />)}
-          </div>
-        </div>
-        <div>
-          <div className="px-3 mb-2 text-[10px] uppercase tracking-[0.2em] text-white/30">
-            Modules
-          </div>
-          <div className="space-y-1">
-            {NAV_MODULES.map((i) => <Item key={i.id} item={i} />)}
-          </div>
-        </div>
-      </div>
+      {ys.map((y, i) => {
+        const col = NODES[i].color;
+        const pid = `nc${i}`;
+        const c1x = Math.round(nodeX + (midX - nodeX) * 0.38);
+        const c2x = Math.round(nodeX + (midX - nodeX) * 0.74);
+        const d   = `M ${nodeX} ${y} C ${c1x} ${y}, ${c2x} ${midY}, ${midX} ${midY}`;
+        return (
+          <g key={i}>
+            <path d={d} fill="none" stroke={col} strokeWidth="2.5" opacity={active ? "0.2" : "0.06"} />
+            <path id={pid} d={d} fill="none" stroke={col} strokeWidth={active ? "1.8" : "1.2"}
+              opacity={active ? 0.85 : 0.25} filter={`url(#cf${i})`} />
+            <circle cx={nodeX} cy={y} r={active ? "4.5" : "3.5"} fill="#0D0F14" stroke={col} strokeWidth="1.5" opacity="0.88" />
+            <circle cx={nodeX} cy={y} r={active ? "2.5" : "1.6"} fill={col} opacity={active ? "1" : "0.55"}>
+              <animate attributeName="opacity" values={active ? "0.8;1;0.8" : "0.3;0.6;0.3"} dur="1s" repeatCount="indefinite" />
+            </circle>
+            <circle r={active ? "3" : "2"} fill={col} opacity={active ? "1" : "0.5"}>
+              <animateMotion dur={`${2.5 + i * 0.45}s`} repeatCount="indefinite" begin={`${i * 0.55}s`}>
+                <mpath href={`#nc${i}`} />
+              </animateMotion>
+            </circle>
+          </g>
+        );
+      })}
 
-      {/* Footer */}
-      <div className="border-t border-white/[0.06] px-3 py-3 flex items-center justify-between">
-        <button
-          onClick={onOpenSettings}
-          className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
-        >
-          <Settings size={16} />
-        </button>
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-white/60">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-[#2FE0C8] opacity-60 animate-ping" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2FE0C8]" />
-          </span>
-          System Online
-        </div>
-      </div>
-    </aside>
+      {/* Junction */}
+      <circle cx={midX} cy={midY} r="10" fill="url(#cjunc)" opacity={active ? "0.55" : "0.2"} />
+      <circle cx={midX} cy={midY} r="5.5" fill="#0D0F14" stroke="#22252D" strokeWidth="1.5" />
+      <circle cx={midX} cy={midY} r="2.5" fill="#2FE0C8" opacity={active ? "0.95" : "0.5"}>
+        <animate attributeName="r" values={active ? "2;3.5;2" : "1.8;2.8;1.8"} dur="2s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Junction → orb */}
+      {(() => {
+        const d2 = `M ${midX} ${midY} C ${midX + Math.round((orbEdgeX-midX)*0.38)} ${midY}, ${orbEdgeX - Math.round((orbEdgeX-midX)*0.18)} ${midY}, ${orbEdgeX} ${midY}`;
+        return (
+          <g>
+            <path d={d2} fill="none" stroke="#2FE0C8" strokeWidth="2.5" opacity="0.06" />
+            <path id="ncmain" d={d2} fill="none" stroke="#2FE0C8" strokeWidth="1.5"
+              opacity={active ? 0.65 : 0.28} filter="url(#cfmain)" />
+            <circle r="2.5" fill="#2FE0C8" opacity={active ? "1" : "0.6"}>
+              <animateMotion dur="1.6s" repeatCount="indefinite">
+                <mpath href="#ncmain" />
+              </animateMotion>
+            </circle>
+          </g>
+        );
+      })()}
+
+      {/* Orb entry dot */}
+      <circle cx={orbEdgeX} cy={midY} r="3.5" fill="#0D0F14" stroke="#2FE0C8" strokeWidth="1.5" opacity="0.85" />
+      <circle cx={orbEdgeX} cy={midY} r="1.6" fill="#2FE0C8" opacity={active ? "0.9" : "0.5"} />
+    </svg>
   );
 }
 
-/* ---------------- Central Orb + Wires ---------------- */
+// ─── Primitives ───────────────────────────────────────────────────────────────
+const Mono = ({
+  children, className = "", style,
+}: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) => (
+  <span
+    className={`font-mono text-[10px] uppercase tracking-[0.08em] text-[#5C616B] ${className}`}
+    style={style}>
+    {children}
+  </span>
+);
 
-function CentralStage({ onOpen }) {
-  // Icons positioned in a vertical column on the left of the orb.
-  // SVG viewBox: 600x520. Orb center at (420, 260). Icons at x=90.
-  const orbCx = 420;
-  const orbCy = 260;
-  const iconX = 90;
-  const nodes = [
-    { id: "memory", label: "Memory", Icon: Brain,     y: 60,  color: "#2FE0C8" },
-    { id: "soul",   label: "Soul",   Icon: Heart,     y: 190, color: "#F43F5E" },
-    { id: "skills", label: "Skills", Icon: Zap,       y: 320, color: "#F5B733" },
-    { id: "settings",label:"Settings",Icon: Settings, y: 450, color: "#8B7CF6" },
-  ];
+function StatusDot({ s }: { s: "active" | "standby" | "error" }) {
+  const cols = { active: "#34D399", standby: "#5C616B", error: "#FF5C5C" };
+  return (
+    <span className="dot-pulse flex-shrink-0 rounded-full"
+      style={{ width: 6, height: 6, background: cols[s], display: "inline-block" }} />
+  );
+}
+
+// ─── Left Sidebar ─────────────────────────────────────────────────────────────
+function UpdaterWidget() {
+  const [updateStatus, setUpdateStatus] = useState<string>("Check for Updates");
+  const [progress, setProgress] = useState<number | null>(null);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+
+  useEffect(() => {
+    if (!(window as any).electronAPI) return;
+    const api = (window as any).electronAPI;
+
+    api.onUpdateAvailable((info: any) => setUpdateStatus("Update Available!"));
+    
+    api.onUpdateNotAvailable(() => {
+      setUpdateStatus("Up to date");
+      setTimeout(() => setUpdateStatus("Check for Updates"), 3000);
+    });
+
+    api.onUpdateProgress((prog: any) => {
+      setUpdateStatus("Downloading...");
+      setProgress(Math.round(prog.percent));
+    });
+
+    api.onUpdateDownloaded(() => {
+      setUpdateStatus("Restart to Install");
+      setProgress(null);
+      setIsDownloaded(true);
+    });
+
+    api.onUpdateError((err: string) => {
+      setUpdateStatus("Update Failed");
+      setProgress(null);
+      setTimeout(() => setUpdateStatus("Check for Updates"), 3000);
+    });
+  }, []);
+
+  const handleAction = () => {
+    const api = (window as any).electronAPI;
+    if (isDownloaded) {
+      api?.installUpdate();
+    } else {
+      setUpdateStatus("Checking...");
+      api?.checkForUpdates();
+    }
+  };
 
   return (
-    <div className="relative flex-1 min-w-0 h-full overflow-hidden">
-      {/* backdrop grid + glow */}
-      <div
-        className="absolute inset-0 opacity-[0.15]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
-          backgroundSize: "42px 42px",
-        }}
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(47,224,200,0.12),transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_80%,rgba(139,124,246,0.10),transparent_60%)]" />
+    <button className="glass-btn" onClick={handleAction} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "7px 14px", borderRadius: 8, cursor: "pointer", marginBottom: 6, background: isDownloaded ? "rgba(52,211,153,0.15)" : undefined, border: isDownloaded ? "1px solid rgba(52,211,153,0.3)" : undefined }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <RefreshCw size={13} style={{ color: isDownloaded ? "#34D399" : "#4A5066" }} className={progress !== null ? "spin" : ""} />
+        <span style={{ fontSize: 11.5, color: isDownloaded ? "#34D399" : "#7A8090", fontWeight: isDownloaded ? 600 : 400 }}>{updateStatus}</span>
+      </div>
+      {progress !== null && <span style={{ fontSize: 10, color: "#34D399" }}>{progress}%</span>}
+    </button>
+  );
+}
 
-      {/* Header strip */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-8 py-5">
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.3em] text-white/40">Operations Status</div>
-          <div className="text-white text-xl font-semibold tracking-wide mt-1">AI Core · Active</div>
-        </div>
-        <div className="flex items-center gap-3 text-[11px] text-white/50">
-          <span className="px-2 py-1 rounded-md border border-white/10 bg-white/[0.03]">CPU 12%</span>
-          <span className="px-2 py-1 rounded-md border border-white/10 bg-white/[0.03]">MEM 3.4G</span>
-          <span className="px-2 py-1 rounded-md border border-white/10 bg-white/[0.03] text-[#2FE0C8]">
-            AGENTS 24
-          </span>
+function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: string; setActiveNav: (id: string) => void; onOpenSettings: () => void; }) {
+  const [showModules, setShowModules] = useState(false);
+  return (
+    <div style={{
+      width: 220, flexShrink: 0,
+      display: "flex", flexDirection: "column",
+      background: "#090B11",
+      borderRight: "1px solid #1A1D24",
+      minHeight: 0,
+    }}>
+      {/* Logo */}
+      <div style={{ padding: "10px 14px 6px", flexShrink: 0 }}>
+        <div style={{
+          width: 38, height: 38, borderRadius: "50%", overflow: "hidden",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <img src={logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.15)" }} />
         </div>
       </div>
 
-      {/* SVG stage */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <svg
-          viewBox="0 0 600 520"
-          className="w-full h-full max-w-[900px] max-h-[620px]"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <defs>
-            <radialGradient id="orbCore" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#7FF3E1" stopOpacity="1" />
-              <stop offset="45%" stopColor="#2FE0C8" stopOpacity="0.9" />
-              <stop offset="75%" stopColor="#8B7CF6" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#0A0B0F" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient id="orbHalo" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#2FE0C8" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#2FE0C8" stopOpacity="0" />
-            </radialGradient>
-            <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            {nodes.map((n) => (
-              <linearGradient key={n.id} id={`wire-${n.id}`} x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor={n.color} stopOpacity="0.15" />
-                <stop offset="50%" stopColor={n.color} stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#2FE0C8" stopOpacity="0.7" />
-              </linearGradient>
-            ))}
-          </defs>
-
-          {/* Halo rings */}
-          <circle cx={orbCx} cy={orbCy} r="180" fill="url(#orbHalo)" />
-          <circle
-            cx={orbCx}
-            cy={orbCy}
-            r="150"
-            fill="none"
-            stroke="rgba(47,224,200,0.15)"
-            strokeDasharray="2 6"
-          >
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from={`0 ${orbCx} ${orbCy}`}
-              to={`360 ${orbCx} ${orbCy}`}
-              dur="40s"
-              repeatCount="indefinite"
-            />
-          </circle>
-          <circle
-            cx={orbCx}
-            cy={orbCy}
-            r="118"
-            fill="none"
-            stroke="rgba(139,124,246,0.20)"
-            strokeDasharray="1 8"
-          >
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from={`360 ${orbCx} ${orbCy}`}
-              to={`0 ${orbCx} ${orbCy}`}
-              dur="28s"
-              repeatCount="indefinite"
-            />
-          </circle>
-
-          {/* Orb core */}
-          <circle cx={orbCx} cy={orbCy} r="90" fill="url(#orbCore)" filter="url(#softGlow)">
-            <animate attributeName="r" values="88;94;88" dur="4s" repeatCount="indefinite" />
-          </circle>
-          <circle
-            cx={orbCx}
-            cy={orbCy}
-            r="60"
-            fill="none"
-            stroke="rgba(255,255,255,0.25)"
-            strokeWidth="1"
-          />
-
-          {/* Wires + endpoint dots + data packets */}
-          {nodes.map((n, i) => {
-            const path = `M ${iconX + 28} ${n.y + 20} C ${iconX + 140} ${n.y + 20}, ${orbCx - 160} ${orbCy}, ${orbCx - 90} ${orbCy}`;
-            const pathId = `wirepath-${n.id}`;
-            return (
-              <g key={n.id}>
-                <path
-                  id={pathId}
-                  d={path}
-                  fill="none"
-                  stroke={`url(#wire-${n.id})`}
-                  strokeWidth="1.2"
-                  opacity="0.85"
-                />
-                {/* flowing pulse dashes */}
-                <path
-                  d={path}
-                  fill="none"
-                  stroke={n.color}
-                  strokeWidth="1.2"
-                  strokeDasharray="2 14"
-                  opacity="0.55"
-                >
-                  <animate
-                    attributeName="stroke-dashoffset"
-                    from="0"
-                    to="-48"
-                    dur={`${2 + i * 0.4}s`}
-                    repeatCount="indefinite"
-                  />
-                </path>
-                {/* traveling data packet */}
-                <circle r="2.4" fill={n.color} filter="url(#softGlow)">
-                  <animateMotion dur={`${3.4 + i * 0.5}s`} repeatCount="indefinite">
-                    <mpath xlinkHref={`#${pathId}`} />
-                  </animateMotion>
-                </circle>
-                {/* orb connection dot */}
-                <circle cx={orbCx - 90} cy={orbCy} r="3" fill={n.color} opacity="0.9" />
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Floating icon buttons overlaid on the SVG */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="relative w-full h-full max-w-[900px] max-h-[620px] mx-auto">
-            {nodes.map((n) => {
-              // Map SVG coords (600x520) → percentages of overlay box
-              const leftPct = ((iconX) / 600) * 100;
-              const topPct = ((n.y) / 520) * 100;
-              const Icon = n.Icon;
-              return (
-                <button
-                  key={n.id}
-                  onClick={() => onOpen(n.id)}
-                  className="pointer-events-auto absolute group"
-                  style={{ left: `${leftPct}%`, top: `${topPct}%` }}
-                  title={n.label}
-                >
-                  <div
-                    className="w-[42px] h-[42px] rounded-xl border flex items-center justify-center backdrop-blur-md transition-all duration-300 group-hover:scale-110"
-                    style={{
-                      background: `linear-gradient(135deg, ${n.color}22, rgba(255,255,255,0.02))`,
-                      borderColor: `${n.color}55`,
-                      boxShadow: `0 0 18px ${n.color}33, inset 0 0 8px ${n.color}22`,
-                    }}
-                  >
-                    <Icon size={18} style={{ color: n.color }} />
-                  </div>
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 mt-1 text-[9px] uppercase tracking-[0.2em] text-white/50 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                  >
-                    {n.label}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+      {/* Scrollable nav area */}
+      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 4 }} className="custom-scroll">
+        {/* Core Apps */}
+        <div style={{ padding: "3px 14px 5px" }}>
+          <Mono>Core Apps</Mono>
         </div>
+        {NAV_ITEMS.map(item => {
+          const isActive = activeNav === item.id;
+          return (
+            <button key={item.id} 
+              onClick={() => { playUISound('tab-click'); setActiveNav(item.id); }}
+              onMouseEnter={() => playUISound('hover')}
+              className={`group ${isActive ? "glass-btn-active" : "glass-btn"}`}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", gap: 8,
+                padding: "7px 14px", textAlign: "left", borderRadius: 8, marginBottom: 4,
+                borderLeft: `2px solid ${isActive ? item.color : "transparent"}`,
+                transition: "all 0.3s ease"
+              }}>
+              <div className="transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6"
+                   style={{ transform: isActive ? "scale(1.15)" : "scale(1)" }}>
+                <item.Icon size={13} style={{ 
+                  color: item.color, 
+                  opacity: isActive ? 1 : 0.65, 
+                  filter: isActive ? `drop-shadow(0 0 6px ${item.color}80)` : "none",
+                  flexShrink: 0,
+                  transition: "all 0.3s ease"
+                }} />
+              </div>
+              <span className="transition-colors duration-300" style={{ fontSize: 11.5, color: isActive ? "#F5F6F8" : "#7A8090", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Business Modules - Collapsible */}
+        <div style={{ padding: "10px 14px 5px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Mono>Business Modules</Mono>
+          <button onClick={() => { playUISound('soft-click'); setShowModules(!showModules); }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: 4, cursor: "pointer", transition: "all 0.2s" }}>
+            <ChevronDown size={11} style={{ color: "#5C616B", transform: showModules ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+          </button>
+        </div>
+        {showModules && MODULES.map((mod, i) => (
+          <button key={i} className="group glass-btn"
+            onClick={() => playUISound('click')}
+            onMouseEnter={() => playUISound('hover')}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "5px 14px", borderRadius: 8, marginBottom: 4,
+              transition: "all 0.3s ease"
+            }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div className="transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6">
+                <mod.Icon size={11} style={{ color: mod.color, opacity: 0.75, flexShrink: 0, transition: "all 0.3s ease" }} />
+              </div>
+              <span className="transition-colors duration-300 group-hover:text-white" style={{ fontSize: 11, color: "#6B7280" }}>{mod.label}</span>
+            </div>
+            <span className="soon-badge">SOON</span>
+          </button>
+        ))}
       </div>
 
-      {/* Bottom telemetry */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 px-8 py-4 flex items-center justify-between text-[11px] text-white/40 border-t border-white/[0.04] bg-black/20 backdrop-blur">
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-2"><Circle size={6} className="fill-[#2FE0C8] text-[#2FE0C8]" /> Voice channel armed</span>
-          <span>Uplink · 42ms</span>
-        </div>
-        <div>DIGI OS v0.9 · build 2026.07</div>
+      {/* Pinned Settings - Always visible at bottom */}
+      <div style={{ flexShrink: 0, padding: "6px 14px 0px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <UpdaterWidget />
+      </div>
+      <div style={{ flexShrink: 0, padding: "6px 14px 10px", borderTop: "1px solid #1A1D24" }}>
+        <button className="glass-btn" 
+          onClick={() => { playUISound('click'); onOpenSettings(); }}
+          onMouseEnter={() => playUISound('hover')}
+          style={{
+            width: "100%", display: "flex", alignItems: "center", gap: 8,
+            padding: "7px 14px", borderRadius: 8, cursor: "pointer"
+          }}>
+          <Settings size={13} style={{ color: "#4A5066" }} />
+          <span style={{ fontSize: 11.5, color: "#7A8090" }}>Settings</span>
+        </button>
       </div>
     </div>
   );
 }
 
-/* ---------------- Right Chat / Command Panel ---------------- */
-
-function RightPanel() {
-  const [messages, setMessages] = useState([
-    { role: "system", text: "> DIGI kernel booted" },
-    { role: "system", text: "> 24 agents synced · memory OK" },
-    { role: "assistant", text: "Standing by. Say 'hey digi' or type a command." },
-  ]);
-  const [input, setInput] = useState("");
-  const [listening, setListening] = useState(false);
-  const scrollRef = useRef(null);
+// ─── Operations Panel ─────────────────────────────────────────────────────────
+function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
+  const [activeNode, setActiveNode] = useState<string | null>("soul");
+  const [agentTab, setAgentTab] = useState("town");
+  const [cameraOn, setCameraOn] = useState(false);
+  const [screenShareOn, setScreenShareOn] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [dims,  setDims]  = useState({ w: 600 });
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
+    const el = wrapRef.current; if (!el) return;
+    const ro = new ResizeObserver(([e]) => setDims({ w: Math.round(e.contentRect.width) }));
+    ro.observe(el);
+    setDims({ w: Math.round(el.offsetWidth) });
+    return () => ro.disconnect();
+  }, []);
+
+  // Computed height of the node-map section
+  const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
+  // Keep the layout height tied to the cards so the huge globe doesn't push the UI down
+  const nodeMapH = baseNodeMapH;
+
+  return (
+    <div style={{
+      flex: 1, minWidth: 0,
+      display: "flex", flexDirection: "column",
+      borderRight: "1px solid #1A1D24",
+      overflow: "hidden",
+    }}>
+
+      {/* ── Operations header ── */}
+      <div style={{
+        height: 36, flexShrink: 0,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 14px",
+        borderBottom: "1px solid #1A1D24",
+        background: "rgba(10,12,18,0.5)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <StatusDot s="active" />
+          <Mono className="!text-[#9AA0AC] !text-[10.5px]">Operations Status</Mono>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {["ALL", "HIGH", "MED"].map((f, i) => (
+            <button key={f} 
+              onClick={() => playUISound('soft-click')}
+              onMouseEnter={() => playUISound('hover')}
+              className={i === 0 ? "glass-btn-active" : "glass-btn"} style={{
+              fontSize: 9.5, fontFamily: "'JetBrains Mono', monospace",
+              padding: "4px 8px", borderRadius: 6, textTransform: "uppercase" as const,
+              color: i === 0 ? "#F5F6F8" : "#5C616B",
+            }}>{f}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Node map ── */}
+      <div ref={wrapRef} style={{
+        position: "relative", flexShrink: 0, height: nodeMapH,
+        display: "flex", alignItems: "stretch",
+        padding: C_PAD, gap: 0,
+        marginBottom: 35,
+        marginTop: 35, // Pushed globe down a bit
+      }}>
+        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} />
+
+        {/* Node cards column */}
+        <div style={{
+          display: "flex", flexDirection: "column", gap: C_CARD_GAP,
+          position: "relative", zIndex: 10,
+          width: C_CARD_W, flexShrink: 0,
+          justifyContent: "center",
+        }}>
+          {NODES.map(n => {
+            const lit = activeNode === n.id;
+            return (
+              <button key={n.id} onClick={() => {
+                playUISound('click');
+                setActiveNode(n.id);
+                onOpenModal(n.id);
+              }}
+                onMouseEnter={() => playUISound('hover')}
+                className={lit ? "glass-btn-active" : "glass-btn"}
+                style={{
+                  height: C_CARD_H, width: C_CARD_W,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  borderRadius: 10,
+                  transform:  lit ? "translateY(-1px)" : "none",
+                  background: lit ? n.bg : "transparent",
+                  border: lit ? `1px solid ${n.color}40` : "1px solid transparent",
+                  boxShadow: lit ? `0 0 14px ${n.glow}` : "none",
+                }}
+                title={n.label}>
+                <n.Icon size={16} style={{ color: lit ? n.color : "#8A909E" }} />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Spacer — connector lines travel through here */}
+        <div style={{ flex: 1, minWidth: 0 }} />
+
+        {/* Orb column */}
+        <div style={{
+          width: C_ORB_AREA, flexShrink: 0,
+          position: "relative", zIndex: 10,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          alignSelf: "stretch",
+        }}>
+          <div style={{
+            width: 320, height: 320,
+            background: "rgba(16, 21, 28, 0.4)",
+            border: "1px solid rgba(47, 224, 200, 0.05)",
+            borderRadius: 24,
+            position: "relative",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            boxShadow: "inset 0 0 20px rgba(0,0,0,0.2)"
+          }}>
+            {/* Action Icons Top Right */}
+            <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "column", gap: 8, zIndex: 30 }}>
+              <button 
+                onClick={() => { playUISound('click'); setCameraOn(!cameraOn); }}
+                onMouseEnter={() => playUISound('hover')}
+                className="glass-btn" 
+                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: cameraOn ? "#2FE0C8" : "#5C616B", background: cameraOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: cameraOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
+                onMouseOver={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
+                onMouseOut={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
+              >
+                <Camera size={15} />
+              </button>
+              <button 
+                onClick={() => { playUISound('click'); setScreenShareOn(!screenShareOn); }}
+                onMouseEnter={() => playUISound('hover')}
+                className="glass-btn" 
+                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
+                onMouseOver={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
+                onMouseOut={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
+              >
+                <Monitor size={15} />
+              </button>
+            </div>
+
+            <style>{`
+              @keyframes shake-orb {
+                0% { transform: translate(0, 0) scale(1); }
+                25% { transform: translate(-1px, 1px) scale(1.02); }
+                50% { transform: translate(1px, -1px) scale(1); }
+                75% { transform: translate(1px, 1px) scale(1.01); }
+                100% { transform: translate(0, 0) scale(1); }
+              }
+              .orb-shake {
+                animation: shake-orb 0.4s ease-in-out infinite;
+              }
+            `}</style>
+            
+            {/* Orb container shifted slightly up to make room for bottom elements */}
+            <div style={{ position: "relative", width: 200, height: 200, marginTop: -20 }}>
+              <div className={aiActive ? "orb-breathe" : ""}
+                style={{ 
+                  position: "absolute", width: "100%", height: "100%", 
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  filter: aiActive ? "drop-shadow(0 0 35px rgba(47,224,200,0.5))" : "drop-shadow(0 0 8px rgba(47,224,200,0.08))",
+                  pointerEvents: "none",
+                  transition: "filter 0.5s ease"
+                }}>
+                <ParticleOrb active={aiActive} />
+              </div>
+            </div>
+  
+            {/* Start AI Button positioned at the bottom of the container */}
+            <div style={{ position: "absolute", bottom: 24, left: 0, zIndex: 20, width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, width: "80%" }}>
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.03)" }} />
+                <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.03)" }} />
+              </div>
+              <button 
+                onClick={async () => { 
+                  playUISound('powerup'); 
+                  onToggleAI();
+                  if ((window as any).electronAPI) {
+                    if (!aiActive) {
+                      await (window as any).electronAPI.startGeminiVoiceAssistant?.();
+                      await (window as any).electronAPI.triggerGeminiLiveCall?.(true);
+                    } else {
+                      await (window as any).electronAPI.triggerGeminiLiveCall?.(false);
+                      await (window as any).electronAPI.stopGeminiVoiceAssistant?.();
+                    }
+                  }
+                }} 
+                onMouseEnter={() => playUISound('hover')}
+                className={aiActive ? "glass-btn" : "glass-btn-active"} 
+                style={{
+                  padding: "8px 38px", borderRadius: 24,
+                  fontSize: 13, fontWeight: 600,
+                  color: aiActive ? "#FF5C5C" : "#34D399",
+                  cursor: "pointer",
+                  background: "rgba(10, 15, 20, 0.8)",
+                  border: "1px solid rgba(52, 211, 153, 0.2)"
+                }}
+                onMouseOver={(e) => { if(!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
+                onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+              >
+                {aiActive ? "STOP AI" : "START AI"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Agent Town tab bar ── */}
+      <div style={{
+        height: 34, flexShrink: 0, marginTop: 15,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 14px",
+        borderTop: "1px solid #1A1D24",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <StatusDot s="error" />
+          <Mono className="!text-[#9AA0AC]">Agent Town</Mono>
+        </div>
+        <div style={{ display: "flex", gap: 3 }}>
+          {[{ id: "town", l: "Agent Town" }, { id: "visual", l: "Visual Hub" }].map(tab => (
+            <button key={tab.id} 
+              onClick={() => { playUISound('tab-click'); setAgentTab(tab.id); }}
+              onMouseEnter={() => playUISound('hover')}
+              className={agentTab === tab.id ? "glass-btn-active" : "glass-btn"}
+              style={{
+                fontSize: 9.5, fontFamily: "'JetBrains Mono', monospace",
+                padding: "4px 8px", borderRadius: 5, textTransform: "uppercase" as const,
+                color: agentTab === tab.id ? "#F5F6F8"  : "#5C616B",
+              }}>{tab.l}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Scrollable content ── */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="custom-scroll">
+      </div>
+
+      {/* ── Status bar ── */}
+      <div style={{
+        height: 32, flexShrink: 0,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 14px",
+        borderTop: "1px solid #1A1D24",
+        background: "rgba(10,12,18,0.4)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <StatusDot s="active" />
+          <Mono>All Systems Normal</Mono>
+        </div>
+        <input placeholder="Add new objective..."
+          style={{ fontSize: 11, background: "transparent", outline: "none", color: "#5C616B", width: 155 }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Chat Bubble ──────────────────────────────────────────────────────────────
+function ChatBubble({ m }: { m: any }) {
+  const isUser   = m.role === "user";
+  const hasArabic = /[\u0600-\u06FF]/.test(m.text || '');
+  const parts    = (m.text || '').split(/(\*\*[^*]+\*\*)/g);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(m.text || '');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", padding: "0 12px" }}>
+      {!isUser && (
+        <div style={{
+          width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+          marginRight: 7, marginTop: 3,
+          background: "rgba(47,224,200,0.1)", border: "1px solid rgba(47,224,200,0.2)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <Layers size={10} style={{ color: "#2FE0C8" }} />
+        </div>
+      )}
+      <div style={{
+        maxWidth: "88%", borderRadius: 12, padding: "8px 11px",
+        fontSize: 12, lineHeight: 1.7, color: "#E8EAF0",
+        background: isUser ? "rgba(47,224,200,0.07)" : "#15181E",
+        border: `1px solid ${isUser ? "rgba(47,224,200,0.18)" : "#1D2028"}`,
+        borderBottomRightRadius: isUser ? 3 : 12,
+        borderBottomLeftRadius:  isUser ? 12 : 3,
+        direction:  hasArabic ? "rtl"   : "ltr",
+        textAlign:  hasArabic ? "right" : "left",
+      }}>
+        {m.reasoning && (
+          <div style={{ fontSize: 10, color: "#9AA0AC", marginBottom: 4, fontStyle: "italic", borderBottom: "1px solid #1A1D24", paddingBottom: 4 }}>
+            {m.reasoning}
+          </div>
+        )}
+        {m.status && (
+          <div style={{ fontSize: 10, color: "#2FE0C8", marginBottom: 4 }}>
+            <span className="animate-pulse">▶</span> {m.status}
+          </div>
+        )}
+        {parts.map((part: string, i: number) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            return <strong key={i} style={{ color: "#F5F6F8" }}>{part.slice(2, -2)}</strong>;
+          }
+          return (
+            <span key={i}>
+              {part.split("\n").map((line, j, arr) => (
+                <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+              ))}
+            </span>
+          );
+        })}
+        {m.isStreaming && <span className="animate-pulse ml-1 text-[#2FE0C8]">▋</span>}
+      </div>
+      {!isUser && !m.isStreaming && (
+        <button 
+          onClick={handleCopy}
+          className="glass-btn"
+          style={{ 
+            marginLeft: 8, marginTop: 4, width: 24, height: 24, borderRadius: 6,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            opacity: 0.6, flexShrink: 0, alignSelf: "flex-end"
+          }}
+          title="Copy"
+        >
+          {copied ? <Check size={12} color="#34D399" /> : <Copy size={12} color="#9AA0AC" />}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ─── Chat Panel ───────────────────────────────────────────────────────────────
+import { useElectronChat } from "@/hooks/digi/useElectronChat";
+import { useSpeechRecognition } from "@/hooks/digi/useSpeechRecognition";
+
+function ChatPanel({ aiActive, onToggleAI, isOpen, onToggle }: { aiActive: boolean; onToggleAI: () => void; isOpen: boolean; onToggle: () => void }) {
+  const [input,     setInput] = useState("");
+  const { msgs, send, connected, listening } = useElectronChat(aiActive);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  const { isListening, startListening, stopListening } = useSpeechRecognition((text, isFinal) => {
+    if (isFinal) {
+      send(text);
+      setInput("");
+    } else {
+      setInput(text);
+    }
+  });
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
+
+  useEffect(() => {
+    if (aiActive) {
+      startListening();
+    } else {
+      stopListening();
+    }
+  }, [aiActive, startListening, stopListening]);
+
+  useEffect(() => {
+    const api = (window as any).electronAPI;
+    if (!api) return;
+
+    if (aiActive) {
+      api.startGeminiVoiceAssistant?.().catch((err: any) => {
+        console.error('Failed to start hidden Gemini voice session:', err);
+      });
+    } else {
+      api.stopGeminiVoiceAssistant?.().catch((err: any) => {
+        console.error('Failed to stop hidden Gemini voice session:', err);
+      });
+    }
+  }, [aiActive]);
+
+  useEffect(() => {
+    if ((window as any).electronAPI && (window as any).electronAPI.onWakeWord) {
+      (window as any).electronAPI.onWakeWord((command: string) => {
+        if (!aiActive) onToggleAI();
+        if (!isOpen) onToggle();
+        send(command);
+      });
+    }
+  }, [aiActive, isOpen, onToggleAI, onToggle, send]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    console.log("trigger backend: send", input);
-    setMessages((m) => [...m, { role: "user", text: input }]);
+    playUISound('send');
+    send(input);
     setInput("");
   };
 
-  const toggleVoice = () => {
-    console.log("trigger backend: toggleVoice");
-    setListening((v) => !v);
-  };
-
   return (
-    <aside className="w-[360px] shrink-0 h-full flex flex-col border-l border-white/[0.06] bg-[#0A0B0F]/80 backdrop-blur-xl">
-      {/* Terminal log */}
-      <div className="border-b border-white/[0.06]">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/40">
-            <Terminal size={12} /> System Log
-          </div>
-          <div className="flex gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#F43F5E]/70" />
-            <span className="w-2 h-2 rounded-full bg-[#F5B733]/70" />
-            <span className="w-2 h-2 rounded-full bg-[#2FE0C8]/70" />
-          </div>
-        </div>
-        <div className="px-4 pb-3 font-mono text-[11px] leading-relaxed text-white/50 max-h-[150px] overflow-y-auto space-y-0.5">
-          <div><span className="text-[#2FE0C8]">[ok]</span> daemon.core → ready</div>
-          <div><span className="text-[#2FE0C8]">[ok]</span> voice.gateway → armed</div>
-          <div><span className="text-[#8B7CF6]">[..]</span> agent.town → syncing (24/24)</div>
-          <div className="text-white/30">{"{ status: 'ONLINE', latency: 42, tokens: 1284 }"}</div>
-        </div>
+    <div style={{
+      width: 270, flexShrink: 0,
+      display: "flex", flexDirection: "column",
+      borderRight: "1px solid #1A1D24",
+      background: "rgba(9,10,15,0.75)",
+    }}>
+      {/* Top Header */}
+      <div style={{
+        padding: "12px 14px 6px",
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
+      }}>
+        <button className="glass-btn" 
+          onClick={() => playUISound('soft-click')}
+          onMouseEnter={() => playUISound('hover')}
+          style={{ padding: "6px", borderRadius: 8 }}>
+          <RotateCcw size={13} style={{ color: "#9AA0AC" }} />
+        </button>
       </div>
 
-      {/* Chat area */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.06]">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/40">
-          <MessageCircle size={12} /> Command Chat
-        </div>
-        <span className="text-[10px] text-white/40">GPT-Ω · streaming</span>
-      </div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.map((m, i) => {
-          if (m.role === "system") {
-            return (
-              <div key={i} className="text-[11px] font-mono text-white/40">
-                {m.text}
-              </div>
-            );
-          }
-          const isUser = m.role === "user";
-          return (
-            <div key={i} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[85%] px-3 py-2 rounded-xl text-[13px] leading-relaxed ${
-                  isUser
-                    ? "bg-gradient-to-br from-[#2FE0C8]/20 to-[#8B7CF6]/20 border border-[#2FE0C8]/30 text-white"
-                    : "bg-white/[0.03] border border-white/[0.06] text-white/85"
-                }`}
-              >
-                {m.text}
-              </div>
-            </div>
-          );
-        })}
+      {/* Search bar */}
+      <div style={{
+        height: 36, flexShrink: 0,
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "0 12px",
+        borderBottom: "1px solid #1A1D24",
+        background: "rgba(10,12,18,0.5)",
+      }}>
+        <Search size={13} style={{ color: "#5C616B", flexShrink: 0 }} />
+        <input placeholder="Search anything..."
+          style={{ flex: 1, background: "transparent", outline: "none", fontSize: 12, color: "#F5F6F8" }} />
+        <Monitor size={13} style={{ color: "#5C616B" }} />
       </div>
 
-      {/* Composer */}
-      <div className="border-t border-white/[0.06] p-3">
-        <div className="relative flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl px-2 py-2 focus-within:border-[#2FE0C8]/50 focus-within:shadow-[0_0_20px_rgba(47,224,200,0.15)] transition">
-          <button
-            onClick={toggleVoice}
-            className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-              listening
-                ? "bg-[#F43F5E]/20 text-[#F43F5E]"
-                : "bg-white/[0.04] text-white/60 hover:text-[#2FE0C8]"
-            }`}
-            title="Voice control"
-          >
-            {listening && (
-              <span className="absolute inset-0 rounded-xl bg-[#F43F5E]/30 animate-ping" />
-            )}
-            <Mic size={16} className="relative" />
-          </button>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Speak or type a command…"
-            className="flex-1 bg-transparent outline-none text-[13px] text-white placeholder:text-white/30"
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "10px 0", display: "flex", flexDirection: "column", gap: 10 }}
+        className="no-scrollbar">
+
+        {msgs.map(m => <ChatBubble key={m.id} m={m} />)}
+
+        <div ref={endRef} />
+      </div>
+
+      {/* Chat Input like Gemini */}
+      <div style={{ padding: 12 }}>
+        <div style={{
+          background: "#08090C", border: "1px solid #1E2129",
+          borderRadius: 16, padding: "8px 10px",
+          display: "flex", flexDirection: "column", gap: 6
+        }}>
+          <textarea
+            value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder="Message Agent Town..."
+            rows={1}
+            style={{
+              width: "100%", background: "transparent", border: "none", outline: "none", resize: "none",
+              fontSize: 13, color: "#F5F6F8", lineHeight: 1.5, maxHeight: 68, padding: "2px 4px",
+              overflow: "hidden", scrollbarWidth: "none"
+            }}
           />
-          <button
-            onClick={handleSend}
-            className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2FE0C8] to-[#8B7CF6] text-black flex items-center justify-center hover:brightness-110 transition"
-          >
-            <Send size={15} />
-          </button>
-        </div>
-        <div className="mt-2 px-1 flex items-center justify-between text-[10px] text-white/30 uppercase tracking-[0.2em]">
-          <span>{listening ? "Listening…" : "Idle"}</span>
-          <span>⌘ + K</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {/* Attachment Buttons */}
+            <div style={{ display: "flex", gap: 4 }}>
+              <label className="glass-btn" 
+                onClick={() => playUISound('soft-click')}
+                onMouseEnter={() => playUISound('hover')}
+                style={{
+                width: 28, height: 28, borderRadius: 8, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }} title="Add File">
+                <input type="file" style={{ display: "none" }} />
+                <Paperclip size={14} style={{ color: "#9AA0AC" }} />
+              </label>
+              <label className="glass-btn" 
+                onClick={() => playUISound('soft-click')}
+                onMouseEnter={() => playUISound('hover')}
+                style={{
+                width: 28, height: 28, borderRadius: 8, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }} title="Upload Image">
+                <input type="file" accept="image/*" style={{ display: "none" }} />
+                <ImageIcon size={14} style={{ color: "#9AA0AC" }} />
+              </label>
+              <label className="glass-btn" 
+                onClick={() => playUISound('soft-click')}
+                onMouseEnter={() => playUISound('hover')}
+                style={{
+                width: 28, height: 28, borderRadius: 8, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }} title="Integrate Folder">
+                <input type="file" {...{ webkitdirectory: "", directory: "" } as any} style={{ display: "none" }} />
+                <Folder size={14} style={{ color: "#9AA0AC" }} />
+              </label>
+            </div>
+
+            {/* Mic + Send */}
+            <div style={{ display: "flex", gap: 4 }}>
+              <button onClick={() => { playUISound('tech'); isListening ? stopListening() : startListening(); }} 
+                onMouseEnter={() => playUISound('hover')}
+                style={{
+                width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: isListening ? "rgba(47,224,200,0.1)" : "transparent",
+                border: `1px solid ${isListening ? "#2FE0C8" : "#252830"}`,
+              }}>
+                <Mic size={11} style={{ color: isListening ? "#2FE0C8" : "#5C616B" }} />
+              </button>
+              <button onClick={handleSend} 
+                onMouseEnter={() => playUISound('hover')}
+                style={{
+                width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: input.trim() ? "#2FE0C8" : "transparent", 
+                border: `1px solid ${input.trim() ? "transparent" : "#252830"}`,
+                boxShadow: input.trim() ? "0 0 12px rgba(47,224,200,0.4)" : "none",
+                transition: "all 0.2s ease"
+              }}>
+                <ArrowUp size={11} style={{ color: input.trim() ? "#08090C" : "#5C616B" }} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </aside>
+    </div>
   );
 }
 
-/* ---------------- Root ---------------- */
+// ─── Title Bar ────────────────────────────────────────────────────────────────
 
-export default function DigiApp() {
-  const [active, setActive] = useState("dashboard");
-  const [dialog, setDialog] = useState<null | "memory" | "soul" | "skills" | "settings">(null);
+// ─── Title Bar ────────────────────────────────────────────────────────────────
+function TitleBar() {
+  const handleWindowAction = (action: 'minimize' | 'maximize' | 'close') => {
+    // Check if electronAPI exists (meaning we are running inside Electron)
+    if (window.electronAPI && window.electronAPI[action]) {
+      window.electronAPI[action]();
+    } else {
+      console.log(`Window action triggered: ${action} (Electron not detected)`);
+    }
+  };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#08090C] text-white font-sans flex">
-      {/* ambient background glow */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(47,224,200,0.06),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(139,124,246,0.08),transparent_60%)]" />
+    <div style={{
+      height: 34, flexShrink: 0,
+      display: "flex", alignItems: "center",
+      background: "#07080C",
+      borderBottom: "1px solid #1A1D24",
+      position: "relative",
+      WebkitAppRegion: "drag", // Enable dragging for Electron window
+    } as React.CSSProperties}>
+      {/* Left balance spacer (width = left sidebar) */}
+      <div style={{ width: 220, flexShrink: 0 }} />
 
-      <LeftSidebar
-        active={active}
-        onSelect={setActive}
-        onOpenSettings={() => setDialog("settings")}
-      />
-      <CentralStage onOpen={(id) => setDialog(id)} />
-      <RightPanel />
+      {/* Centered title */}
+      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+        <span style={{
+          fontSize: 12, fontFamily: "'JetBrains Mono', monospace",
+          fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase",
+          color: "#D2D6E0",
+        }}>DIGI BUSINESS OS</span>
+      </div>
 
-      <MemoryDialog open={dialog === "memory"} onOpenChange={(o) => !o && setDialog(null)} />
-      <SoulDialog open={dialog === "soul"} onOpenChange={(o) => !o && setDialog(null)} />
-      <SkillsDialog open={dialog === "skills"} onOpenChange={(o) => !o && setDialog(null)} />
-      <SettingsDialog open={dialog === "settings"} onOpenChange={(o) => !o && setDialog(null)} />
+      {/* Window controls */}
+      <div style={{ 
+        width: 320, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8, gap: 6,
+        WebkitAppRegion: "no-drag" // Buttons must not be draggable
+      } as React.CSSProperties}>
+
+        {([
+          { act: 'minimize', icon: <span key="m" style={{ display: "block", width: 10, height: 1, background: "currentColor", borderRadius: 1 }} /> },
+          { act: 'maximize', icon: <span key="s" style={{ display: "block", width: 10, height: 10, borderRadius: 2, border: "1px solid currentColor" }} /> },
+          { act: 'close', icon: <svg key="x" width="9" height="9" viewBox="0 0 9 9" fill="none" style={{ display: "block" }}>
+            <line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg> },
+        ]).map((btn, i) => (
+          <button key={i} 
+          onClick={() => { playUISound('soft-click'); handleWindowAction(btn.act as 'minimize' | 'maximize' | 'close'); }}
+          style={{
+            width: 26, height: 22, borderRadius: 5, flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#5C616B", transition: "color 150ms, background 150ms",
+            cursor: "pointer"
+          }}
+          onMouseEnter={e => { playUISound('hover'); e.currentTarget.style.color = btn.act === 'close' ? "#FF5C5C" : "#9AA0AC"; e.currentTarget.style.background = btn.act === 'close' ? "rgba(255,92,92,0.1)" : "#1E212A"; }}
+          onMouseLeave={e => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; }}>
+            {btn.icon}
+          </button>
+        ))}
+      </div>
     </div>
+  );
+}
+
+// ─── Sound System ─────────────────────────────────────────────────────────────
+const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click' | 'tab-click' | 'send') => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+    
+    if (type === 'hover') {
+      // Subtle sci-fi holographic chirp
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(2000, ctx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.015, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.04);
+      
+    } else if (type === 'click') {
+      // Sharp digital confirm click
+      const osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.08);
+      
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1500;
+      filter.Q.value = 5;
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.08);
+      
+    } else if (type === 'tech') {
+      // Processing multi-beep
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.setValueAtTime(1600, ctx.currentTime + 0.05);
+      osc.frequency.setValueAtTime(800, ctx.currentTime + 0.1);
+      osc.connect(gain);
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.03, ctx.currentTime + 0.01);
+      gain.gain.setValueAtTime(0.03, ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0, ctx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.03, ctx.currentTime + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+      
+    } else if (type === 'soft-click') {
+      // Gentle, low-pitched click for minor interactions
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.05);
+      osc.connect(gain);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.05);
+
+    } else if (type === 'tab-click') {
+      // Crisp snap for changing tabs
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.06);
+      osc.connect(gain);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.06);
+
+    } else if (type === 'send') {
+      // Fast upward swoosh for sending messages
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.15);
+      osc.connect(gain);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+
+    } else if (type === 'powerup') {
+      const audio = new Audio('/audio/gadget-activation.mp3');
+      audio.volume = 1.0;
+      audio.play().catch(() => {});
+    }
+  } catch (e) {
+    // Ignore audio context errors
+  }
+};
+
+// ─── Startup Screen ────────────────────────────────────────────────────────────
+function StartupScreen({ onComplete }: { onComplete: () => void }) {
+  const [started, setStarted] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const startVideo = () => {
+    setStarted(true);
+    playUISound('tech');
+    if (videoRef.current) {
+      videoRef.current.play().catch(e => {
+        console.warn("Video play error, skipping:", e);
+        onComplete();
+      });
+    } else {
+      onComplete();
+    }
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999, background: "#000",
+      display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer"
+    }} onClick={!started ? startVideo : undefined}>
+      
+      {!started && (
+        <div style={{
+          position: "absolute", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 20
+        }}>
+          <img src={logoUrl} alt="DIGI" style={{ width: 80, height: 80, borderRadius: "50%", opacity: 0.8 }} className="blob-float" />
+          <h2 style={{ color: "#2FE0C8", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.2em", fontSize: 14 }} className="animate-pulse">
+            CLICK ANYWHERE TO INITIALIZE
+          </h2>
+        </div>
+      )}
+
+      <video
+        ref={videoRef}
+        src={startupVideoUrl}
+        onEnded={onComplete}
+        onError={(e) => {
+          console.warn("Video failed to load or play, skipping to next screen", e);
+          onComplete(); // fallback so it doesn't get stuck
+        }}
+        style={{ 
+          width: "100%", height: "100%", objectFit: "cover",
+          opacity: started ? 1 : 0, transition: "opacity 0.5s ease"
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Loading Screen ────────────────────────────────────────────────────────────
+function LoadingScreen({ onComplete }: { onComplete: () => void }) {
+  const [progress, setProgress] = useState(0);
+  const [loadingText, setLoadingText] = useState("INITIALIZING_CORE_SYSTEMS...");
+
+  useEffect(() => {
+    const messages = [
+      "ESTABLISHING_SECURE_CONNECTION...",
+      "LOADING_MEMORY_SHARDS...",
+      "OPTIMIZING_NEURAL_PATHWAYS...",
+      "SYNCING_WITH_HERMES_BRIDGE...",
+      "READY."
+    ];
+    
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress += Math.floor(Math.random() * 5) + 1; // Random increment 1-5
+      if (currentProgress >= 100) {
+        currentProgress = 100;
+        clearInterval(interval);
+        setTimeout(onComplete, 500); // Wait a bit at 100% before transitioning
+      }
+      setProgress(currentProgress);
+      
+      // Update text based on progress
+      if (currentProgress > 85) setLoadingText(messages[4]);
+      else if (currentProgress > 60) setLoadingText(messages[3]);
+      else if (currentProgress > 40) setLoadingText(messages[2]);
+      else if (currentProgress > 20) setLoadingText(messages[1]);
+      else setLoadingText(messages[0]);
+    }, 150);
+
+    return () => clearInterval(interval);
+  }, [onComplete]);
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9998, background: "#050608",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Inter', sans-serif", color: "#F5F6F8"
+    }}>
+      {/* Logo container with spinning ring */}
+      <div style={{ position: "relative", width: 120, height: 120, marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {/* Spinning outer ring */}
+        <div className="blob-float" style={{
+          position: "absolute", inset: -10, borderRadius: "50%",
+          border: "1px solid rgba(47, 224, 200, 0.15)",
+          borderTopColor: "#2FE0C8",
+          animation: "spin 3s linear infinite"
+        }} />
+        {/* Inner static ring */}
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: "50%",
+          border: "1px solid rgba(255, 255, 255, 0.05)"
+        }} />
+        {/* Logo */}
+        <img src={logoUrl} alt="DIGI Logo" style={{ width: 64, height: 64, borderRadius: "50%", objectFit: "cover", zIndex: 2 }} />
+      </div>
+
+      {/* Title */}
+      <h1 style={{
+        fontSize: 32, letterSpacing: "0.5em", fontWeight: 300, 
+        marginLeft: "0.5em", // offset for letter spacing centering
+        marginBottom: 40, color: "#fff"
+      }}>
+        DIGI
+      </h1>
+
+      {/* Progress Bar Container */}
+      <div style={{ width: 340 }}>
+        {/* Bar */}
+        <div style={{
+          width: "100%", height: 2, background: "rgba(255, 255, 255, 0.1)", 
+          position: "relative", marginBottom: 12, overflow: "hidden"
+        }}>
+          <div style={{
+            position: "absolute", top: 0, left: 0, bottom: 0,
+            width: `${progress}%`, background: "#2FE0C8",
+            transition: "width 0.2s ease-out",
+            boxShadow: "0 0 10px rgba(47, 224, 200, 0.5)"
+          }} />
+        </div>
+        
+        {/* Text Details */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, fontFamily: "monospace", color: "#5C616B", letterSpacing: "0.1em" }}>
+          <span>{loadingText}</span>
+          <span>{progress.toString().padStart(3, '0')}%</span>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [aiActive,   setAI]       = useState(false);
+  const [activeNav,  setActiveNav] = useState("dashboard");
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const [isMemoryOpen, setMemoryOpen] = useState(false);
+  const [isSoulOpen, setSoulOpen] = useState(false);
+  const [isSkillsOpen, setSkillsOpen] = useState(false);
+  const [activeTab,  setActiveTab] = useState("voice");
+  const [isChatOpen, setChatOpen] = useState(true);
+  const [showStartupVideo, setShowStartupVideo] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const [hermesStatus, setHermesStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
+  const [hermesPort, setHermesPort] = useState<number | null>(null);
+
+  useEffect(() => {
+    if ((window as any).electronAPI && (window as any).electronAPI.getHermesPort) {
+      (window as any).electronAPI.getHermesPort().then((port: number) => {
+        setHermesPort(port);
+      });
+    } else {
+      setHermesPort(18789); // fallback
+    }
+  }, []);
+
+  // ─── Hermes Bridge Health Check ─────────────────────────────────────────────
+  useEffect(() => {
+    if (!hermesPort) return;
+    let ws: WebSocket;
+    let reconnectTimeout: ReturnType<typeof setTimeout>;
+
+    const connect = () => {
+      setHermesStatus('connecting');
+      try {
+        ws = new WebSocket(`ws://127.0.0.1:${hermesPort}`);
+
+        ws.onopen = () => {
+          setHermesStatus('online');
+        };
+
+        ws.onclose = () => {
+          setHermesStatus('offline');
+          reconnectTimeout = setTimeout(connect, 3000);
+        };
+
+        ws.onerror = () => {
+          setHermesStatus('offline');
+        };
+      } catch (err) {
+        setHermesStatus('offline');
+        reconnectTimeout = setTimeout(connect, 3000);
+      }
+    };
+
+    connect();
+
+    return () => {
+      clearTimeout(reconnectTimeout);
+      if (ws) ws.close();
+    };
+  }, [hermesPort]);
+
+  const handleVideoComplete = () => {
+    setShowStartupVideo(false);
+    setShowLoadingScreen(true);
+  };
+
+  const openSettings = (tabId?: string) => {
+    if (tabId) setActiveTab(tabId);
+    else setActiveTab("voice");
+    setSettingsOpen(true);
+  };
+
+  const openModal = (id: string) => {
+    if (id === 'settings') openSettings();
+    else if (id === 'memory') setMemoryOpen(true);
+    else if (id === 'soul') setSoulOpen(true);
+    else if (id === 'skills') setSkillsOpen(true);
+  };
+
+  return (
+    <>
+      <style>{G}</style>
+      {showStartupVideo ? (
+        <StartupScreen onComplete={handleVideoComplete} />
+      ) : showLoadingScreen ? (
+        <LoadingScreen onComplete={() => setShowLoadingScreen(false)} />
+      ) : (
+      <div style={{
+        position: "fixed", inset: 0,
+        display: "flex", flexDirection: "column",
+        overflow: "hidden",
+        fontFamily: "'Inter', sans-serif",
+        background: "#08090C",
+        userSelect: "none",
+        border: "1px solid #1A1D24",
+        borderRadius: 8,
+      }}>
+        {/* Ambient blobs */}
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+          {[
+            { w: 520, h: 520, top: "-120px", left: "22%",  c: "rgba(139,124,246,0.038)" },
+            { w: 420, h: 420, bottom: "-60px", right: "18%", c: "rgba(47,224,200,0.03)" },
+            { w: 360, h: 360, top: "35%",    right: "6%",  c: "rgba(59,130,246,0.025)" },
+          ].map((b, i) => (
+            <div key={i} className="blob-float" style={{
+              position: "absolute", width: b.w, height: b.h,
+              top: (b as any).top, bottom: (b as any).bottom,
+              left: (b as any).left, right: (b as any).right,
+              borderRadius: "50%",
+              background: `radial-gradient(circle, ${b.c} 0%, transparent 68%)`,
+              animationDelay: `${i * -5}s`,
+            }} />
+          ))}
+        </div>
+
+        {/* Main content */}
+        <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+          <TitleBar />
+          <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+            <LeftSidebar activeNav={activeNav} setActiveNav={setActiveNav} onOpenSettings={() => openSettings()} />
+            {activeNav === "voice" ? (
+              <VoiceAIPage />
+            ) : (
+              <>
+                <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
+                <ChatPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} isOpen={isChatOpen} onToggle={() => setChatOpen(!isChatOpen)} />
+              </>
+            )}
+          </div>
+
+          {/* ─── Status Bar (Bottom) ─── */}
+          <div style={{
+            height: 26, flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "0 12px",
+            background: "#0C0D12",
+            borderTop: "1px solid #1A1D24",
+            fontSize: 10, fontFamily: "'JetBrains Mono', 'Consolas', monospace",
+            color: "#4A4F5C", letterSpacing: "0.03em",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ 
+                  width: 6, height: 6, borderRadius: "50%", 
+                  background: hermesStatus === 'online' ? "#2FE0C8" : hermesStatus === 'connecting' ? "#F5A623" : "#D0021B", 
+                  boxShadow: hermesStatus === 'online' ? "0 0 6px rgba(47,224,200,0.5)" : "none" 
+                }} />
+                {hermesStatus === 'online' ? "SYSTEM ONLINE" : hermesStatus === 'connecting' ? "CONNECTING..." : "SYSTEM OFFLINE"}
+              </span>
+              <span>v0.0.1</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ color: hermesStatus === 'online' ? "#4A4F5C" : "#D0021B" }}>
+                HERMES BRIDGE: {hermesStatus === 'online' ? (hermesPort || "...") : "DISCONNECTED"}
+              </span>
+              <span>DIGI BUSINESS OS</span>
+            </div>
+          </div>
+
+          <SettingsDialog open={isSettingsOpen} onOpenChange={setSettingsOpen} defaultTab={activeTab} />
+          <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
+          <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
+          <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
+        </div>
+      </div>
+      )}
+    </>
   );
 }
