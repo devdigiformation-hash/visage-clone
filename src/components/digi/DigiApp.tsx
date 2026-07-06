@@ -735,7 +735,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         <div style={{
           width: C_ORB_AREA, flexShrink: 0,
           position: "relative", zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "flex-start",
+          display: "flex", alignItems: "flex-start", justifyContent: "flex-start", paddingTop: 60,
           alignSelf: "stretch",
         }}>
           <div style={{
