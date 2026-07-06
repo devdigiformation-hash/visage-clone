@@ -173,7 +173,7 @@ const C_PAD      = 12;   // padding inside the node-map wrapper
 const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
-const C_ORB_AREA = 220;  // width reserved for the orb (decreased to push it absolutely right)
+const C_ORB_AREA = 300;  // width reserved for the orb + right control rail
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
