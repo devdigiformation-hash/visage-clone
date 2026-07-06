@@ -7,7 +7,7 @@ import {
   Wallet, RotateCcw, PanelRightClose, PanelRightOpen,
   PanelLeftClose, PanelLeftOpen, Paperclip, Image as ImageIcon,
   Volume2, TrendingUp, BarChart2, Folder, FileText, Copy, Check,
-  Workflow
+  Workflow, Wrench
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
