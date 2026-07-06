@@ -676,14 +676,15 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         <div style={{
           width: C_ORB_AREA, flexShrink: 0,
           position: "relative", zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "center",
+          display: "flex", alignItems: "center", justifyContent: "flex-start",
           alignSelf: "stretch",
         }}>
           <div style={{
             width: 320, height: 320,
+            marginLeft: -30,
             background: "rgba(16, 21, 28, 0.4)",
-            border: "1px solid rgba(47, 224, 200, 0.05)",
-            borderRadius: 24,
+            border: "1px solid rgba(47, 224, 200, 0.25)",
+            borderRadius: 8,
             position: "relative",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             boxShadow: "inset 0 0 20px rgba(0,0,0,0.2)"
