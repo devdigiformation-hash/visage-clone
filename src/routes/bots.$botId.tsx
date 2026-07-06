@@ -14,10 +14,13 @@ type Tab = "overview" | "config" | "connections" | "runs";
 function BotDetail() {
   const { botId } = Route.useParams();
   const nav = useNavigate();
-  const [b, setB] = useState<Bot | undefined>(() => botsRepo.get(botId));
+  const [b, setB] = useState<Bot | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
 
   useEffect(() => {
+    setB(botsRepo.get(botId));
+    setLoaded(true);
     const unsub = botsRepo.subscribe(() => setB(botsRepo.get(botId)));
     return () => { unsub(); };
   }, [botId]);
@@ -25,7 +28,7 @@ function BotDetail() {
   if (!b) return (
     <div style={{ maxWidth: 520 }}>
       <Link to="/bots" style={{ ...btnGhost, marginBottom: 16 }}><ArrowLeft size={13}/> All bots</Link>
-      <div style={{ padding: 20, borderRadius: 10, border: "1px dashed #1F232C", color: "#8A909C" }}>Bot not found.</div>
+      <div style={{ padding: 20, borderRadius: 10, border: "1px dashed #1F232C", color: "#8A909C" }}>{loaded ? "Bot not found." : "Loading…"}</div>
     </div>
   );
 
