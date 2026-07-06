@@ -75,7 +75,10 @@ function NavRow({ to, label, Icon, color, active }: { to: string; label: string;
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, moduleLabel }: { children: ReactNode; moduleLabel?: string }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const label = moduleLabel
+    ?? [...NAV, ...MODS].find((n) => (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to)))?.label;
   return (
     <div style={{
       display: "flex", width: "100vw", height: "100vh", overflow: "hidden",
@@ -83,7 +86,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     }}>
       <ShellSidebar />
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {children}
+        <ModuleErrorBoundary label={label}>
+          {children}
+        </ModuleErrorBoundary>
       </div>
     </div>
   );
