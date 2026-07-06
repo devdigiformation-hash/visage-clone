@@ -99,7 +99,38 @@ export interface Channel extends Entity {
   lastConnectedAt?: number;
   sessionId?: string;       // whatsapp QR session ref
 }
-export interface Integration extends Entity { name: string; category: string; apiKey?: string; endpoint?: string; status: "connected" | "disconnected" | "error"; notes?: string; }
+export type IntegrationCategory =
+  | "AI Provider" | "Email" | "Messaging" | "Browser" | "API" | "Webhook"
+  | "CRM" | "Storage" | "Docs" | "Spreadsheet" | "Automation" | "Cloud"
+  | "Payments" | "Analytics" | "DevTools" | "Custom";
+export type IntegrationConnectionMethod = "api_key" | "oauth" | "webhook" | "smtp" | "browser" | "custom";
+export type IntegrationStatus = "connected" | "disconnected" | "pending" | "error";
+export interface Integration extends Entity {
+  name: string;
+  provider?: string;
+  category: IntegrationCategory | string;
+  method: IntegrationConnectionMethod;
+  status: IntegrationStatus;
+  source?: "catalog" | "custom";
+  templateId?: string;
+  description?: string;
+  apiKey?: string;
+  clientId?: string;
+  clientSecret?: string;
+  endpoint?: string;
+  webhookUrl?: string;
+  webhookSecret?: string;
+  smtpHost?: string;
+  smtpPort?: string;
+  smtpUser?: string;
+  smtpPass?: string;
+  browserProfile?: string;
+  config?: string;      // JSON blob, free-form
+  tags?: string;
+  notes?: string;
+  active?: boolean;
+  lastConnectedAt?: number;
+}
 export type JobStatus = "queued" | "pending" | "running" | "review" | "approved" | "completed" | "failed" | "blocked" | "cancelled";
 export interface Job extends Entity { title: string; agent: string; workflowId?: string; type?: string; status: JobStatus; step: number; totalSteps: number; notes?: string; startedAt?: number; completedAt?: number; durationMs?: number; module?: string; }
 export interface MemoryItem extends Entity { title: string; scope: "user" | "system" | "project"; content: string; tags?: string; }
