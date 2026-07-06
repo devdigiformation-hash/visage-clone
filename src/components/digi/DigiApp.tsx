@@ -576,6 +576,65 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const [agentTab, setAgentTab] = useState("town");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
+  const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
+  const screenVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const toggleCamera = useCallback(async () => {
+    playUISound('click');
+    if (cameraOn) {
+      cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+      cameraStreamRef.current = null;
+      setCameraOn(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      cameraStreamRef.current = stream;
+      setCameraOn(true);
+    } catch (err) {
+      console.error('Camera access denied', err);
+      alert('Camera access denied or unavailable.');
+    }
+  }, [cameraOn]);
+
+  const toggleScreenShare = useCallback(async () => {
+    playUISound('click');
+    if (screenShareOn) {
+      screenStreamRef.current?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current = null;
+      setScreenShareOn(false);
+      return;
+    }
+    try {
+      const stream = await (navigator.mediaDevices as any).getDisplayMedia({ video: true, audio: false });
+      screenStreamRef.current = stream;
+      stream.getVideoTracks()[0].addEventListener('ended', () => {
+        screenStreamRef.current = null;
+        setScreenShareOn(false);
+      });
+      setScreenShareOn(true);
+    } catch (err) {
+      console.error('Screen share denied', err);
+    }
+  }, [screenShareOn]);
+
+  useEffect(() => {
+    if (cameraVideoRef.current && cameraStreamRef.current) {
+      cameraVideoRef.current.srcObject = cameraStreamRef.current;
+    }
+  }, [cameraOn]);
+  useEffect(() => {
+    if (screenVideoRef.current && screenStreamRef.current) {
+      screenVideoRef.current.srcObject = screenStreamRef.current;
+    }
+  }, [screenShareOn]);
+  useEffect(() => () => {
+    cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
+
   const wrapRef = useRef<HTMLDivElement>(null);
   const [dims,  setDims]  = useState({ w: 600 });
 
