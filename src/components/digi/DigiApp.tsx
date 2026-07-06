@@ -173,7 +173,8 @@ const C_PAD      = 12;   // padding inside the node-map wrapper
 const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
-const C_ORB_AREA = 300;  // width reserved for the orb + right control rail
+const C_ORB_SIZE = 340;  // visible center globe container size
+const C_GLOBE_Y_RATIO = 0.43; // slightly raised vertical axis for the globe hub
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
@@ -305,19 +306,14 @@ function ParticleOrb({ active }: { active: boolean }) {
 // Geometry constants MUST stay in sync with OperationsPanel layout.
 function ConnectorSVG({ active, W, H }: { active: boolean; W: number; H: number }) {
   const nodeX = C_PAD + C_CARD_W;                    // right edge of card column
-  const orbContainerLeft = W - C_PAD - C_ORB_AREA;
-  // Connect exactly to the left edge of the visual sphere inside the container
-  // The 3D projection divides by a fov of 2.85, so the visual radius is smaller.
-  const visualPlanetR = PLANET_R / 2.85;
-  // Offset adjusted to perfectly meet the planet edge
-  // Globe is centered horizontally inside the orb column (minus the ~48px right control rail)
-  const rightRailW = 48;
-  const globeCenterX = orbContainerLeft + (C_ORB_AREA - rightRailW) / 2;
+  // Globe is now the true center hub of the Operations Status composition.
+  const globeCenterX = Math.round(W / 2);
+  const visualPlanetR = Math.round(C_ORB_SIZE * 0.43);
   const orbEdgeX = globeCenterX - visualPlanetR;
-  const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.75); // Multiplier changed to push junction right
-  const midY  = Math.round(H / 2);
+  const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.70);
+  const midY  = Math.round(H * C_GLOBE_Y_RATIO);
   const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
-  const startY = (H - nodeCardsTotalH) / 2;
+  const startY = midY - nodeCardsTotalH / 2;
   const ys    = NODES.map((_, i) => startY + i * (C_CARD_H + C_CARD_GAP) + Math.round(C_CARD_H / 2));
 
   return (
