@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
+import { TaskStrip } from "@/components/analytics/TaskStrip";
 import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
@@ -2018,6 +2019,7 @@ export default function App() {
           <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
           <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
           <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
+          {activeNav === "dashboard" && <TaskStrip />}
         </div>
       </div>
       )}
