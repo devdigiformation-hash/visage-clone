@@ -68,7 +68,8 @@ export interface Agent extends Entity { name: string; role: string; modelId?: st
 export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
 export interface Channel extends Entity { name: string; type: "whatsapp" | "email" | "telegram" | "web" | "webhook" | "custom"; credentials?: string; agentId?: string; active: boolean; }
 export interface Integration extends Entity { name: string; category: string; apiKey?: string; endpoint?: string; status: "connected" | "disconnected" | "error"; notes?: string; }
-export interface Job extends Entity { title: string; agent: string; workflowId?: string; status: "pending" | "running" | "review" | "approved" | "completed"; step: number; totalSteps: number; notes?: string; }
+export type JobStatus = "queued" | "pending" | "running" | "review" | "approved" | "completed" | "failed" | "blocked" | "cancelled";
+export interface Job extends Entity { title: string; agent: string; workflowId?: string; type?: string; status: JobStatus; step: number; totalSteps: number; notes?: string; startedAt?: number; completedAt?: number; durationMs?: number; module?: string; }
 export interface MemoryItem extends Entity { title: string; scope: "user" | "system" | "project"; content: string; tags?: string; }
 export interface KnowledgePack extends Entity { name: string; source: string; itemCount: number; notes?: string; }
 export interface KnowledgeItem extends Entity {
