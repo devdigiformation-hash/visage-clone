@@ -31,6 +31,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkflowsLibraryRouteImport } from './routes/workflows.library'
 import { Route as IntegrationsNewRouteImport } from './routes/integrations.new'
+import { Route as IntegrationsIntegrationIdRouteImport } from './routes/integrations.$integrationId'
 import { Route as ChannelsNewRouteImport } from './routes/channels.new'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
@@ -147,6 +148,12 @@ const IntegrationsNewRoute = IntegrationsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => IntegrationsRoute,
 } as any)
+const IntegrationsIntegrationIdRoute =
+  IntegrationsIntegrationIdRouteImport.update({
+    id: '/$integrationId',
+    path: '/$integrationId',
+    getParentRoute: () => IntegrationsRoute,
+  } as any)
 const ChannelsNewRoute = ChannelsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/integrations/new': typeof IntegrationsNewRoute
   '/workflows/library': typeof WorkflowsLibraryRoute
 }
@@ -228,6 +236,7 @@ export interface FileRoutesByTo {
   '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/integrations/new': typeof IntegrationsNewRoute
   '/workflows/library': typeof WorkflowsLibraryRoute
 }
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/integrations/new': typeof IntegrationsNewRoute
   '/workflows/library': typeof WorkflowsLibraryRoute
 }
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/integrations/$integrationId'
     | '/integrations/new'
     | '/workflows/library'
   fileRoutesByTo: FileRoutesByTo
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/integrations/$integrationId'
     | '/integrations/new'
     | '/workflows/library'
   id:
@@ -347,6 +359,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/integrations/$integrationId'
     | '/integrations/new'
     | '/workflows/library'
   fileRoutesById: FileRoutesById
@@ -530,6 +543,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntegrationsNewRouteImport
       parentRoute: typeof IntegrationsRoute
     }
+    '/integrations/$integrationId': {
+      id: '/integrations/$integrationId'
+      path: '/$integrationId'
+      fullPath: '/integrations/$integrationId'
+      preLoaderRoute: typeof IntegrationsIntegrationIdRouteImport
+      parentRoute: typeof IntegrationsRoute
+    }
     '/channels/new': {
       id: '/channels/new'
       path: '/new'
@@ -606,10 +626,12 @@ const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
 )
 
 interface IntegrationsRouteChildren {
+  IntegrationsIntegrationIdRoute: typeof IntegrationsIntegrationIdRoute
   IntegrationsNewRoute: typeof IntegrationsNewRoute
 }
 
 const IntegrationsRouteChildren: IntegrationsRouteChildren = {
+  IntegrationsIntegrationIdRoute: IntegrationsIntegrationIdRoute,
   IntegrationsNewRoute: IntegrationsNewRoute,
 }
 
