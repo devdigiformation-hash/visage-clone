@@ -623,7 +623,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
           if (hideable && !showModules) return null;
           return (
           <button key={i} className="group glass-btn"
-            onClick={() => playUISound('click')}
+            onClick={() => { playUISound('click'); if (mod.route) navigate({ to: mod.route }); }}
             onMouseEnter={() => playUISound('hover')}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
