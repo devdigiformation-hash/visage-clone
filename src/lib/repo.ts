@@ -155,9 +155,20 @@ export const workflowsRepo = createRepo<Workflow>("workflows", [
   { name: "Weekly Sales Report", trigger: "schedule", status: "active" },
 ]);
 export const channelsRepo = createRepo<Channel>("channels", [
-  { name: "Support WhatsApp", type: "whatsapp", active: true },
-  { name: "Sales Email", type: "email", active: true },
+  { name: "Support WhatsApp", type: "whatsapp", status: "disconnected", active: false, description: "Primary customer support line" },
+  { name: "Sales Email", type: "email", status: "disconnected", active: false, description: "Inbound sales inbox" },
 ]);
+export const CHANNEL_CATALOG: Array<{ type: ChannelType; label: string; color: string; blurb: string; setupMethod: string; }> = [
+  { type: "whatsapp", label: "WhatsApp", color: "#22C55E", blurb: "QR based session or Business Cloud API", setupMethod: "QR / Cloud API" },
+  { type: "telegram", label: "Telegram", color: "#3B82F6", blurb: "Bot token via @BotFather", setupMethod: "Bot Token" },
+  { type: "discord", label: "Discord", color: "#7C3AED", blurb: "Bot token + guild, or webhook URL", setupMethod: "Bot / Webhook" },
+  { type: "slack", label: "Slack", color: "#F59E0B", blurb: "Incoming webhook or Slack app", setupMethod: "Webhook / App" },
+  { type: "email", label: "Email", color: "#EC4899", blurb: "SMTP / IMAP mailbox", setupMethod: "SMTP + IMAP" },
+  { type: "sms", label: "SMS", color: "#F97316", blurb: "Twilio / provider number", setupMethod: "Provider API" },
+  { type: "web", label: "Web Chat", color: "#06B6D4", blurb: "Embeddable site chat widget", setupMethod: "Snippet" },
+  { type: "webhook", label: "Webhook", color: "#A78BFA", blurb: "Generic inbound/outbound webhook", setupMethod: "URL + Secret" },
+  { type: "custom", label: "Custom Channel", color: "#5C616B", blurb: "Any private API, bot or protocol", setupMethod: "Free-form config" },
+];
 export const integrationsRepo = createRepo<Integration>("integrations", [
   { name: "OpenRouter", category: "AI Provider", status: "disconnected" },
   { name: "Slack", category: "Communication", status: "disconnected" },
