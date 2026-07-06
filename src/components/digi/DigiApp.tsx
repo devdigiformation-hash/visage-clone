@@ -677,14 +677,15 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 
   // Computed height of the node-map section
   const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
-  const availableCompositionH = Math.max(baseNodeMapH + 180, dims.h - 36 - 32);
-  const nodeMapH = Math.max(baseNodeMapH + 180, Math.round(availableCompositionH * 0.78));
-  const globeSize = Math.min(370, Math.max(300, Math.round(Math.min(dims.w * 0.43, nodeMapH * 0.62))));
+  const availableCompositionH = Math.max(baseNodeMapH + 220, dims.h - 36 - 32);
+  const nodeMapH = Math.max(baseNodeMapH + 220, Math.round(availableCompositionH * 0.80));
+  const globeSize = Math.min(390, Math.max(330, Math.round(Math.min(dims.w * 0.47, nodeMapH * 0.58))));
   const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
   const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
   const nodeCardsTop = Math.round(globeCenterY - nodeCardsTotalH / 2);
   const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - 33);
   const globeCenterX = Math.round((C_LEFT_STACK_X + C_CARD_W + rightActionStackX) / 2);
+  const agentTownMinH = Math.max(118, Math.round(availableCompositionH * 0.18));
 
   return (
     <div ref={panelRef} style={{
@@ -912,7 +913,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 
       {/* ── Agent Town tab bar ── */}
       <div style={{
-        height: 34, flexShrink: 0, marginTop: 15,
+        height: 34, flexShrink: 0, marginTop: 0,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 14px",
         borderTop: "1px solid #1A1D24",
@@ -937,7 +938,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
       </div>
 
       {/* ── Scrollable content ── */}
-      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="custom-scroll">
+      <div style={{ flex: 1, overflowY: "auto", minHeight: agentTownMinH }} className="custom-scroll">
       </div>
 
       {/* ── Status bar ── */}
