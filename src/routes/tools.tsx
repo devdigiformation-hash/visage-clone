@@ -16,6 +16,8 @@ export const Route = createFileRoute("/tools")({
         repo={toolsRepo}
         fields={[
           { key: "name", label: "Name" },
+          { key: "category", label: "Category", placeholder: "Browser, Terminal, Messaging, ..." },
+          { key: "subcategory", label: "Subcategory" },
           { key: "type", label: "Type", type: "select", options: ["api", "local", "mcp", "script", "browser", "file"] },
           { key: "provider", label: "Provider" },
           { key: "endpoint", label: "Endpoint / Command" },
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/tools")({
         ]}
         columns={[
           { key: "name", label: "Name" },
+          { key: "category", label: "Category" },
           { key: "type", label: "Type" },
           { key: "provider", label: "Provider" },
           { key: "active", label: "Status", render: (r) => <StatusPill label={r.active ? "Active" : "Off"} color={r.active ? "#34D399" : "#5C616B"} /> },
