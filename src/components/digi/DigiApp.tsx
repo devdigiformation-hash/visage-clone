@@ -1199,6 +1199,8 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         <input placeholder="Add new objective..."
           style={{ fontSize: 11, background: "transparent", outline: "none", color: "#5C616B", width: 155 }} />
       </div>
+
+      <CommandCenterOverlay open={commandCenterOpen} onClose={() => setCommandCenterOpen(false)} />
     </div>
   );
 }
