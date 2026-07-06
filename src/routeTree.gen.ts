@@ -19,6 +19,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as LogsRouteImport } from './routes/logs'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as CommandRouteImport } from './routes/command'
@@ -78,6 +79,11 @@ const LogsRoute = LogsRouteImport.update({
   path: '/logs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/command': typeof CommandRoute
   '/integrations': typeof IntegrationsRoute
   '/jobs': typeof JobsRoute
+  '/knowledge': typeof KnowledgeRoute
   '/logs': typeof LogsRoute
   '/memory': typeof MemoryRoute
   '/models': typeof ModelsRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/command': typeof CommandRoute
   '/integrations': typeof IntegrationsRoute
   '/jobs': typeof JobsRoute
+  '/knowledge': typeof KnowledgeRoute
   '/logs': typeof LogsRoute
   '/memory': typeof MemoryRoute
   '/models': typeof ModelsRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/command': typeof CommandRoute
   '/integrations': typeof IntegrationsRoute
   '/jobs': typeof JobsRoute
+  '/knowledge': typeof KnowledgeRoute
   '/logs': typeof LogsRoute
   '/memory': typeof MemoryRoute
   '/models': typeof ModelsRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/command'
     | '/integrations'
     | '/jobs'
+    | '/knowledge'
     | '/logs'
     | '/memory'
     | '/models'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/command'
     | '/integrations'
     | '/jobs'
+    | '/knowledge'
     | '/logs'
     | '/memory'
     | '/models'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/command'
     | '/integrations'
     | '/jobs'
+    | '/knowledge'
     | '/logs'
     | '/memory'
     | '/models'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   CommandRoute: typeof CommandRoute
   IntegrationsRoute: typeof IntegrationsRoute
   JobsRoute: typeof JobsRoute
+  KnowledgeRoute: typeof KnowledgeRoute
   LogsRoute: typeof LogsRoute
   MemoryRoute: typeof MemoryRoute
   ModelsRoute: typeof ModelsRoute
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LogsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jobs': {
       id: '/jobs'
       path: '/jobs'
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommandRoute: CommandRoute,
   IntegrationsRoute: IntegrationsRoute,
   JobsRoute: JobsRoute,
+  KnowledgeRoute: KnowledgeRoute,
   LogsRoute: LogsRoute,
   MemoryRoute: MemoryRoute,
   ModelsRoute: ModelsRoute,

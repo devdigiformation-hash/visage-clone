@@ -62,8 +62,8 @@ export function createRepo<T extends Entity>(name: string, seed: Omit<T, "id" | 
 
 // ─── Entity types ──────────────────────────────────────────────────────────
 export interface Model extends Entity { name: string; provider: string; modelId: string; apiKey?: string; baseURL?: string; tags?: string; active: boolean; isDefault?: boolean; notes?: string; }
-export interface Skill extends Entity { name: string; category: string; type: "prompt" | "tool" | "code" | "automation" | "markdown"; content: string; tags?: string; active: boolean; }
-export interface Tool extends Entity { name: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; active: boolean; }
+export interface Skill extends Entity { name: string; category: string; subcategory?: string; type: "prompt" | "tool" | "code" | "automation" | "markdown"; content: string; tags?: string; relatedToolIds?: string; relatedWorkflowIds?: string; knowledgeRefs?: string; active: boolean; }
+export interface Tool extends Entity { name: string; category: string; subcategory?: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; relatedSkillIds?: string; active: boolean; }
 export interface Agent extends Entity { name: string; role: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
 export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
 export interface Channel extends Entity { name: string; type: "whatsapp" | "email" | "telegram" | "web" | "webhook" | "custom"; credentials?: string; agentId?: string; active: boolean; }
@@ -71,6 +71,16 @@ export interface Integration extends Entity { name: string; category: string; ap
 export interface Job extends Entity { title: string; agent: string; workflowId?: string; status: "pending" | "running" | "review" | "approved" | "completed"; step: number; totalSteps: number; notes?: string; }
 export interface MemoryItem extends Entity { title: string; scope: "user" | "system" | "project"; content: string; tags?: string; }
 export interface KnowledgePack extends Entity { name: string; source: string; itemCount: number; notes?: string; }
+export interface KnowledgeItem extends Entity {
+  title: string;
+  category: string;
+  subcategory?: string;
+  format: "markdown" | "snippet" | "reference" | "sop" | "prompt" | "link";
+  content: string;
+  source?: string;
+  tags?: string;
+  active: boolean;
+}
 export interface Workspace extends Entity {
   name: string;
   path: string;
@@ -104,14 +114,18 @@ export const modelsRepo = createRepo<Model>("models", [
   { name: "Llama 3.1 8B", provider: "Ollama", modelId: "llama3.1:8b", baseURL: "http://localhost:11434", tags: "local,free", active: false },
 ]);
 export const skillsRepo = createRepo<Skill>("skills", [
-  { name: "Summarize Text", category: "Writing", type: "prompt", content: "You are an expert summarizer...", tags: "writing", active: true },
-  { name: "Translate to Urdu", category: "Language", type: "prompt", content: "Translate the following to fluent Urdu...", tags: "language", active: true },
-  { name: "Extract Invoice Data", category: "Finance", type: "tool", content: "Extract structured invoice fields.", tags: "finance,extract", active: true },
+  { name: "Summarize Text", category: "Writing", subcategory: "Summarization", type: "prompt", content: "You are an expert summarizer...", tags: "writing", active: true },
+  { name: "Translate to Urdu", category: "Language", subcategory: "Translation", type: "prompt", content: "Translate the following to fluent Urdu...", tags: "language", active: true },
+  { name: "Extract Invoice Data", category: "Document / OCR", subcategory: "Extraction", type: "tool", content: "Extract structured invoice fields.", tags: "finance,extract", active: true },
+  { name: "Scan Repo Structure", category: "Coding", subcategory: "Repo Analysis", type: "code", content: "Walk workspace and classify files.", tags: "code,repo", active: true },
+  { name: "Fill Web Form", category: "Browser", subcategory: "Form Automation", type: "automation", content: "Detect fields and populate.", tags: "browser", active: true },
 ]);
 export const toolsRepo = createRepo<Tool>("tools", [
-  { name: "Web Search", type: "api", provider: "Serper", endpoint: "https://api.serper.dev/search", active: true },
-  { name: "Send Email", type: "api", provider: "Resend", active: true },
-  { name: "File Reader", type: "local", active: true },
+  { name: "Web Search", category: "Browser", subcategory: "Search", type: "api", provider: "Serper", endpoint: "https://api.serper.dev/search", active: true },
+  { name: "Send Email", category: "Messaging", subcategory: "Email", type: "api", provider: "Resend", active: true },
+  { name: "File Reader", category: "File / Workspace", subcategory: "IO", type: "local", active: true },
+  { name: "Terminal Exec", category: "Terminal", subcategory: "Shell", type: "local", active: false },
+  { name: "Git Ops", category: "Coding / Dev", subcategory: "Repo", type: "local", active: false },
 ]);
 export const agentsRepo = createRepo<Agent>("agents", [
   { name: "Sales Agent", role: "Handles inbound leads and quotes", active: true },
@@ -148,6 +162,94 @@ export const workspacesRepo = createRepo<Workspace>("workspaces", [
 ]);
 export const commandRunsRepo = createRepo<CommandRun>("commandRuns", []);
 export const fileOpsRepo = createRepo<FileOp>("fileOps", []);
+
+export const knowledgeItemsRepo = createRepo<KnowledgeItem>("knowledgeItems", [
+  { title: "Bash Cheatsheet", category: "Terminal", subcategory: "Shell", format: "reference", content: "ls, cd, grep, sed, awk...", tags: "bash", active: true },
+  { title: "Git Recovery", category: "Coding", subcategory: "Git", format: "sop", content: "git reflog, git restore...", tags: "git", active: true },
+  { title: "Playwright Selectors", category: "Browser Automation", subcategory: "Selectors", format: "reference", content: "get_by_role, get_by_label...", tags: "browser", active: true },
+  { title: "Stripe Webhook Verify", category: "Integrations", subcategory: "Stripe", format: "snippet", content: "constructEvent(payload, sig, secret)", tags: "stripe", active: true },
+  { title: "Client Onboarding SOP", category: "Business Automation", subcategory: "Onboarding", format: "sop", content: "1. Collect KYC 2. Verify 3. Provision", tags: "sop", active: true },
+  { title: "WhatsApp Reply Style", category: "Channels", subcategory: "WhatsApp", format: "prompt", content: "Be warm, concise, bilingual.", tags: "whatsapp", active: true },
+]);
+
+// ─── Taxonomy (default category tree; user-extendable at runtime) ────────
+export const TAXONOMY = {
+  skills: {
+    "Coding": ["Python", "TypeScript", "Shell", "APIs", "Debugging", "Repo Analysis"],
+    "Browser": ["Search", "Form Automation", "Scraping", "Login Flows"],
+    "Document / OCR": ["Extraction", "Classification", "Redaction"],
+    "Messaging": ["WhatsApp", "Email", "Telegram"],
+    "Marketing": ["Content", "SEO", "Social"],
+    "Sales": ["Outreach", "Quoting", "Follow-up"],
+    "Verification": ["KYC", "AML", "Doc Verify"],
+    "Research": ["Web", "Docs", "Competitive"],
+    "File / Workspace": ["Read", "Write", "Scan"],
+    "Integration": ["Payments", "Comms", "Data"],
+    "Backend / DevOps": ["Deploy", "Monitor", "CI"],
+    "Voice / Assistant": ["STT", "TTS", "Wake"],
+    "Automation / Workflow": ["Trigger", "Router", "Notifier"],
+    "Language": ["Translation", "Rewrite"],
+    "Writing": ["Summarization", "Draft"],
+  },
+  tools: {
+    "File / Workspace": ["IO", "Search", "Diff"],
+    "Terminal": ["Shell", "Package Mgr", "Build"],
+    "Browser": ["Search", "Navigate", "Extract"],
+    "OCR / Document": ["Parse", "Convert"],
+    "Messaging": ["Email", "WhatsApp", "Telegram"],
+    "Data Extraction": ["HTML", "PDF", "Structured"],
+    "Verification": ["KYC", "Address"],
+    "Coding / Dev": ["Repo", "Lint", "Test"],
+    "Integration": ["Stripe", "Wise", "Sheets"],
+    "Marketing": ["Analytics", "Ads"],
+    "Sales": ["CRM"],
+    "Monitoring / Logging": ["Logs", "Alerts"],
+    "Scheduler / Cron": ["Cron", "Queue"],
+  },
+  knowledge: {
+    "Coding": ["Python", "TypeScript", "Shell", "APIs", "Debugging", "Deployment", "Git"],
+    "Terminal": ["Shell", "Env Setup", "Build"],
+    "Browser Automation": ["Selectors", "Login", "Scraping"],
+    "Business Automation": ["Onboarding", "Support", "Orders", "Verification"],
+    "Channels": ["WhatsApp", "Email", "Telegram"],
+    "Integrations": ["Stripe", "PayPal", "Wise", "Payoneer", "WorldFirst", "Companies House"],
+    "Internal SOPs": ["Ops", "Compliance"],
+    "Prompts": ["System", "Persona"],
+    "Templates": ["Docs", "Emails"],
+    "Agent Instructions": [],
+    "Tool Instructions": [],
+    "Workflow Instructions": [],
+  },
+} as const;
+
+// ─── System settings (execution model etc.) ────────────────────────────────
+export type ExecutionMode = "tools-first" | "workflows-first" | "ai-first";
+const SYS_KEY = "digi.system.settings";
+export interface SystemSettings {
+  executionMode: ExecutionMode;
+  allowLocalTerminal: boolean;
+  allowLocalFiles: boolean;
+  allowBrowser: boolean;
+  requireApprovalOnRisky: boolean;
+}
+const DEFAULT_SETTINGS: SystemSettings = {
+  executionMode: "tools-first",
+  allowLocalTerminal: false,
+  allowLocalFiles: false,
+  allowBrowser: true,
+  requireApprovalOnRisky: true,
+};
+export function getSystemSettings(): SystemSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+  try { const raw = localStorage.getItem(SYS_KEY); return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS; }
+  catch { return DEFAULT_SETTINGS; }
+}
+export function setSystemSettings(patch: Partial<SystemSettings>) {
+  if (typeof window === "undefined") return;
+  const next = { ...getSystemSettings(), ...patch };
+  localStorage.setItem(SYS_KEY, JSON.stringify(next));
+}
+
 
 // ─── React hook ─────────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";

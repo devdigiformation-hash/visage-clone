@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   Brain, Bot, LayoutDashboard, Users, MessageSquare, Zap, Wrench, Workflow,
-  Layers, BarChart2, Settings, Heart, Database, Command, Plug, Activity, FolderTree,
+  Layers, BarChart2, Settings, Heart, Database, Command, Plug, Activity, FolderTree, BookOpen,
 } from "lucide-react";
 
 export const NAV = [
@@ -13,6 +13,7 @@ export const NAV = [
 ] as const;
 
 export const MODS = [
+  { to: "/knowledge", label: "Knowledge Base", Icon: BookOpen, color: "#2FE0C8" },
   { to: "/tools", label: "Tools", Icon: Wrench, color: "#7DD3FC" },
   { to: "/skills", label: "Skills", Icon: Zap, color: "#3B82F6" },
   { to: "/models", label: "Models", Icon: Brain, color: "#F472B6" },
