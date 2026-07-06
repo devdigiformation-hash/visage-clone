@@ -578,33 +578,47 @@ export function SettingsDialog({ open, onOpenChange, defaultTab = "voice" }: { o
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[#22C55E]/30 bg-[#0A140F] overflow-hidden mt-6">
-                  {/* Accordion Header */}
-                  <div className="p-3 bg-[#0D1C14] border-b border-[#22C55E]/20 flex items-center justify-between cursor-pointer">
+                <div className={`rounded-xl border overflow-hidden mt-6 ${waLinked ? 'border-[#22C55E]/30 bg-[#0A140F]' : 'border-[#2A2D34] bg-[#0D0D0D]'}`}>
+                  <div className={`p-3 border-b flex items-center justify-between ${waLinked ? 'bg-[#0D1C14] border-[#22C55E]/20' : 'bg-[#111318] border-[#1A1D24]'}`}>
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-[#22C55E]/20 flex items-center justify-center">
-                        <Smartphone size={12} className="text-[#22C55E]" />
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${waLinked ? 'bg-[#22C55E]/20' : 'bg-[#1A1D24]'}`}>
+                        <Smartphone size={12} className={waLinked ? 'text-[#22C55E]' : 'text-[#7A8090]'} />
                       </div>
                       <div>
                         <div className="text-xs font-semibold text-white">WhatsApp</div>
-                        <div className="text-[10px] text-[#22C55E]">Linked</div>
+                        <div className={`text-[10px] ${waLinked ? 'text-[#22C55E]' : 'text-[#7A8090]'}`}>{waLinked ? 'Linked' : 'Not connected'}</div>
                       </div>
                     </div>
-                    <div className="text-[#22C55E] mr-2">^</div>
                   </div>
-                  
-                  {/* Accordion Body */}
+
                   <div className="p-6 flex flex-col items-center text-center">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                      <span className="text-sm font-semibold text-[#22C55E]">WhatsApp Linked</span>
+                      <div className={`w-2 h-2 rounded-full ${waLinked ? 'bg-[#22C55E] animate-pulse' : 'bg-[#5C616B]'}`} />
+                      <span className={`text-sm font-semibold ${waLinked ? 'text-[#22C55E]' : 'text-[#8A909C]'}`}>{waLinked ? 'WhatsApp Linked' : 'WhatsApp Disconnected'}</span>
                     </div>
-                    <p className="text-[11px] text-[#666] mb-6">Send messages to yourself to control DIGI remotely</p>
-                    
-                    <Button variant="outline" className="w-full max-w-xs border-[#EF4444]/30 text-[#EF4444] bg-[#EF4444]/5 hover:bg-[#EF4444]/10 hover:text-[#EF4444] rounded-lg h-9 text-xs">
-                      Disconnect
-                    </Button>
-                    
+                    <p className="text-[11px] text-[#666] mb-6">
+                      {waLinked
+                        ? 'Send messages to yourself to control DIGI remotely'
+                        : 'Connect to send commands from your phone via WhatsApp "Message Yourself" chat.'}
+                    </p>
+
+                    {waLinked ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => { setWaLinked(false); toast.success('WhatsApp disconnected'); }}
+                        className="w-full max-w-xs border-[#EF4444]/30 text-[#EF4444] bg-[#EF4444]/5 hover:bg-[#EF4444]/10 hover:text-[#EF4444] rounded-lg h-9 text-xs"
+                      >
+                        Disconnect
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => { setWaLinked(true); toast.success('WhatsApp link initiated — scan QR from your phone'); }}
+                        className="w-full max-w-xs bg-[#22C55E] hover:bg-[#22C55E]/80 text-black rounded-lg h-9 text-xs font-semibold"
+                      >
+                        Connect WhatsApp
+                      </Button>
+                    )}
+
                     <div className="w-full max-w-xs flex justify-between items-center mt-6 pt-4 border-t border-[#1A2E20]">
                       <span className="text-xs text-[#777]">Auto-connect on startup</span>
                       <Switch checked={waAutoConnect} onCheckedChange={setWaAutoConnect} className="data-[state=checked]:bg-[#22C55E] scale-90" />
