@@ -124,14 +124,18 @@ const NODES = [
 // Single source of truth: pull nav + modules from the shared AppShell config so
 // the dashboard sidebar and the /route AppShell sidebar never diverge and
 // no module is ever listed twice.
-import { NAV as APPSHELL_NAV, MODS as APPSHELL_MODS } from "@/components/shell/AppShell";
+import { NAV as APPSHELL_NAV, MOD_GROUPS as APPSHELL_MOD_GROUPS } from "@/components/shell/AppShell";
 const NAV_ITEMS = APPSHELL_NAV.map(n => ({
   id: n.to === "/" ? "dashboard" : n.to.replace("/", ""),
   label: n.label, Icon: n.Icon, color: n.color, route: n.to,
 }));
-const MODULES = APPSHELL_MODS.map(m => ({
-  label: m.label, Icon: m.Icon, color: m.color, route: m.to,
+const MODULE_GROUPS = APPSHELL_MOD_GROUPS.map(g => ({
+  id: g.id,
+  label: g.label,
+  defaultOpen: g.defaultOpen,
+  items: g.items.map(m => ({ label: m.label, Icon: m.Icon, color: m.color, route: m.to })),
 }));
+
 
 const MSGS_INIT: Msg[] = [
   { id: 1, role: "ai", text: "I'm analyzing the conversation style. Considering the user's 'Hello' in English, I am determining the best response. Given the context, I will decide whether to offer a warm Urdu greeting, or a transition to English. This is important to ensure a smooth interaction with the user." },
