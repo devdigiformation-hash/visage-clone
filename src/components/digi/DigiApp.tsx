@@ -169,22 +169,34 @@ const METRICS = [
 ];
 
 // ─── Layout constants (must be identical across ConnectorSVG & OperationsPanel)
-const C_PAD      = 12;   // padding inside the node-map wrapper
-const C_CARD_W   = 34;  // width of the node-cards column
-const C_CARD_H   = 44;   // height of each node card
-const C_CARD_GAP = 12;   // gap between cards
-const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
-const C_GLOBE_Y_RATIO = 0.30; // raised vertical axis inside the top 80% zone (shifted up)
+const C_PAD      = 12;
+const C_CARD_W   = 34;
+const C_CARD_H   = 44;
+const C_CARD_GAP = 12; // legacy
+const C_LABEL_H  = 14;
+const C_LABEL_GAP = 4;
+const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // 62 — card + label
+const C_ITEM_GAP = 10;                                  // gap between full items
+const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // 72 — one full row
+const C_LEFT_STACK_X = 46;
+const C_GLOBE_Y_RATIO = 0.30;
 
-// Right-side outgoing wires — separate palette from the left input modules.
-// Kept premium/subtle within the dark theme.
+// Right-side outgoing wires — separate palette from left input modules.
 const RIGHT_WIRES = [
   { color: "#C4B5FD", glow: "rgba(196,181,253,0.55)" }, // violet — Camera
   { color: "#F5A623", glow: "rgba(245,166,35,0.55)"  }, // amber  — Screen Share
   { color: "#F472B6", glow: "rgba(244,114,182,0.55)" }, // rose   — Agent
   { color: "#7DD3FC", glow: "rgba(125,211,252,0.55)" }, // sky    — Workflow
 ];
-const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
+
+// Right-side action cards — mirror of NODES for row-by-row symmetry.
+const ACTIONS = [
+  { id: "camera",   label: "Camera",       Icon: Camera,   color: RIGHT_WIRES[0].color, bg: "rgba(196,181,253,0.12)", glow: RIGHT_WIRES[0].glow },
+  { id: "screen",   label: "Screen Share", Icon: Monitor,  color: RIGHT_WIRES[1].color, bg: "rgba(245,166,35,0.12)",  glow: RIGHT_WIRES[1].glow },
+  { id: "agent",    label: "Agent",        Icon: Bot,      color: RIGHT_WIRES[2].color, bg: "rgba(244,114,182,0.12)", glow: RIGHT_WIRES[2].glow },
+  { id: "workflow", label: "Workflow",     Icon: Workflow, color: RIGHT_WIRES[3].color, bg: "rgba(125,211,252,0.12)", glow: RIGHT_WIRES[3].glow },
+];
+const PLANET_R   = 700;
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
 function ParticleOrb({ active }: { active: boolean }) {
