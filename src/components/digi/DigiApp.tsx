@@ -461,7 +461,7 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rig
       {rightButtonYs.map((by, i) => {
         const col = RIGHT_WIRES[i].color;
         const pid = `rnc${i}`;
-        const btnX = rightActionX - 6;
+        const btnX = rightActionX;
         const c1x = Math.round(rMidX + (btnX - rMidX) * 0.26);
         const c2x = Math.round(rMidX + (btnX - rMidX) * 0.62);
         const d   = `M ${rMidX} ${rMidY} C ${c1x} ${rMidY}, ${c2x} ${by}, ${btnX} ${by}`;
