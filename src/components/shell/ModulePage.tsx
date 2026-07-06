@@ -27,6 +27,7 @@ export function ModulePage<T extends Entity>({
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<T | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
 
   const filtered = items.filter((it) =>
     !q || JSON.stringify(it).toLowerCase().includes(q.toLowerCase())
