@@ -5,6 +5,7 @@ import {
   MessageSquare, Plug, Database, Shield, Activity, Clock, Download,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { reportError, reportSuccess, safeJsonParse } from "@/lib/safe";
 
 // ────────────────────────────────────────────────────────────────────────────
 // OpenClaw-level System Settings
