@@ -297,7 +297,7 @@ function ParticleOrb({ active }: { active: boolean }) {
     return () => cancelAnimationFrame(id);
   }, [active]);
 
-  return <canvas ref={ref} width={S} height={S} style={{ display: "block", position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }} />;
+  return <canvas ref={ref} width={S} height={S} style={{ display: "block", position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%" }} />;
 }
 
 // ─── Connector SVG ────────────────────────────────────────────────────────────
