@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { jobsRepo, useRepo, type Job, type JobStatus } from "@/lib/repo";
 import { Activity, CheckCircle2, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 
