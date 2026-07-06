@@ -4,6 +4,7 @@ import {
   Brain, Bot, LayoutDashboard, Users, MessageSquare, Zap, Wrench, Workflow,
   Layers, BarChart2, Settings, Heart, Database, Command, Plug, Activity, FolderTree, BookOpen, Sparkles,
 } from "lucide-react";
+import { ModuleErrorBoundary } from "./ModuleErrorBoundary";
 
 export const NAV = [
   { to: "/", label: "Dashboard", Icon: LayoutDashboard, color: "#3B82F6" },
