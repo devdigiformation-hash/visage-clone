@@ -1009,7 +1009,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             <div key={a.id} style={{
               position: "absolute",
               top: cy - C_CARD_H / 2,
-              left: rightActionStackX - 25,
+              left: rightContainerLeft,
               width: 84,
               display: "flex", flexDirection: "column", alignItems: "center",
               zIndex: 10,
