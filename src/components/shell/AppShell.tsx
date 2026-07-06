@@ -14,12 +14,15 @@ export const NAV = [
   { to: "/brain", label: "Brain", Icon: Brain, color: "#F59E0B" },
 ] as const;
 
+type ModItem = { to: string; label: string; Icon: any; color: string };
+type ModGroup = { id: string; label: string; defaultOpen: boolean; items: ModItem[] };
+
 /**
  * MODULES grouped by purpose. Rendering iterates MOD_GROUPS; the flat MODS
  * export is preserved so anything importing the old shape (labels, colours,
  * highlight lookups) keeps working.
  */
-export const MOD_GROUPS = [
+export const MOD_GROUPS: ModGroup[] = [
   {
     id: "intelligence",
     label: "Intelligence",
@@ -78,11 +81,12 @@ export const MOD_GROUPS = [
       { to: "/settings", label: "Settings", Icon: Settings, color: "#EF4444" },
     ],
   },
-] as const;
+];
 
 // Flat list preserved for lookups (label/color resolution, page-title
 // derivation, and any consumer that iterated the old MODS array).
-export const MODS = MOD_GROUPS.flatMap((g) => g.items);
+export const MODS: ModItem[] = MOD_GROUPS.flatMap((g) => g.items);
+
 
 export function ShellSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
