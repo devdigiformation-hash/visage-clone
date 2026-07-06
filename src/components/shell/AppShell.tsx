@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   Brain, Bot, LayoutDashboard, Users, MessageSquare, Zap, Wrench, Workflow,
-  Layers, BarChart2, Settings, Heart, Database, Command, Plug, Activity,
+  Layers, BarChart2, Settings, Heart, Database, Command, Plug, Activity, FolderTree,
 } from "lucide-react";
 
 export const NAV = [
