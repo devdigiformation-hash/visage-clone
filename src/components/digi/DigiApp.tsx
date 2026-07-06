@@ -172,7 +172,7 @@ const C_LABEL_GAP = 4;
 const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // 62 — card + label
 const C_ITEM_GAP = 10;                                  // gap between full items
 const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // 72 — one full row
-const C_LEFT_STACK_X = 18;
+const C_LEFT_STACK_X = 40;
 const C_GLOBE_Y_RATIO = 0.30;
 
 // Right-side outgoing wires — separate palette from left input modules.
@@ -1076,7 +1076,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           top: globeCenterY - globeSize / 2,
           transform: "translateX(-50%)",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          gap: 13,
+          gap: 4,
           zIndex: 20,
           pointerEvents: "auto",
         }}>
@@ -1100,11 +1100,14 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200 }}>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-            <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
-            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-          </div>
+          {!aiActive && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200, marginTop: -14 }}>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+              <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+            </div>
+          )}
+
           <button
             onClick={async () => {
               playUISound('powerup');
