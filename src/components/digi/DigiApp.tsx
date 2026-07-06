@@ -653,7 +653,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   // Computed height of the node-map section
   const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
   // Keep the layout height tied to the cards so the huge globe doesn't push the UI down
-  const nodeMapH = Math.max(baseNodeMapH, 420);
+  const nodeMapH = Math.max(baseNodeMapH, 460);
 
   return (
     <div style={{
@@ -818,24 +818,55 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
               100% { transform: translate(0, 0) scale(1); }
             }
             .orb-shake { animation: shake-orb 0.4s ease-in-out infinite; }
+            @keyframes twinkle-star {
+              0%, 100% { opacity: 0.15; transform: scale(0.7); }
+              50%      { opacity: 1;    transform: scale(1.3); }
+            }
+            .orb-sparkle {
+              position: absolute; border-radius: 50%;
+              background: radial-gradient(circle, rgba(230,240,255,0.95) 0%, rgba(180,210,230,0.5) 40%, rgba(180,210,230,0) 70%);
+              box-shadow: 0 0 4px rgba(220,235,255,0.7);
+              animation: twinkle-star 3.2s ease-in-out infinite;
+              pointer-events: none;
+            }
           `}</style>
 
           {/* Center stack: globe + Start AI button, horizontally centered in the remaining space */}
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            gap: 14, marginTop: -12,
+            gap: 14, marginTop: -22,
           }}>
-            <div style={{ position: "relative", width: 260, height: 260 }}>
+            <div style={{ position: "relative", width: 300, height: 300 }}>
+              {/* Silver firefly sparkles — only visible in standby */}
+              {!aiActive && (
+                <>
+                  {[
+                    { top: '12%', left: '22%', size: 3, delay: '0s' },
+                    { top: '18%', left: '78%', size: 2, delay: '0.6s' },
+                    { top: '35%', left: '8%',  size: 4, delay: '1.2s' },
+                    { top: '48%', left: '92%', size: 2, delay: '0.3s' },
+                    { top: '62%', left: '15%', size: 3, delay: '1.8s' },
+                    { top: '72%', left: '82%', size: 2, delay: '0.9s' },
+                    { top: '85%', left: '38%', size: 3, delay: '2.1s' },
+                    { top: '25%', left: '55%', size: 2, delay: '1.5s' },
+                    { top: '55%', left: '48%', size: 2, delay: '2.6s' },
+                    { top: '80%', left: '68%', size: 3, delay: '0.4s' },
+                  ].map((s, i) => (
+                    <span key={i} className="orb-sparkle"
+                      style={{ top: s.top, left: s.left, width: s.size, height: s.size, animationDelay: s.delay }} />
+                  ))}
+                </>
+              )}
               <div className={aiActive ? "orb-breathe" : ""}
                 style={{
                   position: "absolute", width: "100%", height: "100%",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   filter: aiActive
                     ? "drop-shadow(0 0 40px rgba(47,224,200,0.55))"
-                    : "drop-shadow(0 0 22px rgba(47,224,200,0.28)) drop-shadow(0 0 6px rgba(200,220,230,0.15))",
+                    : "drop-shadow(0 0 26px rgba(47,224,200,0.32)) drop-shadow(0 0 8px rgba(210,225,240,0.22))",
                   pointerEvents: "none",
                   transition: "filter 0.5s ease",
-                  opacity: aiActive ? 1 : 0.92,
+                  opacity: aiActive ? 1 : 0.95,
                 }}>
                 <ParticleOrb active={aiActive} />
               </div>
