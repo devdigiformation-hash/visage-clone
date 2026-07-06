@@ -169,22 +169,34 @@ const METRICS = [
 ];
 
 // ─── Layout constants (must be identical across ConnectorSVG & OperationsPanel)
-const C_PAD      = 12;   // padding inside the node-map wrapper
-const C_CARD_W   = 34;  // width of the node-cards column
-const C_CARD_H   = 44;   // height of each node card
-const C_CARD_GAP = 12;   // gap between cards
-const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
-const C_GLOBE_Y_RATIO = 0.30; // raised vertical axis inside the top 80% zone (shifted up)
+const C_PAD      = 12;
+const C_CARD_W   = 34;
+const C_CARD_H   = 44;
+const C_CARD_GAP = 12; // legacy
+const C_LABEL_H  = 14;
+const C_LABEL_GAP = 4;
+const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // 62 — card + label
+const C_ITEM_GAP = 10;                                  // gap between full items
+const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // 72 — one full row
+const C_LEFT_STACK_X = 46;
+const C_GLOBE_Y_RATIO = 0.30;
 
-// Right-side outgoing wires — separate palette from the left input modules.
-// Kept premium/subtle within the dark theme.
+// Right-side outgoing wires — separate palette from left input modules.
 const RIGHT_WIRES = [
   { color: "#C4B5FD", glow: "rgba(196,181,253,0.55)" }, // violet — Camera
   { color: "#F5A623", glow: "rgba(245,166,35,0.55)"  }, // amber  — Screen Share
   { color: "#F472B6", glow: "rgba(244,114,182,0.55)" }, // rose   — Agent
   { color: "#7DD3FC", glow: "rgba(125,211,252,0.55)" }, // sky    — Workflow
 ];
-const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
+
+// Right-side action cards — mirror of NODES for row-by-row symmetry.
+const ACTIONS = [
+  { id: "camera",   label: "Camera",       Icon: Camera,   color: RIGHT_WIRES[0].color, bg: "rgba(196,181,253,0.12)", glow: RIGHT_WIRES[0].glow },
+  { id: "screen",   label: "Screen Share", Icon: Monitor,  color: RIGHT_WIRES[1].color, bg: "rgba(245,166,35,0.12)",  glow: RIGHT_WIRES[1].glow },
+  { id: "agent",    label: "Agent",        Icon: Bot,      color: RIGHT_WIRES[2].color, bg: "rgba(244,114,182,0.12)", glow: RIGHT_WIRES[2].glow },
+  { id: "workflow", label: "Workflow",     Icon: Workflow, color: RIGHT_WIRES[3].color, bg: "rgba(125,211,252,0.12)", glow: RIGHT_WIRES[3].glow },
+];
+const PLANET_R   = 700;
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
 function ParticleOrb({ active }: { active: boolean }) {
@@ -331,9 +343,9 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rig
   // Right-side junction — mirror of the left junction
   const rMidX = Math.round(orbRightEdgeX + (rightActionX - orbRightEdgeX) * 0.30);
   const rMidY = midY;
-  const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
+  const nodeCardsTotalH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP;
   const startY = midY - nodeCardsTotalH / 2;
-  const ys    = NODES.map((_, i) => startY + i * (C_CARD_H + C_CARD_GAP) + Math.round(C_CARD_H / 2));
+  const ys    = NODES.map((_, i) => startY + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
 
   return (
     <svg width="100%" height="100%"
@@ -449,7 +461,7 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rig
       {rightButtonYs.map((by, i) => {
         const col = RIGHT_WIRES[i].color;
         const pid = `rnc${i}`;
-        const btnX = rightActionX - 6;
+        const btnX = rightActionX;
         const c1x = Math.round(rMidX + (btnX - rMidX) * 0.26);
         const c2x = Math.round(rMidX + (btnX - rMidX) * 0.62);
         const d   = `M ${rMidX} ${rMidY} C ${c1x} ${rMidY}, ${c2x} ${by}, ${btnX} ${by}`;
@@ -653,6 +665,146 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
   );
 }
 
+// ─── Tracking Board ───────────────────────────────────────────────────────────
+type TaskStage = "received" | "in_progress" | "processing" | "awaiting_approval" | "approved" | "completed";
+interface TrackedTask {
+  id: string;
+  title: string;
+  agent: string;
+  stage: TaskStage;
+  step: number;
+  totalSteps: number;
+  stepLabel: string;
+  nextStep: string;
+}
+const STAGE_META: Record<TaskStage, { label: string; color: string; dot: "active" | "standby" | "error" }> = {
+  received:          { label: "RECEIVED",   color: "#7DD3FC", dot: "standby" },
+  in_progress:       { label: "IN PROGRESS", color: "#2FE0C8", dot: "active"  },
+  processing:        { label: "PROCESSING",  color: "#8B7CF6", dot: "active"  },
+  awaiting_approval: { label: "AWAITING APPROVAL", color: "#F5A623", dot: "error" },
+  approved:          { label: "APPROVED",   color: "#34D399", dot: "active"  },
+  completed:         { label: "COMPLETED",  color: "#5C616B", dot: "standby" },
+};
+const INITIAL_TASKS: TrackedTask[] = [
+  { id: "t1", title: "Q3 Sales Report Generation",  agent: "Sales Agent",     stage: "in_progress",       step: 2, totalSteps: 5, stepLabel: "Fetching CRM records",       nextStep: "Aggregate revenue" },
+  { id: "t2", title: "Instagram Campaign Launch",   agent: "Marketing Agent", stage: "awaiting_approval", step: 3, totalSteps: 4, stepLabel: "Creative draft ready",       nextStep: "User approval" },
+  { id: "t3", title: "Invoice #4821 Reconciliation", agent: "Finance Agent",   stage: "processing",        step: 2, totalSteps: 4, stepLabel: "Matching bank statements",   nextStep: "Post to ledger" },
+  { id: "t4", title: "Onboard New Hire — A. Khan",  agent: "HR Agent",        stage: "completed",         step: 6, totalSteps: 6, stepLabel: "All docs signed",            nextStep: "—" },
+];
+function TrackingBoard({ filter }: { filter: string }) {
+  const [tasks, setTasks] = useState<TrackedTask[]>(INITIAL_TASKS);
+  const [expanded, setExpanded] = useState<string | null>("t2");
+  const shown = tasks.filter(t => filter === "visual" ? t.stage === "completed" : t.stage !== "completed");
+
+  const approve = (id: string) => {
+    playUISound('click');
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, stage: "approved", step: t.step + 1, stepLabel: "Approved — finalising", nextStep: "Completion" } : t));
+    setTimeout(() => {
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, stage: "completed", step: t.totalSteps, stepLabel: "Task completed", nextStep: "—" } : t));
+    }, 1400);
+  };
+
+  return (
+    <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+      {shown.length === 0 && (
+        <div style={{ padding: "18px 8px", textAlign: "center", fontSize: 11, color: "#5C616B", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em" }}>
+          NO {filter === "visual" ? "COMPLETED" : "ACTIVE"} TASKS
+        </div>
+      )}
+      {shown.map(t => {
+        const meta = STAGE_META[t.stage];
+        const isOpen = expanded === t.id;
+        const pct = Math.round((t.step / t.totalSteps) * 100);
+        return (
+          <div key={t.id}
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: `1px solid ${isOpen ? meta.color + "44" : "rgba(255,255,255,0.06)"}`,
+              borderRadius: 10,
+              backdropFilter: "blur(12px)",
+              transition: "all 0.2s ease",
+              overflow: "hidden",
+            }}>
+            <button
+              onClick={() => { playUISound('soft-click'); setExpanded(isOpen ? null : t.id); }}
+              onMouseEnter={() => playUISound('hover')}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 10px", cursor: "pointer",
+                background: "transparent", border: "none", textAlign: "left",
+              }}>
+              <StatusDot s={meta.dot} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 11.5, color: "#E8EAF0", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: meta.color, letterSpacing: "0.08em" }}>{meta.label}</span>
+                  <span style={{ fontSize: 9.5, color: "#5C616B" }}>· {t.agent}</span>
+                  <span style={{ fontSize: 9.5, color: "#5C616B", marginLeft: "auto" }}>{t.step}/{t.totalSteps}</span>
+                </div>
+                <div style={{ position: "relative", height: 2, borderRadius: 2, background: "rgba(255,255,255,0.05)", marginTop: 5, overflow: "hidden" }}>
+                  <div style={{ position: "absolute", inset: 0, width: `${pct}%`, background: `linear-gradient(90deg, ${meta.color}, ${meta.color}88)`, borderRadius: 2 }} />
+                </div>
+              </div>
+              <ChevronDown size={12} style={{ color: "#5C616B", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease", flexShrink: 0 }} />
+            </button>
+
+            {isOpen && (
+              <div style={{ padding: "0 10px 10px 10px", display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                <div style={{ display: "flex", gap: 4, padding: "8px 0 4px 0", flexWrap: "wrap" }}>
+                  {(["received","in_progress","processing","awaiting_approval","approved","completed"] as TaskStage[]).map((st, i) => {
+                    const active = (["received","in_progress","processing","awaiting_approval","approved","completed"] as TaskStage[]).indexOf(t.stage) >= i;
+                    const isCurrent = t.stage === st;
+                    return (
+                      <div key={st} style={{
+                        display: "flex", alignItems: "center", gap: 4,
+                        padding: "2px 6px", borderRadius: 4,
+                        background: isCurrent ? meta.color + "18" : "transparent",
+                        border: `1px solid ${isCurrent ? meta.color + "55" : active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}`,
+                      }}>
+                        <span style={{
+                          width: 5, height: 5, borderRadius: "50%",
+                          background: active ? (isCurrent ? meta.color : "#34D399") : "#22252D",
+                        }} />
+                        <span style={{ fontSize: 8.5, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.05em", color: isCurrent ? "#E8EAF0" : active ? "#7A8090" : "#3A3F4B" }}>
+                          {STAGE_META[st].label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: 10.5, color: "#9AA0AC" }}>
+                  <div><span style={{ color: "#5C616B", marginRight: 6 }}>NOW:</span>{t.stepLabel}</div>
+                  <div><span style={{ color: "#5C616B", marginRight: 6 }}>NEXT:</span>{t.nextStep}</div>
+                </div>
+                {t.stage === "awaiting_approval" && (
+                  <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                    <button
+                      onClick={() => approve(t.id)}
+                      onMouseEnter={() => playUISound('hover')}
+                      className="glass-btn-active"
+                      style={{ padding: "5px 12px", borderRadius: 6, fontSize: 10.5, fontWeight: 600, color: "#34D399", cursor: "pointer" }}>
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => playUISound('click')}
+                      onMouseEnter={() => playUISound('hover')}
+                      className="glass-btn"
+                      style={{ padding: "5px 12px", borderRadius: 6, fontSize: 10.5, color: "#9AA0AC", cursor: "pointer" }}>
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Operations Panel ─────────────────────────────────────────────────────────
 function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
   const [activeNode, setActiveNode] = useState<string | null>("soul");
@@ -730,16 +882,17 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   }, []);
 
   // Computed height of the node-map section
-  const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
+  const baseNodeMapH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP + C_PAD * 2;
   const availableCompositionH = Math.max(baseNodeMapH + 220, dims.h - 36 - 32);
   const nodeMapH = Math.max(baseNodeMapH + 220, Math.round(availableCompositionH * 0.80));
   const globeSize = Math.min(390, Math.max(330, Math.round(Math.min(dims.w * 0.47, nodeMapH * 0.58))));
   const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
-  const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
+  const nodeCardsTotalH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP;
   const nodeCardsTop = Math.round(globeCenterY - nodeCardsTotalH / 2);
-  const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - 33);
+  const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - C_CARD_W);
   const globeCenterX = Math.round((C_LEFT_STACK_X + C_CARD_W + rightActionStackX) / 2);
-  const agentTownMinH = Math.max(118, Math.round(availableCompositionH * 0.18));
+  const cardCenterYs = [0, 1, 2, 3].map(i => nodeCardsTop + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
+  const agentTownMinH = Math.max(160, Math.round(availableCompositionH * 0.20));
 
   return (
     <div ref={panelRef} style={{
@@ -778,194 +931,213 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
       {/* ── Node map ── */}
       <div style={{
         position: "relative", flexShrink: 0, height: nodeMapH,
-        display: "flex", alignItems: "stretch",
-        padding: C_PAD, gap: 0,
-        marginBottom: 0,
-        marginTop: 0,
+        overflow: "visible",
       }}>
-        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} globeSize={globeSize} globeCenterX={globeCenterX} rightActionX={rightActionStackX} rightButtonYs={[0,1,2,3].map(i => Math.round((globeCenterY - 8) - 77 + 15.5 + i * 41))} />
+        <ConnectorSVG
+          active={aiActive}
+          W={dims.w}
+          H={nodeMapH}
+          globeSize={globeSize}
+          globeCenterX={globeCenterX}
+          rightActionX={rightActionStackX}
+          rightButtonYs={cardCenterYs}
+        />
 
-        {/* Node cards column */}
-        <div style={{
-          display: "flex", flexDirection: "column", gap: C_CARD_GAP,
-          position: "relative", zIndex: 10,
-          width: C_CARD_W, flexShrink: 0,
-          marginLeft: C_LEFT_STACK_X - C_PAD,
-          marginTop: nodeCardsTop,
-        }}>
-          {NODES.map(n => {
-            const lit = activeNode === n.id;
-            return (
-              <button key={n.id} onClick={() => {
-                playUISound('click');
-                setActiveNode(n.id);
-                onOpenModal(n.id);
-              }}
+        {/* Left node stack — icons + labels, absolutely positioned to card centers */}
+        {NODES.map((n, i) => {
+          const lit = activeNode === n.id;
+          const cy = cardCenterYs[i];
+          return (
+            <div key={n.id} style={{
+              position: "absolute",
+              top: cy - C_CARD_H / 2,
+              left: C_LEFT_STACK_X,
+              width: 84,
+              display: "flex", flexDirection: "column", alignItems: "center",
+              zIndex: 10,
+            }}>
+              <button
+                onClick={() => {
+                  playUISound('click');
+                  setActiveNode(n.id);
+                  onOpenModal(n.id);
+                }}
                 onMouseEnter={() => playUISound('hover')}
                 className={lit ? "glass-btn-active" : "glass-btn"}
                 style={{
                   height: C_CARD_H, width: C_CARD_W,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   borderRadius: 10,
-                  transform:  lit ? "translateY(-1px)" : "none",
+                  transform: lit ? "translateY(-1px)" : "none",
                   background: lit ? n.bg : "transparent",
                   border: lit ? `1px solid ${n.color}40` : "1px solid transparent",
                   boxShadow: lit ? `0 0 14px ${n.glow}` : "none",
                 }}
-                title={n.label}>
+                title={n.label}
+              >
                 <n.Icon size={16} style={{ color: lit ? n.color : "#8A909E" }} />
               </button>
-            );
-          })}
-        </div>
-
-        {/* True-center globe composition + aligned right controls */}
-        <div style={{
-          position: "absolute", inset: C_PAD,
-          zIndex: 10,
-          pointerEvents: "none",
-        }}>
-          {/* Right control rail — vertically centered to the globe hub */}
-          <div style={{
-            position: "absolute", top: globeCenterY - C_PAD - 8, left: rightActionStackX - C_PAD,
-            transform: "translateY(-50%)",
-            display: "flex", flexDirection: "column", gap: 10, zIndex: 30,
-            pointerEvents: "auto",
-          }}>
-            <button
-              onClick={toggleCamera}
-              onMouseEnter={() => playUISound('hover')}
-              title={cameraOn ? "Turn off camera" : "Turn on laptop camera"}
-              className="glass-btn"
-              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: cameraOn ? "#2FE0C8" : "#5C616B", background: cameraOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: cameraOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
-              onMouseOver={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
-              onMouseOut={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
-            >
-              <Camera size={15} />
-            </button>
-            <button
-              onClick={toggleScreenShare}
-              onMouseEnter={() => playUISound('hover')}
-              title={screenShareOn ? "Stop screen share" : "Share your screen"}
-              className="glass-btn"
-              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
-              onMouseOver={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
-              onMouseOut={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
-            >
-              <Monitor size={15} />
-            </button>
-            <button
-              onClick={() => { playUISound('click'); onOpenModal('skills'); }}
-              onMouseEnter={() => playUISound('hover')}
-              title="Agent"
-              className="glass-btn"
-              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
-              onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
-              onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
-            >
-              <Bot size={15} />
-            </button>
-            <button
-              onClick={() => { playUISound('click'); }}
-              onMouseEnter={() => playUISound('hover')}
-              title="Workflow"
-              className="glass-btn"
-              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
-              onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
-              onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
-            >
-              <Workflow size={15} />
-            </button>
-          </div>
-
-          {/* Live media previews (top-left) */}
-          {(cameraOn || screenShareOn) && (
-            <div style={{ position: "absolute", top: globeCenterY - C_PAD - Math.round(globeSize / 2) - 18, left: globeCenterX - C_PAD - Math.round(globeSize / 2) - 22, display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto" }}>
-              {cameraOn && (
-                <video ref={cameraVideoRef} autoPlay playsInline muted
-                  style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
-              )}
-              {screenShareOn && (
-                <video ref={screenVideoRef} autoPlay playsInline muted
-                  style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }} />
-              )}
+              <span style={{
+                marginTop: C_LABEL_GAP,
+                fontSize: 9.5,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: lit ? "#E8EAF0" : "#5C616B",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+              }}>{n.label}</span>
             </div>
-          )}
+          );
+        })}
 
-          <style>{`
-            @keyframes shake-orb {
-              0% { transform: translate(0, 0) scale(1); }
-              25% { transform: translate(-1px, 1px) scale(1.02); }
-              50% { transform: translate(1px, -1px) scale(1); }
-              75% { transform: translate(1px, 1px) scale(1.01); }
-              100% { transform: translate(0, 0) scale(1); }
-            }
-            .orb-shake { animation: shake-orb 0.4s ease-in-out infinite; }
-          `}</style>
-
-          {/* Center stack: globe + Start AI button, fixed on the composition center axis */}
-          <div style={{
-            position: "absolute", left: globeCenterX - C_PAD, top: globeCenterY - C_PAD - globeSize / 2,
-            transform: "translateX(-50%)",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            gap: 13,
-            pointerEvents: "auto",
-          }}>
-            <div style={{ position: "relative", width: globeSize, height: globeSize }}>
-              <div className={aiActive ? "orb-breathe" : ""}
+        {/* Right action stack — perfect mirror of the left stack */}
+        {ACTIONS.map((a, i) => {
+          const cy = cardCenterYs[i];
+          const isCam = a.id === "camera";
+          const isScr = a.id === "screen";
+          const lit = (isCam && cameraOn) || (isScr && screenShareOn);
+          const onClick =
+            isCam ? toggleCamera :
+            isScr ? toggleScreenShare :
+            a.id === "agent" ? () => { playUISound('click'); onOpenModal('skills'); } :
+                               () => { playUISound('click'); };
+          return (
+            <div key={a.id} style={{
+              position: "absolute",
+              top: cy - C_CARD_H / 2,
+              left: rightActionStackX - 25,
+              width: 84,
+              display: "flex", flexDirection: "column", alignItems: "center",
+              zIndex: 10,
+            }}>
+              <button
+                onClick={onClick}
+                onMouseEnter={() => playUISound('hover')}
+                title={a.label}
+                className={lit ? "glass-btn-active" : "glass-btn"}
                 style={{
-                  position: "absolute", width: "100%", height: "100%",
+                  height: C_CARD_H, width: C_CARD_W,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  filter: aiActive
-                    ? "drop-shadow(0 0 40px rgba(47,224,200,0.55))"
-                    : "drop-shadow(0 0 16px rgba(47,224,200,0.18)) drop-shadow(0 0 6px rgba(210,225,240,0.10))",
-                  pointerEvents: "none",
-                  transition: "filter 0.5s ease",
-                  opacity: 1,
-                }}>
-                <ParticleOrb active={aiActive} />
-              </div>
+                  borderRadius: 10,
+                  cursor: "pointer",
+                  transform: lit ? "translateY(-1px)" : "none",
+                  background: lit ? a.bg : "transparent",
+                  border: lit ? `1px solid ${a.color}55` : "1px solid transparent",
+                  boxShadow: lit ? `0 0 14px ${a.glow}` : "none",
+                }}
+              >
+                <a.Icon size={15} style={{ color: lit ? a.color : "#8A909E" }} />
+              </button>
+              <span style={{
+                marginTop: C_LABEL_GAP,
+                fontSize: 9.5,
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: lit ? "#E8EAF0" : "#5C616B",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+              }}>{a.label}</span>
             </div>
+          );
+        })}
 
-            <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200 }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-              <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-            </div>
-            <button
-              onClick={async () => {
-                playUISound('powerup');
-                onToggleAI();
-                if ((window as any).electronAPI) {
-                  if (!aiActive) {
-                    await (window as any).electronAPI.startGeminiVoiceAssistant?.();
-                    await (window as any).electronAPI.triggerGeminiLiveCall?.(true);
-                  } else {
-                    await (window as any).electronAPI.triggerGeminiLiveCall?.(false);
-                    await (window as any).electronAPI.stopGeminiVoiceAssistant?.();
-                  }
-                }
-              }}
-              onMouseEnter={() => playUISound('hover')}
-              className={aiActive ? "glass-btn" : "glass-btn-active"}
-              style={{
-                padding: "8px 38px", borderRadius: 24,
-                fontSize: 13, fontWeight: 600,
-                color: aiActive ? "#FF5C5C" : "#34D399",
-                cursor: "pointer",
-                background: "rgba(10, 15, 20, 0.8)",
-                border: "1px solid rgba(52, 211, 153, 0.2)"
-              }}
-              onMouseOver={(e) => { if(!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
-              onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
-            >
-              {aiActive ? "STOP AI" : "START AI"}
-            </button>
+        {/* Live media previews (top-left, above the globe) */}
+        {(cameraOn || screenShareOn) && (
+          <div style={{
+            position: "absolute",
+            top: globeCenterY - Math.round(globeSize / 2) - 18,
+            left: globeCenterX - Math.round(globeSize / 2) - 22,
+            display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto"
+          }}>
+            {cameraOn && (
+              <video ref={cameraVideoRef} autoPlay playsInline muted
+                style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
+            )}
+            {screenShareOn && (
+              <video ref={screenVideoRef} autoPlay playsInline muted
+                style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }} />
+            )}
           </div>
+        )}
+
+        <style>{`
+          @keyframes shake-orb {
+            0% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-1px, 1px) scale(1.02); }
+            50% { transform: translate(1px, -1px) scale(1); }
+            75% { transform: translate(1px, 1px) scale(1.01); }
+            100% { transform: translate(0, 0) scale(1); }
+          }
+          .orb-shake { animation: shake-orb 0.4s ease-in-out infinite; }
+        `}</style>
+
+        {/* Center stack: globe + Start AI button */}
+        <div style={{
+          position: "absolute",
+          left: globeCenterX,
+          top: globeCenterY - globeSize / 2,
+          transform: "translateX(-50%)",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          gap: 13,
+          zIndex: 20,
+          pointerEvents: "auto",
+        }}>
+          <div style={{ position: "relative", width: globeSize, height: globeSize }}>
+            <div className={aiActive ? "orb-breathe" : ""}
+              style={{
+                position: "absolute", width: "100%", height: "100%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                filter: aiActive
+                  ? "drop-shadow(0 0 40px rgba(47,224,200,0.55))"
+                  : "drop-shadow(0 0 16px rgba(47,224,200,0.18)) drop-shadow(0 0 6px rgba(210,225,240,0.10))",
+                pointerEvents: "none",
+                transition: "filter 0.5s ease",
+                opacity: 1,
+              }}>
+              <ParticleOrb active={aiActive} />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200 }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+            <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+          </div>
+          <button
+            onClick={async () => {
+              playUISound('powerup');
+              onToggleAI();
+              if ((window as any).electronAPI) {
+                if (!aiActive) {
+                  await (window as any).electronAPI.startGeminiVoiceAssistant?.();
+                  await (window as any).electronAPI.triggerGeminiLiveCall?.(true);
+                } else {
+                  await (window as any).electronAPI.triggerGeminiLiveCall?.(false);
+                  await (window as any).electronAPI.stopGeminiVoiceAssistant?.();
+                }
+              }
+            }}
+            onMouseEnter={() => playUISound('hover')}
+            className={aiActive ? "glass-btn" : "glass-btn-active"}
+            style={{
+              padding: "8px 38px", borderRadius: 24,
+              fontSize: 13, fontWeight: 600,
+              color: aiActive ? "#FF5C5C" : "#34D399",
+              cursor: "pointer",
+              background: "rgba(10, 15, 20, 0.8)",
+              border: "1px solid rgba(52, 211, 153, 0.2)"
+            }}
+            onMouseOver={(e) => { if (!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
+            onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+          >
+            {aiActive ? "STOP AI" : "START AI"}
+          </button>
         </div>
       </div>
 
-      {/* ── Agent Town tab bar ── */}
+      {/* ── Tracking Board tab bar ── */}
       <div style={{
         height: 34, flexShrink: 0, marginTop: 0,
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -973,12 +1145,12 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         borderTop: "1px solid #1A1D24",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <StatusDot s="error" />
-          <Mono className="!text-[#9AA0AC]">Agent Town</Mono>
+          <StatusDot s="active" />
+          <Mono className="!text-[#9AA0AC]">Tracking Board</Mono>
         </div>
         <div style={{ display: "flex", gap: 3 }}>
-          {[{ id: "town", l: "Agent Town" }, { id: "visual", l: "Visual Hub" }].map(tab => (
-            <button key={tab.id} 
+          {[{ id: "town", l: "Active" }, { id: "visual", l: "Completed" }].map(tab => (
+            <button key={tab.id}
               onClick={() => { playUISound('tab-click'); setAgentTab(tab.id); }}
               onMouseEnter={() => playUISound('hover')}
               className={agentTab === tab.id ? "glass-btn-active" : "glass-btn"}
@@ -991,8 +1163,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         </div>
       </div>
 
-      {/* ── Scrollable content ── */}
+      {/* ── Tracking Board content ── */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: agentTownMinH }} className="custom-scroll">
+        <TrackingBoard filter={agentTab} />
       </div>
 
       {/* ── Status bar ── */}
