@@ -6,7 +6,8 @@ import {
   ChevronDown, Monitor, LayoutDashboard, Bot, Users,
   Wallet, RotateCcw, PanelRightClose, PanelRightOpen,
   PanelLeftClose, PanelLeftOpen, Paperclip, Image as ImageIcon,
-  Volume2, TrendingUp, BarChart2, Folder, FileText, Copy, Check
+  Volume2, TrendingUp, BarChart2, Folder, FileText, Copy, Check,
+  Workflow
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
@@ -742,15 +743,11 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             width: 300, height: 360,
             maxHeight: "100%",
             marginLeft: -30,
-            background: "rgba(16, 21, 28, 0.4)",
-            border: "1px solid rgba(47, 224, 200, 0.25)",
-            borderRadius: 8,
             position: "relative",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            boxShadow: "inset 0 0 20px rgba(0,0,0,0.2)"
           }}>
-            {/* Action Icons Top Right */}
-            <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "column", gap: 8, zIndex: 30 }}>
+            {/* Action Icons Top Right — Camera / Screen Share / Agent / Workflow */}
+            <div style={{ position: "absolute", top: 16, right: 8, display: "flex", flexDirection: "column", gap: 8, zIndex: 30 }}>
               <button 
                 onClick={toggleCamera}
                 onMouseEnter={() => playUISound('hover')}
@@ -765,12 +762,35 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
               <button 
                 onClick={toggleScreenShare}
                 onMouseEnter={() => playUISound('hover')}
+                title={screenShareOn ? "Stop screen share" : "Share your screen"}
                 className="glass-btn" 
                 style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
                 onMouseOver={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
                 onMouseOut={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
               >
                 <Monitor size={15} />
+              </button>
+              <button 
+                onClick={() => { playUISound('click'); onOpenModal('skills'); }}
+                onMouseEnter={() => playUISound('hover')}
+                title="Agent"
+                className="glass-btn" 
+                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
+                onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
+                onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
+              >
+                <Bot size={15} />
+              </button>
+              <button 
+                onClick={() => { playUISound('click'); }}
+                onMouseEnter={() => playUISound('hover')}
+                title="Workflow"
+                className="glass-btn" 
+                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
+                onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
+                onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
+              >
+                <Workflow size={15} />
               </button>
             </div>
 
@@ -813,7 +833,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             `}</style>
             
             {/* Orb container shifted slightly up to make room for bottom elements */}
-            <div style={{ position: "relative", width: 180, height: 180 }}>
+            <div style={{ position: "relative", width: 220, height: 220 }}>
               <div className={aiActive ? "orb-breathe" : ""}
                 style={{ 
                   position: "absolute", width: "100%", height: "100%", 
