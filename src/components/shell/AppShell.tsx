@@ -9,7 +9,7 @@ import { ModuleErrorBoundary } from "./ModuleErrorBoundary";
 
 export const NAV = [
   { to: "/", label: "Dashboard", Icon: LayoutDashboard, color: "#3B82F6" },
-  { to: "/command", label: "AI Command Center", Icon: Command, color: "#2FE0C8" },
+  { to: "/command", label: "Task Analytics", Icon: Command, color: "#2FE0C8" },
   { to: "/town", label: "Agent Town", Icon: Users, color: "#F43F5E" },
   { to: "/brain", label: "Brain", Icon: Brain, color: "#F59E0B" },
 ] as const;
