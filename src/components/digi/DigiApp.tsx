@@ -14,7 +14,8 @@ import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
 import { VoiceAIPage } from "./VoiceAIPage";
 
-import startupVideoUrl from '@/assets/digi-startup.mp4';
+import startupVideoAsset from '@/assets/digi-startup.mp4.asset.json';
+const startupVideoUrl = startupVideoAsset.url;
 import logoUrl from '@/assets/digi-logo.png';
 
 // ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
