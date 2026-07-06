@@ -122,21 +122,18 @@ const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6" }, // Blue
   { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8" }, // Cyan
   { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E" }, // Rose
-  { id: "whatsapp",  label: "WhatsApp",          Icon: MessageSquare,   color: "#22C55E" }, // Green
   { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B" }, // Amber
 ];
 
 const MODULES = [
-  { label: "CRM",        Icon: Users,       color: "#6366F1" }, // Indigo
-  { label: "Sales",      Icon: TrendingUp,  color: "#10B981" }, // Emerald
-  { label: "Marketing",  Icon: BarChart2,   color: "#EC4899" }, // Pink
-  { label: "Finance",    Icon: Wallet,      color: "#EAB308" }, // Yellow
-  { label: "HR",         Icon: Users,       color: "#F43F5E" }, // Rose
-  { label: "Projects",   Icon: Folder,      color: "#3B82F6" }, // Blue
-  { label: "Automation", Icon: RefreshCw,   color: "#8B5CF6" }, // Violet
-  { label: "Files",      Icon: FileText,    color: "#14B8A6" }, // Teal
-  { label: "Analytics",  Icon: BarChart2,   color: "#06B6D4" }, // Cyan
-  { label: "Reports",    Icon: FileText,    color: "#F97316" }, // Orange
+  { label: "Tools",        Icon: Wrench,      color: "#7DD3FC" }, // Sky
+  { label: "Skills",       Icon: Zap,         color: "#3B82F6" }, // Blue
+  { label: "Workflows",    Icon: Workflow,    color: "#8B5CF6" }, // Violet
+  { label: "Core Jobs",    Icon: Layers,      color: "#2FE0C8" }, // Cyan
+  { label: "Integrations", Icon: Folder,      color: "#F5A623" }, // Amber
+  { label: "Models",       Icon: Brain,       color: "#F472B6" }, // Rose
+  { label: "Channels",     Icon: MessageSquare, color: "#22C55E" }, // Green
+  { label: "Analytics",    Icon: BarChart2,   color: "#06B6D4" }, // Cyan
 ];
 
 const MSGS_INIT: Msg[] = [
@@ -178,7 +175,7 @@ const C_LABEL_GAP = 4;
 const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // 62 — card + label
 const C_ITEM_GAP = 10;                                  // gap between full items
 const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // 72 — one full row
-const C_LEFT_STACK_X = 46;
+const C_LEFT_STACK_X = 18;
 const C_GLOBE_Y_RATIO = 0.30;
 
 // Right-side outgoing wires — separate palette from left input modules.
