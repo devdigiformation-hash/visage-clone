@@ -236,8 +236,8 @@ function ParticleOrb({ active }: { active: boolean }) {
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       } else {
         const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
-        g.addColorStop(0, "rgba(16,185,129,0.17)");
-        g.addColorStop(0.5, "rgba(4,120,87,0.08)");
+        g.addColorStop(0, "rgba(16,185,129,0.09)");
+        g.addColorStop(0.5, "rgba(4,120,87,0.04)");
         g.addColorStop(1, "transparent");
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       }
@@ -250,8 +250,8 @@ function ParticleOrb({ active }: { active: boolean }) {
         body.addColorStop(0, "rgba(21, 94, 117, 0.28)");
         body.addColorStop(0.55, "rgba(6, 78, 91, 0.18)");
       } else {
-        body.addColorStop(0, "rgba(6, 78, 59, 0.34)");
-        body.addColorStop(0.58, "rgba(3, 45, 40, 0.28)");
+        body.addColorStop(0, "rgba(6, 78, 59, 0.20)");
+        body.addColorStop(0.58, "rgba(3, 45, 40, 0.16)");
       }
       body.addColorStop(1, "rgba(2, 8, 12, 0)");
       cx.beginPath();
