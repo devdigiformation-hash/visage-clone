@@ -773,6 +773,31 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
               </button>
             </div>
 
+            {/* Live media previews (top-left inside box) */}
+            {(cameraOn || screenShareOn) && (
+              <div style={{ position: "absolute", top: 12, left: 12, display: "flex", flexDirection: "column", gap: 6, zIndex: 30 }}>
+                {cameraOn && (
+                  <video
+                    ref={cameraVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }}
+                  />
+                )}
+                {screenShareOn && (
+                  <video
+                    ref={screenVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }}
+                  />
+                )}
+              </div>
+            )}
+
+
             <style>{`
               @keyframes shake-orb {
                 0% { transform: translate(0, 0) scale(1); }
