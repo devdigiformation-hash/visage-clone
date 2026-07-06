@@ -66,7 +66,23 @@ export interface Skill extends Entity { name: string; category: string; subcateg
 export interface Tool extends Entity { name: string; category: string; subcategory?: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; relatedSkillIds?: string; active: boolean; }
 export interface Agent extends Entity { name: string; role: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
 export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
-export interface Channel extends Entity { name: string; type: "whatsapp" | "email" | "telegram" | "web" | "webhook" | "custom"; credentials?: string; agentId?: string; active: boolean; }
+export type ChannelType = "whatsapp" | "telegram" | "discord" | "email" | "sms" | "slack" | "web" | "webhook" | "custom";
+export type ChannelStatus = "connected" | "disconnected" | "pending" | "error";
+export interface Channel extends Entity {
+  name: string;
+  type: ChannelType;
+  status: ChannelStatus;
+  description?: string;
+  credentials?: string;
+  config?: string;          // JSON string, type-specific
+  phoneNumber?: string;     // whatsapp / sms
+  botToken?: string;        // telegram / discord bot
+  webhookUrl?: string;      // discord / custom / webhook
+  agentId?: string;
+  active: boolean;
+  lastConnectedAt?: number;
+  sessionId?: string;       // whatsapp QR session ref
+}
 export interface Integration extends Entity { name: string; category: string; apiKey?: string; endpoint?: string; status: "connected" | "disconnected" | "error"; notes?: string; }
 export type JobStatus = "queued" | "pending" | "running" | "review" | "approved" | "completed" | "failed" | "blocked" | "cancelled";
 export interface Job extends Entity { title: string; agent: string; workflowId?: string; type?: string; status: JobStatus; step: number; totalSteps: number; notes?: string; startedAt?: number; completedAt?: number; durationMs?: number; module?: string; }
