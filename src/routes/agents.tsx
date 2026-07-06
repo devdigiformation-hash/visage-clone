@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import { ModulePage, StatusPill } from "@/components/shell/ModulePage";
 import { agentsRepo, type Agent } from "@/lib/repo";
-import { Bot } from "lucide-react";
+import { Bot, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/agents")({
   head: () => ({ meta: [{ title: "Agents · Digi OS" }] }),
