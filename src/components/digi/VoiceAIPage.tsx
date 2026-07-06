@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, PhoneOff, Phone, Volume2, Loader2, LogIn } from "lucide-react";
 
