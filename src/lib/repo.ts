@@ -64,7 +64,23 @@ export function createRepo<T extends Entity>(name: string, seed: Omit<T, "id" | 
 export interface Model extends Entity { name: string; provider: string; modelId: string; apiKey?: string; baseURL?: string; tags?: string; active: boolean; isDefault?: boolean; notes?: string; }
 export interface Skill extends Entity { name: string; category: string; subcategory?: string; type: "prompt" | "tool" | "code" | "automation" | "markdown"; content: string; tags?: string; relatedToolIds?: string; relatedWorkflowIds?: string; knowledgeRefs?: string; active: boolean; }
 export interface Tool extends Entity { name: string; category: string; subcategory?: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; relatedSkillIds?: string; active: boolean; }
-export interface Agent extends Entity { name: string; role: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
+export interface Agent extends Entity { name: string; role: string; category?: string; source?: "custom" | "template" | "imported"; templateId?: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
+export interface Bot extends Entity {
+  name: string;
+  purpose: string;
+  category: string;                  // e.g. "Support", "Sales", "Research"
+  runtime: "agent" | "workflow" | "script" | "external" | "custom";
+  source: "custom" | "template" | "imported";
+  templateId?: string;
+  agentId?: string;
+  workflowId?: string;
+  channelIds?: string;               // comma-separated
+  triggers?: string;                 // e.g. "message,cron,webhook"
+  instructions?: string;
+  config?: string;                   // JSON blob
+  tags?: string;
+  active: boolean;
+}
 export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
 export type ChannelType = "whatsapp" | "telegram" | "discord" | "email" | "sms" | "slack" | "web" | "webhook" | "custom";
 export type ChannelStatus = "connected" | "disconnected" | "pending" | "error";
