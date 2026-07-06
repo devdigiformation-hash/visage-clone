@@ -63,6 +63,9 @@ export function ModulePage<T extends Entity>({
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {extraActions}
+          <button onClick={() => setShowBulk(true)} style={btnGhost} title="Bulk import JSON">
+            <Upload size={12} /> Import
+          </button>
           <button onClick={openCreate} style={btnPrimary(accent)}>
             <Plus size={13} /> New
           </button>
