@@ -690,8 +690,8 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         position: "relative", flexShrink: 0, height: nodeMapH,
         display: "flex", alignItems: "stretch",
         padding: C_PAD, gap: 0,
-        marginBottom: 35,
-        marginTop: 35, // Pushed globe down a bit
+        marginBottom: 20,
+        marginTop: 5,
       }}>
         <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} />
 
