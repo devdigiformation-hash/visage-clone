@@ -559,7 +559,7 @@ function UpdaterWidget() {
 }
 
 function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: string; setActiveNav: (id: string) => void; onOpenSettings: () => void; }) {
-  const [showModules, setShowModules] = useState(true);
+  const [showModules, setShowModules] = useState(false);
   return (
     <div style={{
       width: 220, flexShrink: 0,
@@ -614,11 +614,14 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
           );
         })}
 
-        {/* Business Modules - Collapsible */}
+        {/* Business Modules */}
         <div style={{ padding: "10px 14px 5px" }}>
           <Mono>Business Modules</Mono>
         </div>
-        {MODULES.map((mod, i) => (
+        {MODULES.map((mod, i) => {
+          const hideable = i >= MODULES.length - 3;
+          if (hideable && !showModules) return null;
+          return (
           <button key={i} className="group glass-btn"
             onClick={() => playUISound('click')}
             onMouseEnter={() => playUISound('hover')}
@@ -634,7 +637,19 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
               <span className="transition-colors duration-300 group-hover:text-white" style={{ fontSize: 11, color: "#B8BEC8" }}>{mod.label}</span>
             </div>
           </button>
-        ))}
+          );
+        })}
+        <button
+          onClick={() => { playUISound('soft-click'); setShowModules(!showModules); }}
+          onMouseEnter={() => playUISound('hover')}
+          className="glass-btn"
+          style={{
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            padding: "5px 14px", borderRadius: 8, marginBottom: 4, cursor: "pointer",
+          }}>
+          <ChevronDown size={11} style={{ color: "#5C616B", transform: showModules ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+          <span style={{ fontSize: 10, color: "#7A8090", letterSpacing: "0.08em" }}>{showModules ? "Show less" : "Show more"}</span>
+        </button>
       </div>
 
       {/* Pinned Settings - Always visible at bottom */}
