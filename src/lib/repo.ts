@@ -66,7 +66,23 @@ export interface Skill extends Entity { name: string; category: string; subcateg
 export interface Tool extends Entity { name: string; category: string; subcategory?: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; relatedSkillIds?: string; active: boolean; }
 export interface Agent extends Entity { name: string; role: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
 export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
-export interface Channel extends Entity { name: string; type: "whatsapp" | "email" | "telegram" | "web" | "webhook" | "custom"; credentials?: string; agentId?: string; active: boolean; }
+export type ChannelType = "whatsapp" | "telegram" | "discord" | "email" | "sms" | "slack" | "web" | "webhook" | "custom";
+export type ChannelStatus = "connected" | "disconnected" | "pending" | "error";
+export interface Channel extends Entity {
+  name: string;
+  type: ChannelType;
+  status: ChannelStatus;
+  description?: string;
+  credentials?: string;
+  config?: string;          // JSON string, type-specific
+  phoneNumber?: string;     // whatsapp / sms
+  botToken?: string;        // telegram / discord bot
+  webhookUrl?: string;      // discord / custom / webhook
+  agentId?: string;
+  active: boolean;
+  lastConnectedAt?: number;
+  sessionId?: string;       // whatsapp QR session ref
+}
 export interface Integration extends Entity { name: string; category: string; apiKey?: string; endpoint?: string; status: "connected" | "disconnected" | "error"; notes?: string; }
 export type JobStatus = "queued" | "pending" | "running" | "review" | "approved" | "completed" | "failed" | "blocked" | "cancelled";
 export interface Job extends Entity { title: string; agent: string; workflowId?: string; type?: string; status: JobStatus; step: number; totalSteps: number; notes?: string; startedAt?: number; completedAt?: number; durationMs?: number; module?: string; }
@@ -139,9 +155,20 @@ export const workflowsRepo = createRepo<Workflow>("workflows", [
   { name: "Weekly Sales Report", trigger: "schedule", status: "active" },
 ]);
 export const channelsRepo = createRepo<Channel>("channels", [
-  { name: "Support WhatsApp", type: "whatsapp", active: true },
-  { name: "Sales Email", type: "email", active: true },
+  { name: "Support WhatsApp", type: "whatsapp", status: "disconnected", active: false, description: "Primary customer support line" },
+  { name: "Sales Email", type: "email", status: "disconnected", active: false, description: "Inbound sales inbox" },
 ]);
+export const CHANNEL_CATALOG: Array<{ type: ChannelType; label: string; color: string; blurb: string; setupMethod: string; }> = [
+  { type: "whatsapp", label: "WhatsApp", color: "#22C55E", blurb: "QR based session or Business Cloud API", setupMethod: "QR / Cloud API" },
+  { type: "telegram", label: "Telegram", color: "#3B82F6", blurb: "Bot token via @BotFather", setupMethod: "Bot Token" },
+  { type: "discord", label: "Discord", color: "#7C3AED", blurb: "Bot token + guild, or webhook URL", setupMethod: "Bot / Webhook" },
+  { type: "slack", label: "Slack", color: "#F59E0B", blurb: "Incoming webhook or Slack app", setupMethod: "Webhook / App" },
+  { type: "email", label: "Email", color: "#EC4899", blurb: "SMTP / IMAP mailbox", setupMethod: "SMTP + IMAP" },
+  { type: "sms", label: "SMS", color: "#F97316", blurb: "Twilio / provider number", setupMethod: "Provider API" },
+  { type: "web", label: "Web Chat", color: "#06B6D4", blurb: "Embeddable site chat widget", setupMethod: "Snippet" },
+  { type: "webhook", label: "Webhook", color: "#A78BFA", blurb: "Generic inbound/outbound webhook", setupMethod: "URL + Secret" },
+  { type: "custom", label: "Custom Channel", color: "#5C616B", blurb: "Any private API, bot or protocol", setupMethod: "Free-form config" },
+];
 export const integrationsRepo = createRepo<Integration>("integrations", [
   { name: "OpenRouter", category: "AI Provider", status: "disconnected" },
   { name: "Slack", category: "Communication", status: "disconnected" },

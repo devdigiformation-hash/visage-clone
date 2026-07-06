@@ -28,6 +28,8 @@ import { Route as BrainRouteImport } from './routes/brain'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChannelsNewRouteImport } from './routes/channels.new'
+import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 
 const WorkspacesRoute = WorkspacesRouteImport.update({
   id: '/workspaces',
@@ -124,13 +126,23 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChannelsNewRoute = ChannelsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ChannelsRoute,
+} as any)
+const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
+  id: '/$channelId',
+  path: '/$channelId',
+  getParentRoute: () => ChannelsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/brain': typeof BrainRoute
-  '/channels': typeof ChannelsRoute
+  '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
   '/integrations': typeof IntegrationsRoute
   '/jobs': typeof JobsRoute
@@ -145,13 +157,15 @@ export interface FileRoutesByFullPath {
   '/town': typeof TownRoute
   '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/channels/new': typeof ChannelsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/brain': typeof BrainRoute
-  '/channels': typeof ChannelsRoute
+  '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
   '/integrations': typeof IntegrationsRoute
   '/jobs': typeof JobsRoute
@@ -166,6 +180,8 @@ export interface FileRoutesByTo {
   '/town': typeof TownRoute
   '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/channels/new': typeof ChannelsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -173,7 +189,7 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/brain': typeof BrainRoute
-  '/channels': typeof ChannelsRoute
+  '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
   '/integrations': typeof IntegrationsRoute
   '/jobs': typeof JobsRoute
@@ -188,6 +204,8 @@ export interface FileRoutesById {
   '/town': typeof TownRoute
   '/workflows': typeof WorkflowsRoute
   '/workspaces': typeof WorkspacesRoute
+  '/channels/$channelId': typeof ChannelsChannelIdRoute
+  '/channels/new': typeof ChannelsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,6 +229,8 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/channels/$channelId'
+    | '/channels/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,6 +252,8 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/channels/$channelId'
+    | '/channels/new'
   id:
     | '__root__'
     | '/'
@@ -253,6 +275,8 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/channels/$channelId'
+    | '/channels/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,7 +284,7 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   AnalyticsRoute: typeof AnalyticsRoute
   BrainRoute: typeof BrainRoute
-  ChannelsRoute: typeof ChannelsRoute
+  ChannelsRoute: typeof ChannelsRouteWithChildren
   CommandRoute: typeof CommandRoute
   IntegrationsRoute: typeof IntegrationsRoute
   JobsRoute: typeof JobsRoute
@@ -412,15 +436,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/channels/new': {
+      id: '/channels/new'
+      path: '/new'
+      fullPath: '/channels/new'
+      preLoaderRoute: typeof ChannelsNewRouteImport
+      parentRoute: typeof ChannelsRoute
+    }
+    '/channels/$channelId': {
+      id: '/channels/$channelId'
+      path: '/$channelId'
+      fullPath: '/channels/$channelId'
+      preLoaderRoute: typeof ChannelsChannelIdRouteImport
+      parentRoute: typeof ChannelsRoute
+    }
   }
 }
+
+interface ChannelsRouteChildren {
+  ChannelsChannelIdRoute: typeof ChannelsChannelIdRoute
+  ChannelsNewRoute: typeof ChannelsNewRoute
+}
+
+const ChannelsRouteChildren: ChannelsRouteChildren = {
+  ChannelsChannelIdRoute: ChannelsChannelIdRoute,
+  ChannelsNewRoute: ChannelsNewRoute,
+}
+
+const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
+  ChannelsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRoute,
   AnalyticsRoute: AnalyticsRoute,
   BrainRoute: BrainRoute,
-  ChannelsRoute: ChannelsRoute,
+  ChannelsRoute: ChannelsRouteWithChildren,
   CommandRoute: CommandRoute,
   IntegrationsRoute: IntegrationsRoute,
   JobsRoute: JobsRoute,
