@@ -751,8 +751,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             {/* Action Icons Top Right */}
             <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "column", gap: 8, zIndex: 30 }}>
               <button 
-                onClick={() => { playUISound('click'); setCameraOn(!cameraOn); }}
+                onClick={toggleCamera}
                 onMouseEnter={() => playUISound('hover')}
+                title={cameraOn ? "Turn off camera" : "Turn on laptop camera"}
                 className="glass-btn" 
                 style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: cameraOn ? "#2FE0C8" : "#5C616B", background: cameraOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: cameraOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
                 onMouseOver={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
@@ -761,7 +762,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                 <Camera size={15} />
               </button>
               <button 
-                onClick={() => { playUISound('click'); setScreenShareOn(!screenShareOn); }}
+                onClick={toggleScreenShare}
                 onMouseEnter={() => playUISound('hover')}
                 className="glass-btn" 
                 style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
