@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import { ModulePage, StatusPill } from "@/components/shell/ModulePage";
 import { workflowsRepo, type Workflow as WF } from "@/lib/repo";
-import { Workflow } from "lucide-react";
+import { Workflow, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/workflows")({
   head: () => ({ meta: [{ title: "Workflows · Digi OS" }] }),
