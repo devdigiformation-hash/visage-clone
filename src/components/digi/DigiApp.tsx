@@ -173,8 +173,8 @@ const C_PAD      = 12;   // padding inside the node-map wrapper
 const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
-const C_ORB_SIZE = 340;  // visible center globe container size
-const C_GLOBE_Y_RATIO = 0.43; // slightly raised vertical axis for the globe hub
+const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
+const C_GLOBE_Y_RATIO = 0.35; // raised vertical axis inside the top 80% zone
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
@@ -227,11 +227,41 @@ function ParticleOrb({ active }: { active: boolean }) {
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       } else {
         const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
-        g.addColorStop(0, "rgba(52,211,153,0.15)");
-        g.addColorStop(0.5, "rgba(52,211,153,0.05)");
+        g.addColorStop(0, "rgba(16,185,129,0.17)");
+        g.addColorStop(0.5, "rgba(4,120,87,0.08)");
         g.addColorStop(1, "transparent");
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       }
+
+      // Darker holographic Jupiter-core mass with restrained horizontal banding.
+      cx.save();
+      cx.translate(W / 2, H / 2);
+      const body = cx.createRadialGradient(0, -18, 12, 0, 0, PLANET_R * 0.36);
+      if (active) {
+        body.addColorStop(0, "rgba(21, 94, 117, 0.28)");
+        body.addColorStop(0.55, "rgba(6, 78, 91, 0.18)");
+      } else {
+        body.addColorStop(0, "rgba(6, 78, 59, 0.34)");
+        body.addColorStop(0.58, "rgba(3, 45, 40, 0.28)");
+      }
+      body.addColorStop(1, "rgba(2, 8, 12, 0)");
+      cx.beginPath();
+      cx.ellipse(0, 0, PLANET_R * 0.34, PLANET_R * 0.245, 0, 0, Math.PI * 2);
+      cx.fillStyle = body;
+      cx.fill();
+
+      cx.clip();
+      [-84, -56, -28, 0, 28, 56, 84].forEach((y, idx) => {
+        const edge = Math.abs(y) / 84;
+        cx.beginPath();
+        cx.ellipse(0, y, PLANET_R * (0.30 - edge * 0.035), 7 + edge * 4, 0, 0, Math.PI * 2);
+        cx.strokeStyle = active
+          ? `rgba(170, 255, 244, ${0.06 + (idx % 2) * 0.035})`
+          : `rgba(167, 243, 208, ${0.075 + (idx % 2) * 0.04})`;
+        cx.lineWidth = idx === 3 ? 2.1 : 1.25;
+        cx.stroke();
+      });
+      cx.restore();
       // Outer glow circle removed as requested by user
 
       const sorted = pts.map(p => {
@@ -274,7 +304,7 @@ function ParticleOrb({ active }: { active: boolean }) {
           } else {
             // Standby bands in shades of green
             const band = Math.sin(by * 15) + Math.cos(by * 35) * 0.5;
-            if (band > 0.8) { cr=167; cg=243; cb=208; } // #A7F3D0
+            if (band > 0.8) { cr=74; cg=222; cb=170; } // restrained green highlight, not white sparkle
             else if (band > 0.2) { cr=52; cg=211; cb=153; } // #34D399
             else if (band > -0.5) { cr=16; cg=185; cb=129; } // #10B981
             else if (band > -1.2) { cr=4; cg=120; cb=87; } // #047857
@@ -304,11 +334,10 @@ function ParticleOrb({ active }: { active: boolean }) {
 
 // ─── Connector SVG ────────────────────────────────────────────────────────────
 // Geometry constants MUST stay in sync with OperationsPanel layout.
-function ConnectorSVG({ active, W, H }: { active: boolean; W: number; H: number }) {
-  const nodeX = C_PAD + C_CARD_W;                    // right edge of card column
+function ConnectorSVG({ active, W, H, globeSize, globeCenterX }: { active: boolean; W: number; H: number; globeSize: number; globeCenterX: number }) {
+  const nodeX = C_LEFT_STACK_X + C_CARD_W;                    // right edge of card column
   // Globe is now the true center hub of the Operations Status composition.
-  const globeCenterX = Math.round(W / 2);
-  const visualPlanetR = Math.round(C_ORB_SIZE * 0.43);
+  const visualPlanetR = Math.round(globeSize * 0.43);
   const orbEdgeX = globeCenterX - visualPlanetR;
   const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.70);
   const midY  = Math.round(H * C_GLOBE_Y_RATIO);
@@ -635,27 +664,31 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
     screenStreamRef.current?.getTracks().forEach(t => t.stop());
   }, []);
 
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [dims,  setDims]  = useState({ w: 600 });
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [dims,  setDims]  = useState({ w: 600, h: 640 });
 
   useEffect(() => {
-    const el = wrapRef.current; if (!el) return;
-    const ro = new ResizeObserver(([e]) => setDims({ w: Math.round(e.contentRect.width) }));
+    const el = panelRef.current; if (!el) return;
+    const ro = new ResizeObserver(([e]) => setDims({ w: Math.round(e.contentRect.width), h: Math.round(e.contentRect.height) }));
     ro.observe(el);
-    setDims({ w: Math.round(el.offsetWidth) });
+    setDims({ w: Math.round(el.offsetWidth), h: Math.round(el.offsetHeight) });
     return () => ro.disconnect();
   }, []);
 
   // Computed height of the node-map section
   const baseNodeMapH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP + C_PAD * 2;
-  // Keep the layout height tied to the cards so the huge globe doesn't push the UI down
-  const nodeMapH = Math.max(baseNodeMapH, 490);
+  const availableCompositionH = Math.max(baseNodeMapH + 220, dims.h - 36 - 32);
+  const nodeMapH = Math.max(baseNodeMapH + 220, Math.round(availableCompositionH * 0.80));
+  const globeSize = Math.min(390, Math.max(330, Math.round(Math.min(dims.w * 0.47, nodeMapH * 0.58))));
   const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
   const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
   const nodeCardsTop = Math.round(globeCenterY - nodeCardsTotalH / 2);
+  const rightActionStackX = Math.max(C_LEFT_STACK_X + C_CARD_W + 260, dims.w - C_LEFT_STACK_X - 33);
+  const globeCenterX = Math.round((C_LEFT_STACK_X + C_CARD_W + rightActionStackX) / 2);
+  const agentTownMinH = Math.max(118, Math.round(availableCompositionH * 0.18));
 
   return (
-    <div style={{
+    <div ref={panelRef} style={{
       flex: 1, minWidth: 0,
       display: "flex", flexDirection: "column",
       borderRight: "1px solid #1A1D24",
@@ -689,20 +722,21 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
       </div>
 
       {/* ── Node map ── */}
-      <div ref={wrapRef} style={{
+      <div style={{
         position: "relative", flexShrink: 0, height: nodeMapH,
         display: "flex", alignItems: "stretch",
         padding: C_PAD, gap: 0,
-        marginBottom: 20,
-        marginTop: 5,
+        marginBottom: 0,
+        marginTop: 0,
       }}>
-        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} />
+        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} globeSize={globeSize} globeCenterX={globeCenterX} />
 
         {/* Node cards column */}
         <div style={{
           display: "flex", flexDirection: "column", gap: C_CARD_GAP,
           position: "relative", zIndex: 10,
           width: C_CARD_W, flexShrink: 0,
+          marginLeft: C_LEFT_STACK_X - C_PAD,
           marginTop: nodeCardsTop,
         }}>
           {NODES.map(n => {
@@ -739,7 +773,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         }}>
           {/* Right control rail — vertically centered to the globe hub */}
           <div style={{
-            position: "absolute", top: globeCenterY - C_PAD, left: `calc(50% + ${Math.round(C_ORB_SIZE / 2 + 24)}px)`,
+            position: "absolute", top: globeCenterY - C_PAD - 8, left: rightActionStackX - C_PAD,
             transform: "translateY(-50%)",
             display: "flex", flexDirection: "column", gap: 10, zIndex: 30,
             pointerEvents: "auto",
@@ -792,7 +826,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 
           {/* Live media previews (top-left) */}
           {(cameraOn || screenShareOn) && (
-            <div style={{ position: "absolute", top: globeCenterY - C_PAD - 188, left: "calc(50% - 210px)", display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto" }}>
+            <div style={{ position: "absolute", top: globeCenterY - C_PAD - Math.round(globeSize / 2) - 18, left: globeCenterX - C_PAD - Math.round(globeSize / 2) - 22, display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto" }}>
               {cameraOn && (
                 <video ref={cameraVideoRef} autoPlay playsInline muted
                   style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
@@ -813,48 +847,17 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
               100% { transform: translate(0, 0) scale(1); }
             }
             .orb-shake { animation: shake-orb 0.4s ease-in-out infinite; }
-            @keyframes twinkle-star {
-              0%, 100% { opacity: 0.15; transform: scale(0.7); }
-              50%      { opacity: 1;    transform: scale(1.3); }
-            }
-            .orb-sparkle {
-              position: absolute; border-radius: 50%;
-              background: radial-gradient(circle, rgba(230,240,255,0.95) 0%, rgba(180,210,230,0.5) 40%, rgba(180,210,230,0) 70%);
-              box-shadow: 0 0 4px rgba(220,235,255,0.7);
-              animation: twinkle-star 3.2s ease-in-out infinite;
-              pointer-events: none;
-            }
           `}</style>
 
           {/* Center stack: globe + Start AI button, fixed on the composition center axis */}
           <div style={{
-            position: "absolute", left: "50%", top: globeCenterY - C_PAD - C_ORB_SIZE / 2,
+            position: "absolute", left: globeCenterX - C_PAD, top: globeCenterY - C_PAD - globeSize / 2,
             transform: "translateX(-50%)",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             gap: 13,
             pointerEvents: "auto",
           }}>
-            <div style={{ position: "relative", width: C_ORB_SIZE, height: C_ORB_SIZE }}>
-              {/* Silver firefly sparkles — only visible in standby */}
-              {!aiActive && (
-                <>
-                  {[
-                    { top: '12%', left: '22%', size: 3, delay: '0s' },
-                    { top: '18%', left: '78%', size: 2, delay: '0.6s' },
-                    { top: '35%', left: '8%',  size: 4, delay: '1.2s' },
-                    { top: '48%', left: '92%', size: 2, delay: '0.3s' },
-                    { top: '62%', left: '15%', size: 3, delay: '1.8s' },
-                    { top: '72%', left: '82%', size: 2, delay: '0.9s' },
-                    { top: '85%', left: '38%', size: 3, delay: '2.1s' },
-                    { top: '25%', left: '55%', size: 2, delay: '1.5s' },
-                    { top: '55%', left: '48%', size: 2, delay: '2.6s' },
-                    { top: '80%', left: '68%', size: 3, delay: '0.4s' },
-                  ].map((s, i) => (
-                    <span key={i} className="orb-sparkle"
-                      style={{ top: s.top, left: s.left, width: s.size, height: s.size, animationDelay: s.delay }} />
-                  ))}
-                </>
-              )}
+            <div style={{ position: "relative", width: globeSize, height: globeSize }}>
               <div className={aiActive ? "orb-breathe" : ""}
                 style={{
                   position: "absolute", width: "100%", height: "100%",
@@ -910,7 +913,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 
       {/* ── Agent Town tab bar ── */}
       <div style={{
-        height: 34, flexShrink: 0, marginTop: 15,
+        height: 34, flexShrink: 0, marginTop: 0,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 14px",
         borderTop: "1px solid #1A1D24",
@@ -935,7 +938,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
       </div>
 
       {/* ── Scrollable content ── */}
-      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="custom-scroll">
+      <div style={{ flex: 1, overflowY: "auto", minHeight: agentTownMinH }} className="custom-scroll">
       </div>
 
       {/* ── Status bar ── */}
