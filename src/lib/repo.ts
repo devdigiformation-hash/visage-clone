@@ -62,8 +62,8 @@ export function createRepo<T extends Entity>(name: string, seed: Omit<T, "id" | 
 
 // ─── Entity types ──────────────────────────────────────────────────────────
 export interface Model extends Entity { name: string; provider: string; modelId: string; apiKey?: string; baseURL?: string; tags?: string; active: boolean; isDefault?: boolean; notes?: string; }
-export interface Skill extends Entity { name: string; category: string; type: "prompt" | "tool" | "code" | "automation" | "markdown"; content: string; tags?: string; active: boolean; }
-export interface Tool extends Entity { name: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; active: boolean; }
+export interface Skill extends Entity { name: string; category: string; subcategory?: string; type: "prompt" | "tool" | "code" | "automation" | "markdown"; content: string; tags?: string; relatedToolIds?: string; relatedWorkflowIds?: string; knowledgeRefs?: string; active: boolean; }
+export interface Tool extends Entity { name: string; category: string; subcategory?: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; relatedSkillIds?: string; active: boolean; }
 export interface Agent extends Entity { name: string; role: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
 export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
 export interface Channel extends Entity { name: string; type: "whatsapp" | "email" | "telegram" | "web" | "webhook" | "custom"; credentials?: string; agentId?: string; active: boolean; }
@@ -71,6 +71,16 @@ export interface Integration extends Entity { name: string; category: string; ap
 export interface Job extends Entity { title: string; agent: string; workflowId?: string; status: "pending" | "running" | "review" | "approved" | "completed"; step: number; totalSteps: number; notes?: string; }
 export interface MemoryItem extends Entity { title: string; scope: "user" | "system" | "project"; content: string; tags?: string; }
 export interface KnowledgePack extends Entity { name: string; source: string; itemCount: number; notes?: string; }
+export interface KnowledgeItem extends Entity {
+  title: string;
+  category: string;
+  subcategory?: string;
+  format: "markdown" | "snippet" | "reference" | "sop" | "prompt" | "link";
+  content: string;
+  source?: string;
+  tags?: string;
+  active: boolean;
+}
 export interface Workspace extends Entity {
   name: string;
   path: string;
