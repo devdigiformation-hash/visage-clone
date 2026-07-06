@@ -633,11 +633,10 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
             }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div className="transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6">
-                <mod.Icon size={11} style={{ color: mod.color, opacity: 0.75, flexShrink: 0, transition: "all 0.3s ease" }} />
+                <mod.Icon size={11} style={{ color: mod.color, opacity: 1, flexShrink: 0, filter: `drop-shadow(0 0 4px ${mod.color}55)`, transition: "all 0.3s ease" }} />
               </div>
-              <span className="transition-colors duration-300 group-hover:text-white" style={{ fontSize: 11, color: "#6B7280" }}>{mod.label}</span>
+              <span className="transition-colors duration-300 group-hover:text-white" style={{ fontSize: 11, color: "#B8BEC8" }}>{mod.label}</span>
             </div>
-            <span className="soon-badge">SOON</span>
           </button>
         ))}
       </div>
@@ -890,7 +889,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   // identical distances from the globe center and share the same wire geometry.
   const rightContainerLeft = dims.w - C_LEFT_STACK_X - 84;
   const rightActionStackX = dims.w - C_LEFT_STACK_X - C_CARD_W; // mirror of (C_LEFT_STACK_X + C_CARD_W) -> wire endpoint
-  const globeCenterX = Math.round((C_LEFT_STACK_X + C_CARD_W + rightActionStackX) / 2);
+  const globeCenterX = Math.round(dims.w / 2);
   const cardCenterYs = [0, 1, 2, 3].map(i => nodeCardsTop + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
   const agentTownMinH = Math.max(160, Math.round(availableCompositionH * 0.20));
 
