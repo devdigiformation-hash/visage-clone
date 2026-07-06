@@ -128,12 +128,12 @@ const NAV_ITEMS = [
 const MODULES = [
   { label: "Tools",        Icon: Wrench,      color: "#7DD3FC" }, // Sky
   { label: "Skills",       Icon: Zap,         color: "#3B82F6" }, // Blue
-  { label: "Workflows",    Icon: Workflow,    color: "#8B5CF6" }, // Violet
-  { label: "Core Jobs",    Icon: Layers,      color: "#2FE0C8" }, // Cyan
-  { label: "Integrations", Icon: Folder,      color: "#F5A623" }, // Amber
   { label: "Models",       Icon: Brain,       color: "#F472B6" }, // Rose
   { label: "Channels",     Icon: MessageSquare, color: "#22C55E" }, // Green
   { label: "Analytics",    Icon: BarChart2,   color: "#06B6D4" }, // Cyan
+  { label: "Workflows",    Icon: Workflow,    color: "#8B5CF6" }, // Violet
+  { label: "Core Jobs",    Icon: Layers,      color: "#2FE0C8" }, // Cyan
+  { label: "Integrations", Icon: Folder,      color: "#F5A623" }, // Amber
 ];
 
 const MSGS_INIT: Msg[] = [
