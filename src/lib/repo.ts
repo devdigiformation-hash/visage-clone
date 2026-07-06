@@ -64,8 +64,24 @@ export function createRepo<T extends Entity>(name: string, seed: Omit<T, "id" | 
 export interface Model extends Entity { name: string; provider: string; modelId: string; apiKey?: string; baseURL?: string; tags?: string; active: boolean; isDefault?: boolean; notes?: string; }
 export interface Skill extends Entity { name: string; category: string; subcategory?: string; type: "prompt" | "tool" | "code" | "automation" | "markdown"; content: string; tags?: string; relatedToolIds?: string; relatedWorkflowIds?: string; knowledgeRefs?: string; active: boolean; }
 export interface Tool extends Entity { name: string; category: string; subcategory?: string; type: string; provider?: string; endpoint?: string; config?: string; tags?: string; relatedSkillIds?: string; active: boolean; }
-export interface Agent extends Entity { name: string; role: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
-export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
+export interface Agent extends Entity { name: string; role: string; category?: string; source?: "custom" | "template" | "imported"; templateId?: string; modelId?: string; toolIds?: string; skillIds?: string; prompt?: string; active: boolean; }
+export interface Bot extends Entity {
+  name: string;
+  purpose: string;
+  category: string;                  // e.g. "Support", "Sales", "Research"
+  runtime: "agent" | "workflow" | "script" | "external" | "custom";
+  source: "custom" | "template" | "imported";
+  templateId?: string;
+  agentId?: string;
+  workflowId?: string;
+  channelIds?: string;               // comma-separated
+  triggers?: string;                 // e.g. "message,cron,webhook"
+  instructions?: string;
+  config?: string;                   // JSON blob
+  tags?: string;
+  active: boolean;
+}
+export interface Workflow extends Entity { name: string; trigger: string; category?: string; source?: "custom" | "template" | "imported"; templateId?: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
 export type ChannelType = "whatsapp" | "telegram" | "discord" | "email" | "sms" | "slack" | "web" | "webhook" | "custom";
 export type ChannelStatus = "connected" | "disconnected" | "pending" | "error";
 export interface Channel extends Entity {
@@ -145,15 +161,60 @@ export const toolsRepo = createRepo<Tool>("tools", [
   { name: "Git Ops", category: "Coding / Dev", subcategory: "Repo", type: "local", active: false },
 ]);
 export const agentsRepo = createRepo<Agent>("agents", [
-  { name: "Sales Agent", role: "Handles inbound leads and quotes", active: true },
-  { name: "Support Agent", role: "First-line customer support", active: true },
-  { name: "Marketing Agent", role: "Content, campaigns, social", active: true },
-  { name: "Finance Agent", role: "Invoices, reconciliation, reports", active: true },
+  { name: "Sales Agent", role: "Handles inbound leads and quotes", category: "Sales", source: "template", active: true },
+  { name: "Support Agent", role: "First-line customer support", category: "Support", source: "template", active: true },
+  { name: "Marketing Agent", role: "Content, campaigns, social", category: "Marketing", source: "template", active: true },
+  { name: "Finance Agent", role: "Invoices, reconciliation, reports", category: "Finance", source: "template", active: true },
 ]);
 export const workflowsRepo = createRepo<Workflow>("workflows", [
-  { name: "Onboard New Customer", trigger: "manual", status: "active" },
-  { name: "Weekly Sales Report", trigger: "schedule", status: "active" },
+  { name: "Onboard New Customer", trigger: "manual", category: "Ops", source: "template", status: "active" },
+  { name: "Weekly Sales Report", trigger: "schedule", category: "Sales", source: "template", status: "active" },
 ]);
+export const botsRepo = createRepo<Bot>("bots", [
+  { name: "WhatsApp Support Bot", purpose: "Reply to WhatsApp inbox with support agent",
+    category: "Support", runtime: "agent", source: "template", triggers: "message", active: true },
+  { name: "Lead Qualifier Bot", purpose: "Qualify inbound leads and push to CRM",
+    category: "Sales", runtime: "workflow", source: "template", triggers: "message,form", active: true },
+]);
+
+// ─── Template libraries (ready-made assets) ────────────────────────────
+export type AgentTemplate = { id: string; name: string; category: string; role: string; prompt: string; toolIds?: string; tags?: string };
+export const AGENT_TEMPLATES: AgentTemplate[] = [
+  { id: "tpl_agent_sdr", name: "SDR Outreach Agent", category: "Sales", role: "Cold outreach & follow-up sequences", prompt: "You are a professional SDR. Personalize outreach, keep messages short.", tags: "sales,outreach" },
+  { id: "tpl_agent_cs",  name: "Customer Success Agent", category: "Support", role: "Answer product questions and route tickets", prompt: "You are a warm, precise support agent. Cite docs where useful.", tags: "support" },
+  { id: "tpl_agent_seo", name: "SEO Content Agent", category: "Marketing", role: "Draft SEO-optimised long-form content", prompt: "Follow the target keyword strategy and internal linking rules.", tags: "seo,content" },
+  { id: "tpl_agent_fin", name: "Bookkeeper Agent", category: "Finance", role: "Reconcile transactions and produce reports", prompt: "Be strict about balancing figures. Flag anomalies.", tags: "finance" },
+  { id: "tpl_agent_res", name: "Research Analyst Agent", category: "Research", role: "Multi-source research + synthesis", prompt: "Cite sources with links. Prefer primary sources.", tags: "research" },
+  { id: "tpl_agent_ops", name: "Ops Coordinator Agent", category: "Ops", role: "Track approvals and drive tasks to completion", prompt: "Chase owners, summarise blockers, propose next actions.", tags: "ops" },
+  { id: "tpl_agent_rec", name: "Recruiting Agent", category: "HR", role: "Screen candidates, schedule interviews", prompt: "Score against role rubric; keep tone respectful.", tags: "hr" },
+  { id: "tpl_agent_dev", name: "Dev Assistant Agent", category: "Engineering", role: "Code review, PR summaries, repo Q&A", prompt: "Cite files and line numbers. Prefer minimal diffs.", tags: "engineering,code" },
+];
+
+export type WorkflowTemplate = { id: string; name: string; category: string; trigger: string; steps: string; notes?: string };
+export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
+  { id: "tpl_wf_onboard", name: "Customer Onboarding", category: "Ops", trigger: "manual", steps: "Collect KYC\nVerify docs\nProvision account\nSend welcome email" },
+  { id: "tpl_wf_lead",    name: "Lead Qualification", category: "Sales", trigger: "webhook", steps: "Enrich lead\nScore\nAssign SDR\nNotify Slack" },
+  { id: "tpl_wf_weekly",  name: "Weekly KPI Digest", category: "Analytics", trigger: "schedule", steps: "Pull metrics\nGenerate summary\nEmail stakeholders" },
+  { id: "tpl_wf_invoice", name: "Invoice Reconciliation", category: "Finance", trigger: "schedule", steps: "Fetch invoices\nMatch to payments\nFlag exceptions" },
+  { id: "tpl_wf_content", name: "Content Publishing", category: "Marketing", trigger: "manual", steps: "Draft\nReview\nSchedule\nPublish\nPromote" },
+  { id: "tpl_wf_support", name: "Support Ticket Triage", category: "Support", trigger: "event", steps: "Classify\nTag urgency\nRoute to agent\nAcknowledge" },
+  { id: "tpl_wf_backup",  name: "Nightly DB Backup", category: "DevOps", trigger: "schedule", steps: "Snapshot\nUpload\nVerify\nAlert on failure" },
+  { id: "tpl_wf_social",  name: "Social Post Scheduler", category: "Marketing", trigger: "schedule", steps: "Fetch queue\nRender\nPost\nRecord metrics" },
+];
+
+export type BotTemplate = { id: string; name: string; category: string; purpose: string; runtime: Bot["runtime"]; triggers: string; instructions: string; tags?: string };
+export const BOT_TEMPLATES: BotTemplate[] = [
+  { id: "tpl_bot_wa_sup",  name: "WhatsApp Support Bot", category: "Support",   purpose: "Answer product FAQs on WhatsApp",           runtime: "agent",    triggers: "message",         instructions: "Reply warmly, escalate complex issues to human.", tags: "whatsapp,support" },
+  { id: "tpl_bot_tg_news", name: "Telegram News Digest", category: "Content",   purpose: "Push daily digest to a Telegram channel",   runtime: "workflow", triggers: "cron",            instructions: "Summarise top 5 items with links.", tags: "telegram,news" },
+  { id: "tpl_bot_dc_mod",  name: "Discord Community Mod",category: "Community", purpose: "Moderate messages and welcome new members", runtime: "agent",    triggers: "message,event",    instructions: "Enforce rules politely; ban only on hard violations.", tags: "discord,mod" },
+  { id: "tpl_bot_lead",    name: "Lead Capture Bot",     category: "Sales",     purpose: "Qualify inbound leads and push to CRM",     runtime: "workflow", triggers: "message,form",     instructions: "Collect name, company, need, budget.", tags: "sales,lead" },
+  { id: "tpl_bot_kb",      name: "Knowledge Base Bot",   category: "Support",   purpose: "Answer from internal KB with citations",    runtime: "agent",    triggers: "message",          instructions: "Only answer from KB; cite doc titles.", tags: "kb,rag" },
+  { id: "tpl_bot_meet",    name: "Meeting Notes Bot",    category: "Ops",       purpose: "Transcribe meetings, extract action items", runtime: "workflow", triggers: "event",            instructions: "Split notes into decisions, actions, questions.", tags: "meetings,notes" },
+  { id: "tpl_bot_price",   name: "Price Watch Bot",      category: "Research",  purpose: "Watch competitor prices, alert on change",  runtime: "workflow", triggers: "cron",             instructions: "Report price deltas > 5%.", tags: "research,pricing" },
+  { id: "tpl_bot_hr",      name: "HR Q&A Bot",           category: "HR",        purpose: "Answer employee policy questions",          runtime: "agent",    triggers: "message",          instructions: "Confidential; escalate legal questions.", tags: "hr,policy" },
+];
+
+export const BOT_CATEGORIES = ["Support", "Sales", "Marketing", "Content", "Community", "Ops", "Research", "HR", "Finance", "Engineering", "Custom"] as const;
 export const channelsRepo = createRepo<Channel>("channels", [
   { name: "Support WhatsApp", type: "whatsapp", status: "disconnected", active: false, description: "Primary customer support line" },
   { name: "Sales Email", type: "email", status: "disconnected", active: false, description: "Inbound sales inbox" },

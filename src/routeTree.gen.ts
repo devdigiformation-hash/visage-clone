@@ -25,11 +25,16 @@ import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as CommandRouteImport } from './routes/command'
 import { Route as ChannelsRouteImport } from './routes/channels'
 import { Route as BrainRouteImport } from './routes/brain'
+import { Route as BotsRouteImport } from './routes/bots'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkflowsLibraryRouteImport } from './routes/workflows.library'
 import { Route as ChannelsNewRouteImport } from './routes/channels.new'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
+import { Route as BotsNewRouteImport } from './routes/bots.new'
+import { Route as BotsBotIdRouteImport } from './routes/bots.$botId'
+import { Route as AgentsLibraryRouteImport } from './routes/agents.library'
 
 const WorkspacesRoute = WorkspacesRouteImport.update({
   id: '/workspaces',
@@ -111,6 +116,11 @@ const BrainRoute = BrainRouteImport.update({
   path: '/brain',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BotsRoute = BotsRouteImport.update({
+  id: '/bots',
+  path: '/bots',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -126,6 +136,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkflowsLibraryRoute = WorkflowsLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => WorkflowsRoute,
+} as any)
 const ChannelsNewRoute = ChannelsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -136,11 +151,27 @@ const ChannelsChannelIdRoute = ChannelsChannelIdRouteImport.update({
   path: '/$channelId',
   getParentRoute: () => ChannelsRoute,
 } as any)
+const BotsNewRoute = BotsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => BotsRoute,
+} as any)
+const BotsBotIdRoute = BotsBotIdRouteImport.update({
+  id: '/$botId',
+  path: '/$botId',
+  getParentRoute: () => BotsRoute,
+} as any)
+const AgentsLibraryRoute = AgentsLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AgentsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
+  '/agents': typeof AgentsRouteWithChildren
   '/analytics': typeof AnalyticsRoute
+  '/bots': typeof BotsRouteWithChildren
   '/brain': typeof BrainRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
@@ -155,15 +186,20 @@ export interface FileRoutesByFullPath {
   '/soul': typeof SoulRoute
   '/tools': typeof ToolsRoute
   '/town': typeof TownRoute
-  '/workflows': typeof WorkflowsRoute
+  '/workflows': typeof WorkflowsRouteWithChildren
   '/workspaces': typeof WorkspacesRoute
+  '/agents/library': typeof AgentsLibraryRoute
+  '/bots/$botId': typeof BotsBotIdRoute
+  '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/workflows/library': typeof WorkflowsLibraryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
+  '/agents': typeof AgentsRouteWithChildren
   '/analytics': typeof AnalyticsRoute
+  '/bots': typeof BotsRouteWithChildren
   '/brain': typeof BrainRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
@@ -178,16 +214,21 @@ export interface FileRoutesByTo {
   '/soul': typeof SoulRoute
   '/tools': typeof ToolsRoute
   '/town': typeof TownRoute
-  '/workflows': typeof WorkflowsRoute
+  '/workflows': typeof WorkflowsRouteWithChildren
   '/workspaces': typeof WorkspacesRoute
+  '/agents/library': typeof AgentsLibraryRoute
+  '/bots/$botId': typeof BotsBotIdRoute
+  '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/workflows/library': typeof WorkflowsLibraryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
+  '/agents': typeof AgentsRouteWithChildren
   '/analytics': typeof AnalyticsRoute
+  '/bots': typeof BotsRouteWithChildren
   '/brain': typeof BrainRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
@@ -202,10 +243,14 @@ export interface FileRoutesById {
   '/soul': typeof SoulRoute
   '/tools': typeof ToolsRoute
   '/town': typeof TownRoute
-  '/workflows': typeof WorkflowsRoute
+  '/workflows': typeof WorkflowsRouteWithChildren
   '/workspaces': typeof WorkspacesRoute
+  '/agents/library': typeof AgentsLibraryRoute
+  '/bots/$botId': typeof BotsBotIdRoute
+  '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/workflows/library': typeof WorkflowsLibraryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -213,6 +258,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/analytics'
+    | '/bots'
     | '/brain'
     | '/channels'
     | '/command'
@@ -229,13 +275,18 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/agents/library'
+    | '/bots/$botId'
+    | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/workflows/library'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/agents'
     | '/analytics'
+    | '/bots'
     | '/brain'
     | '/channels'
     | '/command'
@@ -252,13 +303,18 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/agents/library'
+    | '/bots/$botId'
+    | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/workflows/library'
   id:
     | '__root__'
     | '/'
     | '/agents'
     | '/analytics'
+    | '/bots'
     | '/brain'
     | '/channels'
     | '/command'
@@ -275,14 +331,19 @@ export interface FileRouteTypes {
     | '/town'
     | '/workflows'
     | '/workspaces'
+    | '/agents/library'
+    | '/bots/$botId'
+    | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/workflows/library'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AgentsRoute: typeof AgentsRoute
+  AgentsRoute: typeof AgentsRouteWithChildren
   AnalyticsRoute: typeof AnalyticsRoute
+  BotsRoute: typeof BotsRouteWithChildren
   BrainRoute: typeof BrainRoute
   ChannelsRoute: typeof ChannelsRouteWithChildren
   CommandRoute: typeof CommandRoute
@@ -297,7 +358,7 @@ export interface RootRouteChildren {
   SoulRoute: typeof SoulRoute
   ToolsRoute: typeof ToolsRoute
   TownRoute: typeof TownRoute
-  WorkflowsRoute: typeof WorkflowsRoute
+  WorkflowsRoute: typeof WorkflowsRouteWithChildren
   WorkspacesRoute: typeof WorkspacesRoute
 }
 
@@ -415,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrainRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bots': {
+      id: '/bots'
+      path: '/bots'
+      fullPath: '/bots'
+      preLoaderRoute: typeof BotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -436,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflows/library': {
+      id: '/workflows/library'
+      path: '/library'
+      fullPath: '/workflows/library'
+      preLoaderRoute: typeof WorkflowsLibraryRouteImport
+      parentRoute: typeof WorkflowsRoute
+    }
     '/channels/new': {
       id: '/channels/new'
       path: '/new'
@@ -450,8 +525,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsChannelIdRouteImport
       parentRoute: typeof ChannelsRoute
     }
+    '/bots/new': {
+      id: '/bots/new'
+      path: '/new'
+      fullPath: '/bots/new'
+      preLoaderRoute: typeof BotsNewRouteImport
+      parentRoute: typeof BotsRoute
+    }
+    '/bots/$botId': {
+      id: '/bots/$botId'
+      path: '/$botId'
+      fullPath: '/bots/$botId'
+      preLoaderRoute: typeof BotsBotIdRouteImport
+      parentRoute: typeof BotsRoute
+    }
+    '/agents/library': {
+      id: '/agents/library'
+      path: '/library'
+      fullPath: '/agents/library'
+      preLoaderRoute: typeof AgentsLibraryRouteImport
+      parentRoute: typeof AgentsRoute
+    }
   }
 }
+
+interface AgentsRouteChildren {
+  AgentsLibraryRoute: typeof AgentsLibraryRoute
+}
+
+const AgentsRouteChildren: AgentsRouteChildren = {
+  AgentsLibraryRoute: AgentsLibraryRoute,
+}
+
+const AgentsRouteWithChildren =
+  AgentsRoute._addFileChildren(AgentsRouteChildren)
+
+interface BotsRouteChildren {
+  BotsBotIdRoute: typeof BotsBotIdRoute
+  BotsNewRoute: typeof BotsNewRoute
+}
+
+const BotsRouteChildren: BotsRouteChildren = {
+  BotsBotIdRoute: BotsBotIdRoute,
+  BotsNewRoute: BotsNewRoute,
+}
+
+const BotsRouteWithChildren = BotsRoute._addFileChildren(BotsRouteChildren)
 
 interface ChannelsRouteChildren {
   ChannelsChannelIdRoute: typeof ChannelsChannelIdRoute
@@ -467,10 +586,23 @@ const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
   ChannelsRouteChildren,
 )
 
+interface WorkflowsRouteChildren {
+  WorkflowsLibraryRoute: typeof WorkflowsLibraryRoute
+}
+
+const WorkflowsRouteChildren: WorkflowsRouteChildren = {
+  WorkflowsLibraryRoute: WorkflowsLibraryRoute,
+}
+
+const WorkflowsRouteWithChildren = WorkflowsRoute._addFileChildren(
+  WorkflowsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AgentsRoute: AgentsRoute,
+  AgentsRoute: AgentsRouteWithChildren,
   AnalyticsRoute: AnalyticsRoute,
+  BotsRoute: BotsRouteWithChildren,
   BrainRoute: BrainRoute,
   ChannelsRoute: ChannelsRouteWithChildren,
   CommandRoute: CommandRoute,
@@ -485,7 +617,7 @@ const rootRouteChildren: RootRouteChildren = {
   SoulRoute: SoulRoute,
   ToolsRoute: ToolsRoute,
   TownRoute: TownRoute,
-  WorkflowsRoute: WorkflowsRoute,
+  WorkflowsRoute: WorkflowsRouteWithChildren,
   WorkspacesRoute: WorkspacesRoute,
 }
 export const routeTree = rootRouteImport

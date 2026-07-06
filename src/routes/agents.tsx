@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import { ModulePage, StatusPill } from "@/components/shell/ModulePage";
 import { agentsRepo, type Agent } from "@/lib/repo";
-import { Bot } from "lucide-react";
+import { Bot, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/agents")({
   head: () => ({ meta: [{ title: "Agents · Digi OS" }] }),
@@ -14,6 +14,13 @@ export const Route = createFileRoute("/agents")({
         icon={<Bot size={20} color="#A78BFA" />}
         accent="#A78BFA"
         repo={agentsRepo}
+        extraActions={
+          <Link to="/agents/library" style={{
+            display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px",
+            background: "rgba(167,139,250,0.10)", border: "1px solid rgba(167,139,250,0.4)",
+            borderRadius: 8, color: "#A78BFA", fontSize: 12, textDecoration: "none",
+          }}><Sparkles size={13}/> Library</Link>
+        }
         fields={[
           { key: "name", label: "Name" },
           { key: "role", label: "Role / Purpose", type: "textarea" },
