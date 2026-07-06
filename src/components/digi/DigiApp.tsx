@@ -1399,6 +1399,9 @@ function ChatPanel({ aiActive, onToggleAI, isOpen, onToggle }: { aiActive: boole
         </button>
       </div>
 
+      {/* Model + Agent selectors */}
+      <ChatSessionBar />
+
       {/* Search bar */}
       <div style={{
         height: 36, flexShrink: 0,
