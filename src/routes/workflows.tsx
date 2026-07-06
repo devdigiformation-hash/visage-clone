@@ -14,6 +14,13 @@ export const Route = createFileRoute("/workflows")({
         icon={<Workflow size={20} color="#8B5CF6" />}
         accent="#8B5CF6"
         repo={workflowsRepo}
+        extraActions={
+          <Link to="/workflows/library" style={{
+            display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px",
+            background: "rgba(139,92,246,0.10)", border: "1px solid rgba(139,92,246,0.4)",
+            borderRadius: 8, color: "#8B5CF6", fontSize: 12, textDecoration: "none",
+          }}><Sparkles size={13}/> Library</Link>
+        }
         fields={[
           { key: "name", label: "Name" },
           { key: "trigger", label: "Trigger", type: "select", options: ["manual", "schedule", "webhook", "event"] },
