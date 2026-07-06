@@ -2019,6 +2019,7 @@ export default function App() {
           <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
           <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
           <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
+          {activeNav === "dashboard" && <TaskStrip />}
         </div>
       </div>
       )}
