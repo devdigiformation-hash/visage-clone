@@ -921,7 +921,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                     : "drop-shadow(0 0 16px rgba(47,224,200,0.18)) drop-shadow(0 0 6px rgba(210,225,240,0.10))",
                   pointerEvents: "none",
                   transition: "filter 0.5s ease",
-                  opacity: aiActive ? 1 : 0.82,
+                  opacity: 1,
                 }}>
                 <ParticleOrb active={aiActive} />
               </div>
