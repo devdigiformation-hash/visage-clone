@@ -467,15 +467,15 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rig
         const d   = `M ${rMidX} ${rMidY} C ${c1x} ${rMidY}, ${c2x} ${by}, ${btnX} ${by}`;
         return (
           <g key={`rw-${i}`}>
-            <path d={d} fill="none" stroke={col} strokeWidth="2.5" opacity={active ? "0.18" : "0.05"} />
-            <path id={pid} d={d} fill="none" stroke={col} strokeWidth={active ? "1.6" : "1.1"}
-              opacity={active ? 0.8 : 0.22} filter={`url(#rcf${i})`} />
-            <circle cx={btnX} cy={by} r={active ? "4" : "3"} fill="#0D0F14" stroke={col} strokeWidth="1.4" opacity="0.85" />
-            <circle cx={btnX} cy={by} r={active ? "2.2" : "1.5"} fill={col} opacity={active ? "1" : "0.55"}>
-              <animate attributeName="opacity" values={active ? "0.8;1;0.8" : "0.3;0.6;0.3"} dur="1.1s" repeatCount="indefinite" />
+            <path d={d} fill="none" stroke={col} strokeWidth="2.5" opacity={active ? "0.2" : "0.06"} />
+            <path id={pid} d={d} fill="none" stroke={col} strokeWidth={active ? "1.8" : "1.2"}
+              opacity={active ? 0.85 : 0.25} filter={`url(#rcf${i})`} />
+            <circle cx={btnX} cy={by} r={active ? "4.5" : "3.5"} fill="#0D0F14" stroke={col} strokeWidth="1.5" opacity="0.88" />
+            <circle cx={btnX} cy={by} r={active ? "2.5" : "1.6"} fill={col} opacity={active ? "1" : "0.55"}>
+              <animate attributeName="opacity" values={active ? "0.8;1;0.8" : "0.3;0.6;0.3"} dur="1s" repeatCount="indefinite" />
             </circle>
-            <circle r={active ? "2.6" : "1.8"} fill={col} opacity={active ? "0.95" : "0.45"}>
-              <animateMotion dur={`${2.8 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.5}s`}>
+            <circle r={active ? "3" : "2"} fill={col} opacity={active ? "1" : "0.5"}>
+              <animateMotion dur={`${2.5 + i * 0.45}s`} repeatCount="indefinite" begin={`${i * 0.55}s`}>
                 <mpath href={`#${pid}`} />
               </animateMotion>
             </circle>
