@@ -12,8 +12,6 @@ export function TaskStrip() {
   const jobs = useRepo(jobsRepo);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return null;
-
 
   const s = useMemo(() => {
     const isToday = (t?: number) => !!t && Date.now() - t < 24 * 3600 * 1000;
@@ -28,6 +26,9 @@ export function TaskStrip() {
       recent: [...jobs].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, 3),
     };
   }, [jobs]);
+
+  if (!mounted) return null;
+
 
   const chip = (label: string, n: number, color: string) => (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 54, padding: "4px 8px" }}>
