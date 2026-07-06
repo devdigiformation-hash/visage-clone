@@ -57,7 +57,7 @@ function StatusDot({ s }: { s: ChannelStatus }) {
 // ─── Overview ──────────────────────────────────────────────────────────
 function ChannelsOverview() {
   const [items, setItems] = useState<Channel[]>([]);
-  useEffect(() => { setItems(channelsRepo.list()); return channelsRepo.subscribe(() => setItems(channelsRepo.list())); }, []);
+  useEffect(() => { setItems(channelsRepo.list()); return channelsRepo.subscribe(() => { setItems(channelsRepo.list()); }); }, []);
 
   const connected = items.filter((c) => c.status === "connected").length;
 
