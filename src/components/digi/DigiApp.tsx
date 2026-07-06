@@ -1432,7 +1432,7 @@ export default function App() {
   const [isSkillsOpen, setSkillsOpen] = useState(false);
   const [activeTab,  setActiveTab] = useState("voice");
   const [isChatOpen, setChatOpen] = useState(true);
-  const [showStartupVideo, setShowStartupVideo] = useState(true);
+  const [showStartupVideo, setShowStartupVideo] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const [hermesStatus, setHermesStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
   const [hermesPort, setHermesPort] = useState<number | null>(null);
