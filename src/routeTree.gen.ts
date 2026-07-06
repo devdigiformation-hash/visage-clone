@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as WorkflowsRouteImport } from './routes/workflows'
 import { Route as TownRouteImport } from './routes/town'
