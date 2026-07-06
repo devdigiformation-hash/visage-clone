@@ -559,7 +559,7 @@ function UpdaterWidget() {
 }
 
 function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: string; setActiveNav: (id: string) => void; onOpenSettings: () => void; }) {
-  const [showModules, setShowModules] = useState(true);
+  const [showModules, setShowModules] = useState(false);
   return (
     <div style={{
       width: 220, flexShrink: 0,
