@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   Brain, Bot, LayoutDashboard, Users, MessageSquare, Zap, Wrench, Workflow,
-  Layers, Folder, BarChart2, Settings, Heart, Database, Command, Plug,
+  Layers, BarChart2, Settings, Heart, Database, Command, Plug, Activity,
 } from "lucide-react";
 
 export const NAV = [
@@ -24,6 +24,7 @@ export const MODS = [
   { to: "/memory", label: "Memory", Icon: Database, color: "#06B6D4" },
   { to: "/soul", label: "Soul", Icon: Heart, color: "#EC4899" },
   { to: "/analytics", label: "Analytics", Icon: BarChart2, color: "#06B6D4" },
+  { to: "/logs", label: "Logs & Traces", Icon: Activity, color: "#2FE0C8" },
   { to: "/settings", label: "Settings", Icon: Settings, color: "#EF4444" },
 ] as const;
 
