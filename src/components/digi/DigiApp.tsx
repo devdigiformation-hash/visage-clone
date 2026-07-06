@@ -1922,10 +1922,9 @@ export default function App() {
     setShowLoadingScreen(true);
   };
 
-  const openSettings = (tabId?: string) => {
-    if (tabId) setActiveTab(tabId);
-    else setActiveTab("voice");
-    setSettingsOpen(true);
+  const openSettings = (_tabId?: string) => {
+    // Route to the real /settings page (13-section OpenClaw-level system settings)
+    if (typeof window !== "undefined") window.location.href = "/settings";
   };
 
   const openModal = (id: string) => {
