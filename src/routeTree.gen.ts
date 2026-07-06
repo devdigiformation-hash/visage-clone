@@ -30,6 +30,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkflowsLibraryRouteImport } from './routes/workflows.library'
+import { Route as IntegrationsNewRouteImport } from './routes/integrations.new'
 import { Route as ChannelsNewRouteImport } from './routes/channels.new'
 import { Route as ChannelsChannelIdRouteImport } from './routes/channels.$channelId'
 import { Route as BotsNewRouteImport } from './routes/bots.new'
@@ -141,6 +142,11 @@ const WorkflowsLibraryRoute = WorkflowsLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => WorkflowsRoute,
 } as any)
+const IntegrationsNewRoute = IntegrationsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => IntegrationsRoute,
+} as any)
 const ChannelsNewRoute = ChannelsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -175,7 +181,7 @@ export interface FileRoutesByFullPath {
   '/brain': typeof BrainRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
-  '/integrations': typeof IntegrationsRoute
+  '/integrations': typeof IntegrationsRouteWithChildren
   '/jobs': typeof JobsRoute
   '/knowledge': typeof KnowledgeRoute
   '/logs': typeof LogsRoute
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/integrations/new': typeof IntegrationsNewRoute
   '/workflows/library': typeof WorkflowsLibraryRoute
 }
 export interface FileRoutesByTo {
@@ -203,7 +210,7 @@ export interface FileRoutesByTo {
   '/brain': typeof BrainRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
-  '/integrations': typeof IntegrationsRoute
+  '/integrations': typeof IntegrationsRouteWithChildren
   '/jobs': typeof JobsRoute
   '/knowledge': typeof KnowledgeRoute
   '/logs': typeof LogsRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/integrations/new': typeof IntegrationsNewRoute
   '/workflows/library': typeof WorkflowsLibraryRoute
 }
 export interface FileRoutesById {
@@ -232,7 +240,7 @@ export interface FileRoutesById {
   '/brain': typeof BrainRoute
   '/channels': typeof ChannelsRouteWithChildren
   '/command': typeof CommandRoute
-  '/integrations': typeof IntegrationsRoute
+  '/integrations': typeof IntegrationsRouteWithChildren
   '/jobs': typeof JobsRoute
   '/knowledge': typeof KnowledgeRoute
   '/logs': typeof LogsRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/bots/new': typeof BotsNewRoute
   '/channels/$channelId': typeof ChannelsChannelIdRoute
   '/channels/new': typeof ChannelsNewRoute
+  '/integrations/new': typeof IntegrationsNewRoute
   '/workflows/library': typeof WorkflowsLibraryRoute
 }
 export interface FileRouteTypes {
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/integrations/new'
     | '/workflows/library'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/integrations/new'
     | '/workflows/library'
   id:
     | '__root__'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/bots/new'
     | '/channels/$channelId'
     | '/channels/new'
+    | '/integrations/new'
     | '/workflows/library'
   fileRoutesById: FileRoutesById
 }
@@ -347,7 +359,7 @@ export interface RootRouteChildren {
   BrainRoute: typeof BrainRoute
   ChannelsRoute: typeof ChannelsRouteWithChildren
   CommandRoute: typeof CommandRoute
-  IntegrationsRoute: typeof IntegrationsRoute
+  IntegrationsRoute: typeof IntegrationsRouteWithChildren
   JobsRoute: typeof JobsRoute
   KnowledgeRoute: typeof KnowledgeRoute
   LogsRoute: typeof LogsRoute
@@ -511,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkflowsLibraryRouteImport
       parentRoute: typeof WorkflowsRoute
     }
+    '/integrations/new': {
+      id: '/integrations/new'
+      path: '/new'
+      fullPath: '/integrations/new'
+      preLoaderRoute: typeof IntegrationsNewRouteImport
+      parentRoute: typeof IntegrationsRoute
+    }
     '/channels/new': {
       id: '/channels/new'
       path: '/new'
@@ -586,6 +605,18 @@ const ChannelsRouteWithChildren = ChannelsRoute._addFileChildren(
   ChannelsRouteChildren,
 )
 
+interface IntegrationsRouteChildren {
+  IntegrationsNewRoute: typeof IntegrationsNewRoute
+}
+
+const IntegrationsRouteChildren: IntegrationsRouteChildren = {
+  IntegrationsNewRoute: IntegrationsNewRoute,
+}
+
+const IntegrationsRouteWithChildren = IntegrationsRoute._addFileChildren(
+  IntegrationsRouteChildren,
+)
+
 interface WorkflowsRouteChildren {
   WorkflowsLibraryRoute: typeof WorkflowsLibraryRoute
 }
@@ -606,7 +637,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrainRoute: BrainRoute,
   ChannelsRoute: ChannelsRouteWithChildren,
   CommandRoute: CommandRoute,
-  IntegrationsRoute: IntegrationsRoute,
+  IntegrationsRoute: IntegrationsRouteWithChildren,
   JobsRoute: JobsRoute,
   KnowledgeRoute: KnowledgeRoute,
   LogsRoute: LogsRoute,
