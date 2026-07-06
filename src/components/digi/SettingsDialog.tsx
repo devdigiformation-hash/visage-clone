@@ -642,10 +642,11 @@ export function SettingsDialog({ open, onOpenChange, defaultTab = "voice" }: { o
             
             {/* Fallback for unused tabs */}
             {!['voice', 'agent', 'system', 'user', 'whatsapp'].includes(tab) && (
-              <div className="p-8 flex flex-col items-center justify-center h-full text-center space-y-3 opacity-50">
+              <div className="p-8 flex flex-col items-center justify-center h-full text-center space-y-3">
                 <Settings2 size={32} className="text-[#555]" />
-                <h3 className="text-white font-medium">This section is currently under construction.</h3>
-                <p className="text-sm text-[#777]">Switch back to a valid tab to manage settings.</p>
+                <h3 className="text-white font-medium">Open the full System Settings</h3>
+                <p className="text-sm text-[#777] max-w-sm">This section lives in the full-page settings — models, agents, tools, workflows, channels, integrations, memory, security, logs, automations and backup.</p>
+                <a href="/settings" className="mt-2 inline-block px-4 py-2 rounded-lg bg-[#2FE0C8] text-black text-xs font-semibold">Open /settings</a>
               </div>
             )}
             
