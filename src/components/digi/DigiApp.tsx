@@ -285,7 +285,7 @@ function ParticleOrb({ active }: { active: boolean }) {
       sorted.forEach(({ px, py, d, by, isRing, rad }) => {
         const sx = W/2 + px, sy = H/2 + py;
         const sz = Math.max(0.1, active ? 0.6 + d * 1.8 : 0.5 + d * 1.2);
-        let op = active ? 0.2 + d * 0.8 : 0.3 + d * 0.5;
+        let op = active ? 0.2 + d * 0.8 : 0.18 + d * 0.35;
         op = Math.max(0.1, Math.min(1, op)); // Clamp opacity to prevent negative values on the back side
         
         let cr=47, cg=224, cb=200;
