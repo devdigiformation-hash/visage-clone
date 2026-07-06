@@ -227,11 +227,41 @@ function ParticleOrb({ active }: { active: boolean }) {
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       } else {
         const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
-        g.addColorStop(0, "rgba(52,211,153,0.15)");
-        g.addColorStop(0.5, "rgba(52,211,153,0.05)");
+        g.addColorStop(0, "rgba(16,185,129,0.17)");
+        g.addColorStop(0.5, "rgba(4,120,87,0.08)");
         g.addColorStop(1, "transparent");
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       }
+
+      // Darker holographic Jupiter-core mass with restrained horizontal banding.
+      cx.save();
+      cx.translate(W / 2, H / 2);
+      const body = cx.createRadialGradient(0, -18, 12, 0, 0, PLANET_R * 0.36);
+      if (active) {
+        body.addColorStop(0, "rgba(21, 94, 117, 0.28)");
+        body.addColorStop(0.55, "rgba(6, 78, 91, 0.18)");
+      } else {
+        body.addColorStop(0, "rgba(6, 78, 59, 0.34)");
+        body.addColorStop(0.58, "rgba(3, 45, 40, 0.28)");
+      }
+      body.addColorStop(1, "rgba(2, 8, 12, 0)");
+      cx.beginPath();
+      cx.ellipse(0, 0, PLANET_R * 0.34, PLANET_R * 0.245, 0, 0, Math.PI * 2);
+      cx.fillStyle = body;
+      cx.fill();
+
+      cx.clip();
+      [-84, -56, -28, 0, 28, 56, 84].forEach((y, idx) => {
+        const edge = Math.abs(y) / 84;
+        cx.beginPath();
+        cx.ellipse(0, y, PLANET_R * (0.30 - edge * 0.035), 7 + edge * 4, 0, 0, Math.PI * 2);
+        cx.strokeStyle = active
+          ? `rgba(170, 255, 244, ${0.06 + (idx % 2) * 0.035})`
+          : `rgba(167, 243, 208, ${0.075 + (idx % 2) * 0.04})`;
+        cx.lineWidth = idx === 3 ? 2.1 : 1.25;
+        cx.stroke();
+      });
+      cx.restore();
       // Outer glow circle removed as requested by user
 
       const sorted = pts.map(p => {
