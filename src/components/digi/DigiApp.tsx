@@ -997,7 +997,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         </div>
       </div>
 
-      {/* ── Agent Town tab bar ── */}
+      {/* ── Tracking Board tab bar ── */}
       <div style={{
         height: 34, flexShrink: 0, marginTop: 0,
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1005,12 +1005,12 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         borderTop: "1px solid #1A1D24",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <StatusDot s="error" />
-          <Mono className="!text-[#9AA0AC]">Agent Town</Mono>
+          <StatusDot s="active" />
+          <Mono className="!text-[#9AA0AC]">Tracking Board</Mono>
         </div>
         <div style={{ display: "flex", gap: 3 }}>
-          {[{ id: "town", l: "Agent Town" }, { id: "visual", l: "Visual Hub" }].map(tab => (
-            <button key={tab.id} 
+          {[{ id: "town", l: "Active" }, { id: "visual", l: "Completed" }].map(tab => (
+            <button key={tab.id}
               onClick={() => { playUISound('tab-click'); setAgentTab(tab.id); }}
               onMouseEnter={() => playUISound('hover')}
               className={agentTab === tab.id ? "glass-btn-active" : "glass-btn"}
@@ -1023,8 +1023,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         </div>
       </div>
 
-      {/* ── Scrollable content ── */}
+      {/* ── Tracking Board content ── */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: agentTownMinH }} className="custom-scroll">
+        <TrackingBoard filter={agentTab} />
       </div>
 
       {/* ── Status bar ── */}
