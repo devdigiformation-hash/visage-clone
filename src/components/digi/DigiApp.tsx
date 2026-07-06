@@ -1283,10 +1283,17 @@ const ACTIVE_MODEL_KEY = "digi.chat.activeModelId";
 const ACTIVE_AGENT_KEY = "digi.chat.activeAgentId";
 
 function ChatSessionBar() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const models = useRepo(modelsRepo);
   const agents = useRepo(agentsRepo);
-  const [modelId, setModelId] = useState<string>(() => (typeof window !== "undefined" && localStorage.getItem(ACTIVE_MODEL_KEY)) || "");
-  const [agentId, setAgentId] = useState<string>(() => (typeof window !== "undefined" && localStorage.getItem(ACTIVE_AGENT_KEY)) || "");
+  const [modelId, setModelId] = useState<string>("");
+  const [agentId, setAgentId] = useState<string>("");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setModelId(localStorage.getItem(ACTIVE_MODEL_KEY) || "");
+    setAgentId(localStorage.getItem(ACTIVE_AGENT_KEY) || "");
+  }, []);
 
   useEffect(() => {
     if (!modelId && models.length) {
@@ -1309,6 +1316,7 @@ function ChatSessionBar() {
       display: "flex", gap: 6, padding: "8px 12px",
       borderBottom: "1px solid #1A1D24", background: "rgba(10,12,18,0.5)",
     }}>
+      {!mounted ? (<div style={{ height: 22 }} />) : (<>
       <select value={modelId} onChange={(e) => setModelId(e.target.value)} style={selectStyle} title="Active model">
         {models.length === 0 && <option value="">No models</option>}
         {(models as any[]).map((m) => (
@@ -1319,6 +1327,7 @@ function ChatSessionBar() {
         <option value="">No agent</option>
         {(agents as any[]).map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
       </select>
+      </>)}
     </div>
   );
 }
