@@ -121,7 +121,6 @@ export function SettingsDialog({ open, onOpenChange, defaultTab = "voice" }: { o
   const tabs = [
     { id: 'voice', label: 'Voice Assistant', desc: 'Gemini Live & Persona', icon: <Mic size={16} /> },
     { id: 'agent', label: 'Agent Town', desc: 'Hermes & Model Config', icon: <Briefcase size={16} /> },
-    { id: 'demo', label: 'Demo Video', desc: 'How to use DIGI Business OS', icon: <PlaySquare size={16} /> },
     { id: 'system', label: 'System Settings', desc: 'Updates & Performance', icon: <Settings2 size={16} /> },
     { id: 'user', label: 'User Profile', desc: 'Account & Authentication', icon: <User size={16} /> },
     { id: 'whatsapp', label: 'WhatsApp Link', desc: 'Remote Control', icon: <Smartphone size={16} /> },
