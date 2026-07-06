@@ -174,7 +174,16 @@ const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
 const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
-const C_GLOBE_Y_RATIO = 0.35; // raised vertical axis inside the top 80% zone
+const C_GLOBE_Y_RATIO = 0.30; // raised vertical axis inside the top 80% zone (shifted up)
+
+// Right-side outgoing wires — separate palette from the left input modules.
+// Kept premium/subtle within the dark theme.
+const RIGHT_WIRES = [
+  { color: "#C4B5FD", glow: "rgba(196,181,253,0.55)" }, // violet — Camera
+  { color: "#F5A623", glow: "rgba(245,166,35,0.55)"  }, // amber  — Screen Share
+  { color: "#F472B6", glow: "rgba(244,114,182,0.55)" }, // rose   — Agent
+  { color: "#7DD3FC", glow: "rgba(125,211,252,0.55)" }, // sky    — Workflow
+];
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
@@ -227,8 +236,8 @@ function ParticleOrb({ active }: { active: boolean }) {
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       } else {
         const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
-        g.addColorStop(0, "rgba(16,185,129,0.17)");
-        g.addColorStop(0.5, "rgba(4,120,87,0.08)");
+        g.addColorStop(0, "rgba(16,185,129,0.09)");
+        g.addColorStop(0.5, "rgba(4,120,87,0.04)");
         g.addColorStop(1, "transparent");
         cx.fillStyle = g; cx.fillRect(0, 0, W, H);
       }
@@ -241,8 +250,8 @@ function ParticleOrb({ active }: { active: boolean }) {
         body.addColorStop(0, "rgba(21, 94, 117, 0.28)");
         body.addColorStop(0.55, "rgba(6, 78, 91, 0.18)");
       } else {
-        body.addColorStop(0, "rgba(6, 78, 59, 0.34)");
-        body.addColorStop(0.58, "rgba(3, 45, 40, 0.28)");
+        body.addColorStop(0, "rgba(6, 78, 59, 0.20)");
+        body.addColorStop(0.58, "rgba(3, 45, 40, 0.16)");
       }
       body.addColorStop(1, "rgba(2, 8, 12, 0)");
       cx.beginPath();
@@ -276,7 +285,7 @@ function ParticleOrb({ active }: { active: boolean }) {
       sorted.forEach(({ px, py, d, by, isRing, rad }) => {
         const sx = W/2 + px, sy = H/2 + py;
         const sz = Math.max(0.1, active ? 0.6 + d * 1.8 : 0.5 + d * 1.2);
-        let op = active ? 0.2 + d * 0.8 : 0.3 + d * 0.5;
+        let op = active ? 0.2 + d * 0.8 : 0.18 + d * 0.35;
         op = Math.max(0.1, Math.min(1, op)); // Clamp opacity to prevent negative values on the back side
         
         let cr=47, cg=224, cb=200;
@@ -313,7 +322,7 @@ function ParticleOrb({ active }: { active: boolean }) {
 
         cx.beginPath();
         cx.arc(sx, sy, sz, 0, Math.PI * 2);
-        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.8})`;
+        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.55})`;
         cx.fill();
         
         if (active && d > 0.82 && !isRing) {
@@ -334,13 +343,17 @@ function ParticleOrb({ active }: { active: boolean }) {
 
 // ─── Connector SVG ────────────────────────────────────────────────────────────
 // Geometry constants MUST stay in sync with OperationsPanel layout.
-function ConnectorSVG({ active, W, H, globeSize, globeCenterX }: { active: boolean; W: number; H: number; globeSize: number; globeCenterX: number }) {
+function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rightButtonYs }: { active: boolean; W: number; H: number; globeSize: number; globeCenterX: number; rightActionX: number; rightButtonYs: number[] }) {
   const nodeX = C_LEFT_STACK_X + C_CARD_W;                    // right edge of card column
   // Globe is now the true center hub of the Operations Status composition.
   const visualPlanetR = Math.round(globeSize * 0.43);
   const orbEdgeX = globeCenterX - visualPlanetR;
+  const orbRightEdgeX = globeCenterX + visualPlanetR;
   const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.70);
   const midY  = Math.round(H * C_GLOBE_Y_RATIO);
+  // Right-side junction — mirror of the left junction
+  const rMidX = Math.round(orbRightEdgeX + (rightActionX - orbRightEdgeX) * 0.30);
+  const rMidY = midY;
   const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
   const startY = midY - nodeCardsTotalH / 2;
   const ys    = NODES.map((_, i) => startY + i * (C_CARD_H + C_CARD_GAP) + Math.round(C_CARD_H / 2));
@@ -413,9 +426,73 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX }: { active: boole
         );
       })()}
 
-      {/* Orb entry dot */}
+      {/* Orb entry dot (left) */}
       <circle cx={orbEdgeX} cy={midY} r="3.5" fill="#0D0F14" stroke="#2FE0C8" strokeWidth="1.5" opacity="0.85" />
       <circle cx={orbEdgeX} cy={midY} r="1.6" fill="#2FE0C8" opacity={active ? "0.9" : "0.5"} />
+
+      {/* ─── Right-side wires: globe → right junction → 4 action buttons ─── */}
+      <defs>
+        {RIGHT_WIRES.map((_, i) => (
+          <filter key={`rf-${i}`} id={`rcf${i}`} x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        ))}
+        <radialGradient id="rjunc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#C4B5FD" stopOpacity={active ? "0.85" : "0.35"} />
+          <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Orb → right junction */}
+      {(() => {
+        const d3 = `M ${orbRightEdgeX} ${midY} C ${orbRightEdgeX + Math.round((rMidX-orbRightEdgeX)*0.4)} ${midY}, ${rMidX - Math.round((rMidX-orbRightEdgeX)*0.2)} ${rMidY}, ${rMidX} ${rMidY}`;
+        return (
+          <g>
+            <path d={d3} fill="none" stroke="#C4B5FD" strokeWidth="2.5" opacity="0.06" />
+            <path id="rncmain" d={d3} fill="none" stroke="#C4B5FD" strokeWidth="1.5"
+              opacity={active ? 0.6 : 0.22} filter="url(#cfmain)" />
+            <circle r="2.5" fill="#C4B5FD" opacity={active ? "1" : "0.55"}>
+              <animateMotion dur="1.7s" repeatCount="indefinite">
+                <mpath href="#rncmain" />
+              </animateMotion>
+            </circle>
+          </g>
+        );
+      })()}
+
+      {/* Right junction node */}
+      <circle cx={rMidX} cy={rMidY} r="10" fill="url(#rjunc)" opacity={active ? "0.5" : "0.18"} />
+      <circle cx={rMidX} cy={rMidY} r="5.5" fill="#0D0F14" stroke="#22252D" strokeWidth="1.5" />
+      <circle cx={rMidX} cy={rMidY} r="2.5" fill="#C4B5FD" opacity={active ? "0.95" : "0.5"}>
+        <animate attributeName="r" values={active ? "2;3.5;2" : "1.8;2.8;1.8"} dur="2s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Right junction → 4 buttons */}
+      {rightButtonYs.map((by, i) => {
+        const col = RIGHT_WIRES[i].color;
+        const pid = `rnc${i}`;
+        const btnX = rightActionX - 6;
+        const c1x = Math.round(rMidX + (btnX - rMidX) * 0.26);
+        const c2x = Math.round(rMidX + (btnX - rMidX) * 0.62);
+        const d   = `M ${rMidX} ${rMidY} C ${c1x} ${rMidY}, ${c2x} ${by}, ${btnX} ${by}`;
+        return (
+          <g key={`rw-${i}`}>
+            <path d={d} fill="none" stroke={col} strokeWidth="2.5" opacity={active ? "0.18" : "0.05"} />
+            <path id={pid} d={d} fill="none" stroke={col} strokeWidth={active ? "1.6" : "1.1"}
+              opacity={active ? 0.8 : 0.22} filter={`url(#rcf${i})`} />
+            <circle cx={btnX} cy={by} r={active ? "4" : "3"} fill="#0D0F14" stroke={col} strokeWidth="1.4" opacity="0.85" />
+            <circle cx={btnX} cy={by} r={active ? "2.2" : "1.5"} fill={col} opacity={active ? "1" : "0.55"}>
+              <animate attributeName="opacity" values={active ? "0.8;1;0.8" : "0.3;0.6;0.3"} dur="1.1s" repeatCount="indefinite" />
+            </circle>
+            <circle r={active ? "2.6" : "1.8"} fill={col} opacity={active ? "0.95" : "0.45"}>
+              <animateMotion dur={`${2.8 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.5}s`}>
+                <mpath href={`#${pid}`} />
+              </animateMotion>
+            </circle>
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -729,7 +806,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         marginBottom: 0,
         marginTop: 0,
       }}>
-        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} globeSize={globeSize} globeCenterX={globeCenterX} />
+        <ConnectorSVG active={aiActive} W={dims.w} H={nodeMapH} globeSize={globeSize} globeCenterX={globeCenterX} rightActionX={rightActionStackX} rightButtonYs={[0,1,2,3].map(i => Math.round((globeCenterY - 8) - 77 + 15.5 + i * 41))} />
 
         {/* Node cards column */}
         <div style={{
@@ -864,10 +941,10 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                   display: "flex", alignItems: "center", justifyContent: "center",
                   filter: aiActive
                     ? "drop-shadow(0 0 40px rgba(47,224,200,0.55))"
-                    : "drop-shadow(0 0 26px rgba(47,224,200,0.32)) drop-shadow(0 0 8px rgba(210,225,240,0.22))",
+                    : "drop-shadow(0 0 16px rgba(47,224,200,0.18)) drop-shadow(0 0 6px rgba(210,225,240,0.10))",
                   pointerEvents: "none",
                   transition: "filter 0.5s ease",
-                  opacity: aiActive ? 1 : 0.95,
+                  opacity: aiActive ? 1 : 0.82,
                 }}>
                 <ParticleOrb active={aiActive} />
               </div>
