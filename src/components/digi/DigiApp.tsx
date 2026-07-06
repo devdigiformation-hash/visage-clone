@@ -873,10 +873,10 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                   display: "flex", alignItems: "center", justifyContent: "center",
                   filter: aiActive
                     ? "drop-shadow(0 0 40px rgba(47,224,200,0.55))"
-                    : "drop-shadow(0 0 26px rgba(47,224,200,0.32)) drop-shadow(0 0 8px rgba(210,225,240,0.22))",
+                    : "drop-shadow(0 0 16px rgba(47,224,200,0.18)) drop-shadow(0 0 6px rgba(210,225,240,0.10))",
                   pointerEvents: "none",
                   transition: "filter 0.5s ease",
-                  opacity: aiActive ? 1 : 0.95,
+                  opacity: aiActive ? 1 : 0.82,
                 }}>
                 <ParticleOrb active={aiActive} />
               </div>
