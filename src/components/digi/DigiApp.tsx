@@ -735,157 +735,146 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         {/* Spacer — connector lines travel through here */}
         <div style={{ flex: 1, minWidth: 0 }} />
 
-        {/* Orb column */}
+        {/* Orb column — globe centered horizontally, right-side control rail flush right */}
         <div style={{
           width: C_ORB_AREA, flexShrink: 0,
           position: "relative", zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "flex-start",
+          display: "flex", alignItems: "center", justifyContent: "center",
           alignSelf: "stretch",
+          paddingRight: 48, // reserve room for right control rail
         }}>
+          {/* Right control rail — vertically centered, flush right inside orb column */}
           <div style={{
-            width: 300, height: 360,
-            maxHeight: "100%",
-            marginLeft: -30,
-            position: "relative",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            position: "absolute", top: "50%", right: 6,
+            transform: "translateY(-50%)",
+            display: "flex", flexDirection: "column", gap: 10, zIndex: 30,
           }}>
-            {/* Action Icons Top Right — Camera / Screen Share / Agent / Workflow */}
-            <div style={{ position: "absolute", top: 16, right: 8, display: "flex", flexDirection: "column", gap: 8, zIndex: 30 }}>
-              <button 
-                onClick={toggleCamera}
-                onMouseEnter={() => playUISound('hover')}
-                title={cameraOn ? "Turn off camera" : "Turn on laptop camera"}
-                className="glass-btn" 
-                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: cameraOn ? "#2FE0C8" : "#5C616B", background: cameraOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: cameraOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
-                onMouseOver={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
-                onMouseOut={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
-              >
-                <Camera size={15} />
-              </button>
-              <button 
-                onClick={toggleScreenShare}
-                onMouseEnter={() => playUISound('hover')}
-                title={screenShareOn ? "Stop screen share" : "Share your screen"}
-                className="glass-btn" 
-                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
-                onMouseOver={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
-                onMouseOut={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
-              >
-                <Monitor size={15} />
-              </button>
-              <button 
-                onClick={() => { playUISound('click'); onOpenModal('skills'); }}
-                onMouseEnter={() => playUISound('hover')}
-                title="Agent"
-                className="glass-btn" 
-                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
-                onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
-                onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
-              >
-                <Bot size={15} />
-              </button>
-              <button 
-                onClick={() => { playUISound('click'); }}
-                onMouseEnter={() => playUISound('hover')}
-                title="Workflow"
-                className="glass-btn" 
-                style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
-                onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
-                onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
-              >
-                <Workflow size={15} />
-              </button>
+            <button
+              onClick={toggleCamera}
+              onMouseEnter={() => playUISound('hover')}
+              title={cameraOn ? "Turn off camera" : "Turn on laptop camera"}
+              className="glass-btn"
+              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: cameraOn ? "#2FE0C8" : "#5C616B", background: cameraOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: cameraOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
+              onMouseOver={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
+              onMouseOut={(e) => { if (!cameraOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
+            >
+              <Camera size={15} />
+            </button>
+            <button
+              onClick={toggleScreenShare}
+              onMouseEnter={() => playUISound('hover')}
+              title={screenShareOn ? "Stop screen share" : "Share your screen"}
+              className="glass-btn"
+              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: screenShareOn ? "#2FE0C8" : "#5C616B", background: screenShareOn ? "rgba(47, 224, 200, 0.15)" : "transparent", border: screenShareOn ? "1px solid rgba(47, 224, 200, 0.3)" : "1px solid transparent" }}
+              onMouseOver={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; } }}
+              onMouseOut={(e) => { if (!screenShareOn) { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; } }}
+            >
+              <Monitor size={15} />
+            </button>
+            <button
+              onClick={() => { playUISound('click'); onOpenModal('skills'); }}
+              onMouseEnter={() => playUISound('hover')}
+              title="Agent"
+              className="glass-btn"
+              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
+              onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
+              onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
+            >
+              <Bot size={15} />
+            </button>
+            <button
+              onClick={() => { playUISound('click'); }}
+              onMouseEnter={() => playUISound('hover')}
+              title="Workflow"
+              className="glass-btn"
+              style={{ padding: 8, borderRadius: 8, cursor: "pointer", color: "#5C616B", background: "transparent", border: "1px solid transparent" }}
+              onMouseOver={(e) => { e.currentTarget.style.color = "#2FE0C8"; e.currentTarget.style.background = "rgba(47, 224, 200, 0.05)"; e.currentTarget.style.border = "1px solid rgba(47, 224, 200, 0.1)"; }}
+              onMouseOut={(e) => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = "1px solid transparent"; }}
+            >
+              <Workflow size={15} />
+            </button>
+          </div>
+
+          {/* Live media previews (top-left) */}
+          {(cameraOn || screenShareOn) && (
+            <div style={{ position: "absolute", top: 8, left: 8, display: "flex", flexDirection: "column", gap: 6, zIndex: 30 }}>
+              {cameraOn && (
+                <video ref={cameraVideoRef} autoPlay playsInline muted
+                  style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
+              )}
+              {screenShareOn && (
+                <video ref={screenVideoRef} autoPlay playsInline muted
+                  style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }} />
+              )}
             </div>
+          )}
 
-            {/* Live media previews (top-left inside box) */}
-            {(cameraOn || screenShareOn) && (
-              <div style={{ position: "absolute", top: 12, left: 12, display: "flex", flexDirection: "column", gap: 6, zIndex: 30 }}>
-                {cameraOn && (
-                  <video
-                    ref={cameraVideoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }}
-                  />
-                )}
-                {screenShareOn && (
-                  <video
-                    ref={screenVideoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }}
-                  />
-                )}
-              </div>
-            )}
+          <style>{`
+            @keyframes shake-orb {
+              0% { transform: translate(0, 0) scale(1); }
+              25% { transform: translate(-1px, 1px) scale(1.02); }
+              50% { transform: translate(1px, -1px) scale(1); }
+              75% { transform: translate(1px, 1px) scale(1.01); }
+              100% { transform: translate(0, 0) scale(1); }
+            }
+            .orb-shake { animation: shake-orb 0.4s ease-in-out infinite; }
+          `}</style>
 
-
-            <style>{`
-              @keyframes shake-orb {
-                0% { transform: translate(0, 0) scale(1); }
-                25% { transform: translate(-1px, 1px) scale(1.02); }
-                50% { transform: translate(1px, -1px) scale(1); }
-                75% { transform: translate(1px, 1px) scale(1.01); }
-                100% { transform: translate(0, 0) scale(1); }
-              }
-              .orb-shake {
-                animation: shake-orb 0.4s ease-in-out infinite;
-              }
-            `}</style>
-            
-            {/* Orb container shifted slightly up to make room for bottom elements */}
-            <div style={{ position: "relative", width: 220, height: 220 }}>
+          {/* Center stack: globe + Start AI button, horizontally centered in the remaining space */}
+          <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            gap: 14, marginTop: -12,
+          }}>
+            <div style={{ position: "relative", width: 260, height: 260 }}>
               <div className={aiActive ? "orb-breathe" : ""}
-                style={{ 
-                  position: "absolute", width: "100%", height: "100%", 
+                style={{
+                  position: "absolute", width: "100%", height: "100%",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  filter: aiActive ? "drop-shadow(0 0 35px rgba(47,224,200,0.5))" : "drop-shadow(0 0 8px rgba(47,224,200,0.08))",
+                  filter: aiActive
+                    ? "drop-shadow(0 0 40px rgba(47,224,200,0.55))"
+                    : "drop-shadow(0 0 22px rgba(47,224,200,0.28)) drop-shadow(0 0 6px rgba(200,220,230,0.15))",
                   pointerEvents: "none",
-                  transition: "filter 0.5s ease"
+                  transition: "filter 0.5s ease",
+                  opacity: aiActive ? 1 : 0.92,
                 }}>
                 <ParticleOrb active={aiActive} />
               </div>
             </div>
-  
-            {/* Start AI Button positioned at the bottom of the container */}
-            <div style={{ position: "absolute", bottom: 24, left: 0, zIndex: 20, width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, width: "80%" }}>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.03)" }} />
-                <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.03)" }} />
-              </div>
-              <button 
-                onClick={async () => { 
-                  playUISound('powerup'); 
-                  onToggleAI();
-                  if ((window as any).electronAPI) {
-                    if (!aiActive) {
-                      await (window as any).electronAPI.startGeminiVoiceAssistant?.();
-                      await (window as any).electronAPI.triggerGeminiLiveCall?.(true);
-                    } else {
-                      await (window as any).electronAPI.triggerGeminiLiveCall?.(false);
-                      await (window as any).electronAPI.stopGeminiVoiceAssistant?.();
-                    }
-                  }
-                }} 
-                onMouseEnter={() => playUISound('hover')}
-                className={aiActive ? "glass-btn" : "glass-btn-active"} 
-                style={{
-                  padding: "8px 38px", borderRadius: 24,
-                  fontSize: 13, fontWeight: 600,
-                  color: aiActive ? "#FF5C5C" : "#34D399",
-                  cursor: "pointer",
-                  background: "rgba(10, 15, 20, 0.8)",
-                  border: "1px solid rgba(52, 211, 153, 0.2)"
-                }}
-                onMouseOver={(e) => { if(!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
-                onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
-              >
-                {aiActive ? "STOP AI" : "START AI"}
-              </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200 }}>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+              <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
             </div>
+            <button
+              onClick={async () => {
+                playUISound('powerup');
+                onToggleAI();
+                if ((window as any).electronAPI) {
+                  if (!aiActive) {
+                    await (window as any).electronAPI.startGeminiVoiceAssistant?.();
+                    await (window as any).electronAPI.triggerGeminiLiveCall?.(true);
+                  } else {
+                    await (window as any).electronAPI.triggerGeminiLiveCall?.(false);
+                    await (window as any).electronAPI.stopGeminiVoiceAssistant?.();
+                  }
+                }
+              }}
+              onMouseEnter={() => playUISound('hover')}
+              className={aiActive ? "glass-btn" : "glass-btn-active"}
+              style={{
+                padding: "8px 38px", borderRadius: 24,
+                fontSize: 13, fontWeight: 600,
+                color: aiActive ? "#FF5C5C" : "#34D399",
+                cursor: "pointer",
+                background: "rgba(10, 15, 20, 0.8)",
+                border: "1px solid rgba(52, 211, 153, 0.2)"
+              }}
+              onMouseOver={(e) => { if(!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
+              onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+            >
+              {aiActive ? "STOP AI" : "START AI"}
+            </button>
           </div>
         </div>
       </div>
