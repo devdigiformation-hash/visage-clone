@@ -15,7 +15,16 @@ function read<T>(name: string, fallback: T[]): T[] {
 }
 function write<T>(name: string, items: T[]) {
   if (typeof window === "undefined") return;
-  try { localStorage.setItem(K(name), JSON.stringify(items)); } catch {}
+  try {
+    localStorage.setItem(K(name), JSON.stringify(items));
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`[repo:${name}] write failed`, e);
+    // Surface via toast if sonner is available (lazy to avoid SSR + cycle).
+    import("./safe").then(({ reportError }) => {
+      reportError(`Could not save changes to "${name}"`, e, { context: `repo:${name}` });
+    }).catch(() => {});
+  }
 }
 
 const listeners = new Map<string, Set<() => void>>();

@@ -5,6 +5,7 @@ import {
   MessageSquare, Plug, Database, Shield, Activity, Clock, Download,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { reportError, reportSuccess, safeJsonParse } from "@/lib/safe";
 
 // ────────────────────────────────────────────────────────────────────────────
 // OpenClaw-level System Settings
@@ -311,22 +312,33 @@ function SettingsPage() {
               <p style={{ color: "#7A8090", fontSize: 12, marginBottom: 14 }}>Export the full workspace configuration (models, agents, tools, skills, workflows, channels, integrations, memory, settings) as JSON — or restore from a previous export.</p>
               <div style={{ display: "flex", gap: 10 }}>
                 <button onClick={() => {
-                  const dump: any = { settings: data };
-                  ["digi.repo.models","digi.repo.skills","digi.repo.tools","digi.repo.agents","digi.repo.workflows","digi.repo.channels","digi.repo.integrations","digi.repo.jobs","digi.repo.memory","digi.repo.knowledge"].forEach(k => { try { dump[k] = JSON.parse(localStorage.getItem(k) || "[]"); } catch {} });
-                  const blob = new Blob([JSON.stringify(dump, null, 2)], { type: "application/json" });
-                  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `digi-os-backup-${Date.now()}.json`; a.click();
+                  try {
+                    const dump: any = { settings: data };
+                    ["digi.repo.models","digi.repo.skills","digi.repo.tools","digi.repo.agents","digi.repo.workflows","digi.repo.channels","digi.repo.integrations","digi.repo.jobs","digi.repo.memory","digi.repo.knowledge"].forEach(k => {
+                      const parsed = safeJsonParse(localStorage.getItem(k) || "[]");
+                      dump[k] = parsed.ok ? parsed.value : [];
+                    });
+                    const blob = new Blob([JSON.stringify(dump, null, 2)], { type: "application/json" });
+                    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `digi-os-backup-${Date.now()}.json`; a.click();
+                    reportSuccess("Backup exported");
+                  } catch (e) { reportError("Export failed", e, { context: "settings:export" }); }
                 }} style={btnPrimary}>Export All</button>
                 <label style={btnGhost}>
                   Import…
                   <input type="file" accept="application/json" style={{ display: "none" }} onChange={(e) => {
                     const f = e.target.files?.[0]; if (!f) return;
-                    const r = new FileReader(); r.onload = () => {
+                    const r = new FileReader();
+                    r.onerror = () => reportError("Could not read backup file", r.error, { context: "settings:import" });
+                    r.onload = () => {
+                      const parsed = safeJsonParse<Record<string, unknown>>(String(r.result));
+                      if (!parsed.ok) { reportError("Invalid backup file", parsed.error, { context: "settings:import" }); return; }
                       try {
-                        const dump = JSON.parse(String(r.result));
+                        const dump = parsed.value;
                         if (dump.settings) localStorage.setItem(K, JSON.stringify(dump.settings));
-                        Object.keys(dump).forEach(k => { if (k.startsWith("digi.repo.")) localStorage.setItem(k, JSON.stringify(dump[k])); });
-                        alert("Restored. Reloading…"); location.reload();
-                      } catch { alert("Invalid backup file."); }
+                        Object.keys(dump).forEach(k => { if (k.startsWith("digi.repo.")) localStorage.setItem(k, JSON.stringify((dump as any)[k])); });
+                        reportSuccess("Backup restored", "Reloading…");
+                        setTimeout(() => location.reload(), 400);
+                      } catch (err) { reportError("Restore failed", err, { context: "settings:import" }); }
                     }; r.readAsText(f);
                   }} />
                 </label>
