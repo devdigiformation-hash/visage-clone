@@ -1277,6 +1277,51 @@ function ChatBubble({ m }: { m: any }) {
 // ─── Chat Panel ───────────────────────────────────────────────────────────────
 import { useElectronChat } from "@/hooks/digi/useElectronChat";
 import { useSpeechRecognition } from "@/hooks/digi/useSpeechRecognition";
+import { modelsRepo, agentsRepo, useRepo } from "@/lib/repo";
+
+const ACTIVE_MODEL_KEY = "digi.chat.activeModelId";
+const ACTIVE_AGENT_KEY = "digi.chat.activeAgentId";
+
+function ChatSessionBar() {
+  const models = useRepo(modelsRepo);
+  const agents = useRepo(agentsRepo);
+  const [modelId, setModelId] = useState<string>(() => (typeof window !== "undefined" && localStorage.getItem(ACTIVE_MODEL_KEY)) || "");
+  const [agentId, setAgentId] = useState<string>(() => (typeof window !== "undefined" && localStorage.getItem(ACTIVE_AGENT_KEY)) || "");
+
+  useEffect(() => {
+    if (!modelId && models.length) {
+      const def = (models as any[]).find((m) => m.isDefault) || models[0];
+      setModelId((def as any).id);
+    }
+  }, [models, modelId]);
+
+  useEffect(() => { if (modelId) localStorage.setItem(ACTIVE_MODEL_KEY, modelId); }, [modelId]);
+  useEffect(() => { if (agentId) localStorage.setItem(ACTIVE_AGENT_KEY, agentId); }, [agentId]);
+
+  const selectStyle: React.CSSProperties = {
+    flex: 1, minWidth: 0, background: "#08090C", border: "1px solid #1E2129",
+    color: "#D2D6E0", fontSize: 11, borderRadius: 6, padding: "4px 6px", outline: "none",
+    fontFamily: "'Inter', system-ui, sans-serif",
+  };
+
+  return (
+    <div style={{
+      display: "flex", gap: 6, padding: "8px 12px",
+      borderBottom: "1px solid #1A1D24", background: "rgba(10,12,18,0.5)",
+    }}>
+      <select value={modelId} onChange={(e) => setModelId(e.target.value)} style={selectStyle} title="Active model">
+        {models.length === 0 && <option value="">No models</option>}
+        {(models as any[]).map((m) => (
+          <option key={m.id} value={m.id}>{m.provider} · {m.name}{m.isDefault ? " ★" : ""}</option>
+        ))}
+      </select>
+      <select value={agentId} onChange={(e) => setAgentId(e.target.value)} style={selectStyle} title="Active agent">
+        <option value="">No agent</option>
+        {(agents as any[]).map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
+      </select>
+    </div>
+  );
+}
 
 function ChatPanel({ aiActive, onToggleAI, isOpen, onToggle }: { aiActive: boolean; onToggleAI: () => void; isOpen: boolean; onToggle: () => void }) {
   const [input,     setInput] = useState("");
