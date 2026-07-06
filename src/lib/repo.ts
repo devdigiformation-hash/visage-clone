@@ -81,7 +81,7 @@ export interface Bot extends Entity {
   tags?: string;
   active: boolean;
 }
-export interface Workflow extends Entity { name: string; trigger: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
+export interface Workflow extends Entity { name: string; trigger: string; category?: string; source?: "custom" | "template" | "imported"; templateId?: string; steps?: string; status: "draft" | "active" | "archived"; notes?: string; }
 export type ChannelType = "whatsapp" | "telegram" | "discord" | "email" | "sms" | "slack" | "web" | "webhook" | "custom";
 export type ChannelStatus = "connected" | "disconnected" | "pending" | "error";
 export interface Channel extends Entity {
