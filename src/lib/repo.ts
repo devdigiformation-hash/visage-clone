@@ -262,10 +262,57 @@ export const CHANNEL_CATALOG: Array<{ type: ChannelType; label: string; color: s
   { type: "custom", label: "Custom Channel", color: "#5C616B", blurb: "Any private API, bot or protocol", setupMethod: "Free-form config" },
 ];
 export const integrationsRepo = createRepo<Integration>("integrations", [
-  { name: "OpenRouter", category: "AI Provider", status: "disconnected" },
-  { name: "Slack", category: "Communication", status: "disconnected" },
-  { name: "Google Sheets", category: "Data", status: "disconnected" },
+  { name: "OpenRouter",   provider: "OpenRouter",   category: "AI Provider", method: "api_key", status: "disconnected", source: "catalog", description: "Unified LLM gateway across many providers." },
+  { name: "Slack",        provider: "Slack",        category: "Messaging",   method: "oauth",   status: "disconnected", source: "catalog", description: "Post messages and receive events from Slack workspaces." },
+  { name: "Google Sheets",provider: "Google",       category: "Spreadsheet", method: "oauth",   status: "disconnected", source: "catalog", description: "Read and write structured data in Google Sheets." },
 ]);
+
+export type IntegrationTemplate = {
+  id: string;
+  name: string;
+  provider: string;
+  category: IntegrationCategory;
+  method: IntegrationConnectionMethod;
+  color: string;
+  blurb: string;
+  tags?: string;
+};
+export const INTEGRATION_CATALOG: IntegrationTemplate[] = [
+  // AI providers
+  { id: "int_openai",      name: "OpenAI",        provider: "OpenAI",      category: "AI Provider", method: "api_key", color: "#10A37F", blurb: "GPT models, embeddings, assistants." },
+  { id: "int_anthropic",   name: "Anthropic",     provider: "Anthropic",   category: "AI Provider", method: "api_key", color: "#D97757", blurb: "Claude models via API key." },
+  { id: "int_openrouter",  name: "OpenRouter",    provider: "OpenRouter",  category: "AI Provider", method: "api_key", color: "#8B5CF6", blurb: "Unified gateway across many LLMs." },
+  { id: "int_gemini",      name: "Google Gemini", provider: "Google",      category: "AI Provider", method: "api_key", color: "#4285F4", blurb: "Gemini Pro / Flash multimodal models." },
+  // Email
+  { id: "int_smtp",        name: "SMTP Mailbox",  provider: "SMTP",        category: "Email",       method: "smtp",    color: "#EC4899", blurb: "Send outbound mail via any SMTP server." },
+  { id: "int_resend",      name: "Resend",        provider: "Resend",      category: "Email",       method: "api_key", color: "#0EA5E9", blurb: "Transactional email API." },
+  { id: "int_gmail",       name: "Gmail",         provider: "Google",      category: "Email",       method: "oauth",   color: "#EA4335", blurb: "Read and send from a Gmail mailbox." },
+  // Messaging
+  { id: "int_slack",       name: "Slack",         provider: "Slack",       category: "Messaging",   method: "oauth",   color: "#F59E0B", blurb: "Workspaces, channels, DMs, events." },
+  { id: "int_discord",     name: "Discord",       provider: "Discord",     category: "Messaging",   method: "webhook", color: "#7C3AED", blurb: "Post to channels via webhook or bot." },
+  // Browser / automation
+  { id: "int_chrome",      name: "Chrome Browser",provider: "Chromium",    category: "Browser",     method: "browser", color: "#4285F4", blurb: "Attach a browser profile for automation." },
+  { id: "int_playwright",  name: "Playwright",    provider: "Playwright",  category: "Browser",     method: "browser", color: "#2EAD33", blurb: "Headless browser automation runtime." },
+  // API / Webhook
+  { id: "int_rest",        name: "Custom REST API",provider: "Generic",    category: "API",         method: "api_key", color: "#06B6D4", blurb: "Any REST endpoint with key auth." },
+  { id: "int_webhook_in",  name: "Inbound Webhook",provider: "Generic",    category: "Webhook",     method: "webhook", color: "#A78BFA", blurb: "Receive events into Digi OS." },
+  { id: "int_webhook_out", name: "Outbound Webhook",provider: "Generic",   category: "Webhook",     method: "webhook", color: "#A78BFA", blurb: "Push events to an external URL." },
+  // Business systems
+  { id: "int_sheets",      name: "Google Sheets", provider: "Google",      category: "Spreadsheet", method: "oauth",   color: "#0F9D58", blurb: "Read/write spreadsheet rows." },
+  { id: "int_notion",      name: "Notion",        provider: "Notion",      category: "Docs",        method: "oauth",   color: "#F5F6F8", blurb: "Pages, databases, blocks." },
+  { id: "int_gdrive",      name: "Google Drive",  provider: "Google",      category: "Storage",     method: "oauth",   color: "#FBBC05", blurb: "File storage and document sync." },
+  { id: "int_hubspot",     name: "HubSpot",       provider: "HubSpot",     category: "CRM",         method: "oauth",   color: "#FF7A59", blurb: "Contacts, deals, pipelines." },
+  { id: "int_stripe",      name: "Stripe",        provider: "Stripe",      category: "Payments",    method: "api_key", color: "#635BFF", blurb: "Payments, subscriptions, webhooks." },
+  { id: "int_ga4",         name: "Google Analytics",provider: "Google",    category: "Analytics",   method: "oauth",   color: "#F9AB00", blurb: "Site metrics via GA4 API." },
+  { id: "int_github",      name: "GitHub",        provider: "GitHub",      category: "DevTools",    method: "oauth",   color: "#F5F6F8", blurb: "Repos, issues, actions." },
+  // Custom
+  { id: "int_custom",      name: "Custom Integration", provider: "Custom", category: "Custom",      method: "custom",  color: "#5C616B", blurb: "Any external system with free-form config." },
+];
+export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
+  "AI Provider","Email","Messaging","Browser","API","Webhook",
+  "CRM","Storage","Docs","Spreadsheet","Automation","Cloud",
+  "Payments","Analytics","DevTools","Custom",
+];
 const D = 24 * 3600 * 1000;
 const _now = Date.now();
 export const jobsRepo = createRepo<Job>("jobs", [
