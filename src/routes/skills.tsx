@@ -16,15 +16,20 @@ export const Route = createFileRoute("/skills")({
         repo={skillsRepo}
         fields={[
           { key: "name", label: "Name" },
-          { key: "category", label: "Category", placeholder: "Writing, Finance, ..." },
+          { key: "category", label: "Category", placeholder: "Coding, Browser, Messaging, ..." },
+          { key: "subcategory", label: "Subcategory" },
           { key: "type", label: "Type", type: "select", options: ["prompt", "tool", "code", "automation", "markdown"] },
           { key: "content", label: "Content / Instructions", type: "textarea", placeholder: "Prompt, markdown, or config..." },
+          { key: "relatedToolIds", label: "Related Tools (comma ids)" },
+          { key: "relatedWorkflowIds", label: "Related Workflows (comma ids)" },
+          { key: "knowledgeRefs", label: "Knowledge refs (categories/titles)" },
           { key: "tags", label: "Tags" },
           { key: "active", label: "Active", type: "toggle" },
         ]}
         columns={[
           { key: "name", label: "Name" },
           { key: "category", label: "Category" },
+          { key: "subcategory", label: "Subcategory" },
           { key: "type", label: "Type" },
           { key: "active", label: "Status", render: (r) => <StatusPill label={r.active ? "Active" : "Off"} color={r.active ? "#34D399" : "#5C616B"} /> },
         ]}
