@@ -665,6 +665,146 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
   );
 }
 
+// ─── Tracking Board ───────────────────────────────────────────────────────────
+type TaskStage = "received" | "in_progress" | "processing" | "awaiting_approval" | "approved" | "completed";
+interface TrackedTask {
+  id: string;
+  title: string;
+  agent: string;
+  stage: TaskStage;
+  step: number;
+  totalSteps: number;
+  stepLabel: string;
+  nextStep: string;
+}
+const STAGE_META: Record<TaskStage, { label: string; color: string; dot: "active" | "standby" | "error" }> = {
+  received:          { label: "RECEIVED",   color: "#7DD3FC", dot: "standby" },
+  in_progress:       { label: "IN PROGRESS", color: "#2FE0C8", dot: "active"  },
+  processing:        { label: "PROCESSING",  color: "#8B7CF6", dot: "active"  },
+  awaiting_approval: { label: "AWAITING APPROVAL", color: "#F5A623", dot: "error" },
+  approved:          { label: "APPROVED",   color: "#34D399", dot: "active"  },
+  completed:         { label: "COMPLETED",  color: "#5C616B", dot: "standby" },
+};
+const INITIAL_TASKS: TrackedTask[] = [
+  { id: "t1", title: "Q3 Sales Report Generation",  agent: "Sales Agent",     stage: "in_progress",       step: 2, totalSteps: 5, stepLabel: "Fetching CRM records",       nextStep: "Aggregate revenue" },
+  { id: "t2", title: "Instagram Campaign Launch",   agent: "Marketing Agent", stage: "awaiting_approval", step: 3, totalSteps: 4, stepLabel: "Creative draft ready",       nextStep: "User approval" },
+  { id: "t3", title: "Invoice #4821 Reconciliation", agent: "Finance Agent",   stage: "processing",        step: 2, totalSteps: 4, stepLabel: "Matching bank statements",   nextStep: "Post to ledger" },
+  { id: "t4", title: "Onboard New Hire — A. Khan",  agent: "HR Agent",        stage: "completed",         step: 6, totalSteps: 6, stepLabel: "All docs signed",            nextStep: "—" },
+];
+function TrackingBoard({ filter }: { filter: string }) {
+  const [tasks, setTasks] = useState<TrackedTask[]>(INITIAL_TASKS);
+  const [expanded, setExpanded] = useState<string | null>("t2");
+  const shown = tasks.filter(t => filter === "visual" ? t.stage === "completed" : t.stage !== "completed");
+
+  const approve = (id: string) => {
+    playUISound('click');
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, stage: "approved", step: t.step + 1, stepLabel: "Approved — finalising", nextStep: "Completion" } : t));
+    setTimeout(() => {
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, stage: "completed", step: t.totalSteps, stepLabel: "Task completed", nextStep: "—" } : t));
+    }, 1400);
+  };
+
+  return (
+    <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+      {shown.length === 0 && (
+        <div style={{ padding: "18px 8px", textAlign: "center", fontSize: 11, color: "#5C616B", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em" }}>
+          NO {filter === "visual" ? "COMPLETED" : "ACTIVE"} TASKS
+        </div>
+      )}
+      {shown.map(t => {
+        const meta = STAGE_META[t.stage];
+        const isOpen = expanded === t.id;
+        const pct = Math.round((t.step / t.totalSteps) * 100);
+        return (
+          <div key={t.id}
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: `1px solid ${isOpen ? meta.color + "44" : "rgba(255,255,255,0.06)"}`,
+              borderRadius: 10,
+              backdropFilter: "blur(12px)",
+              transition: "all 0.2s ease",
+              overflow: "hidden",
+            }}>
+            <button
+              onClick={() => { playUISound('soft-click'); setExpanded(isOpen ? null : t.id); }}
+              onMouseEnter={() => playUISound('hover')}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 10px", cursor: "pointer",
+                background: "transparent", border: "none", textAlign: "left",
+              }}>
+              <StatusDot s={meta.dot} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 11.5, color: "#E8EAF0", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: meta.color, letterSpacing: "0.08em" }}>{meta.label}</span>
+                  <span style={{ fontSize: 9.5, color: "#5C616B" }}>· {t.agent}</span>
+                  <span style={{ fontSize: 9.5, color: "#5C616B", marginLeft: "auto" }}>{t.step}/{t.totalSteps}</span>
+                </div>
+                <div style={{ position: "relative", height: 2, borderRadius: 2, background: "rgba(255,255,255,0.05)", marginTop: 5, overflow: "hidden" }}>
+                  <div style={{ position: "absolute", inset: 0, width: `${pct}%`, background: `linear-gradient(90deg, ${meta.color}, ${meta.color}88)`, borderRadius: 2 }} />
+                </div>
+              </div>
+              <ChevronDown size={12} style={{ color: "#5C616B", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease", flexShrink: 0 }} />
+            </button>
+
+            {isOpen && (
+              <div style={{ padding: "0 10px 10px 10px", display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                <div style={{ display: "flex", gap: 4, padding: "8px 0 4px 0", flexWrap: "wrap" }}>
+                  {(["received","in_progress","processing","awaiting_approval","approved","completed"] as TaskStage[]).map((st, i) => {
+                    const active = (["received","in_progress","processing","awaiting_approval","approved","completed"] as TaskStage[]).indexOf(t.stage) >= i;
+                    const isCurrent = t.stage === st;
+                    return (
+                      <div key={st} style={{
+                        display: "flex", alignItems: "center", gap: 4,
+                        padding: "2px 6px", borderRadius: 4,
+                        background: isCurrent ? meta.color + "18" : "transparent",
+                        border: `1px solid ${isCurrent ? meta.color + "55" : active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}`,
+                      }}>
+                        <span style={{
+                          width: 5, height: 5, borderRadius: "50%",
+                          background: active ? (isCurrent ? meta.color : "#34D399") : "#22252D",
+                        }} />
+                        <span style={{ fontSize: 8.5, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.05em", color: isCurrent ? "#E8EAF0" : active ? "#7A8090" : "#3A3F4B" }}>
+                          {STAGE_META[st].label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3, fontSize: 10.5, color: "#9AA0AC" }}>
+                  <div><span style={{ color: "#5C616B", marginRight: 6 }}>NOW:</span>{t.stepLabel}</div>
+                  <div><span style={{ color: "#5C616B", marginRight: 6 }}>NEXT:</span>{t.nextStep}</div>
+                </div>
+                {t.stage === "awaiting_approval" && (
+                  <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                    <button
+                      onClick={() => approve(t.id)}
+                      onMouseEnter={() => playUISound('hover')}
+                      className="glass-btn-active"
+                      style={{ padding: "5px 12px", borderRadius: 6, fontSize: 10.5, fontWeight: 600, color: "#34D399", cursor: "pointer" }}>
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => playUISound('click')}
+                      onMouseEnter={() => playUISound('hover')}
+                      className="glass-btn"
+                      style={{ padding: "5px 12px", borderRadius: 6, fontSize: 10.5, color: "#9AA0AC", cursor: "pointer" }}>
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Operations Panel ─────────────────────────────────────────────────────────
 function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
   const [activeNode, setActiveNode] = useState<string | null>("soul");
