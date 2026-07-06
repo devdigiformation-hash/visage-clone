@@ -590,7 +590,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
           const isActive = activeNav === item.id;
           return (
             <button key={item.id} 
-              onClick={() => { playUISound('tab-click'); setActiveNav(item.id); }}
+              onClick={() => { playUISound('tab-click'); setActiveNav(item.id); if (item.route && item.route !== '/') navigate({ to: item.route }); else if (item.route === '/' && window.location.pathname !== '/') navigate({ to: '/' }); }}
               onMouseEnter={() => playUISound('hover')}
               className={`group ${isActive ? "glass-btn-active" : "glass-btn"}`}
               style={{
