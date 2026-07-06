@@ -173,7 +173,7 @@ const C_PAD      = 12;   // padding inside the node-map wrapper
 const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
-const C_LEFT_STACK_X = 34; // optical left inset for the 4 input modules
+const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
 const C_GLOBE_Y_RATIO = 0.38; // raised vertical axis inside the top 80% zone
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
