@@ -163,6 +163,94 @@ export const workspacesRepo = createRepo<Workspace>("workspaces", [
 export const commandRunsRepo = createRepo<CommandRun>("commandRuns", []);
 export const fileOpsRepo = createRepo<FileOp>("fileOps", []);
 
+export const knowledgeItemsRepo = createRepo<KnowledgeItem>("knowledgeItems", [
+  { title: "Bash Cheatsheet", category: "Terminal", subcategory: "Shell", format: "reference", content: "ls, cd, grep, sed, awk...", tags: "bash", active: true },
+  { title: "Git Recovery", category: "Coding", subcategory: "Git", format: "sop", content: "git reflog, git restore...", tags: "git", active: true },
+  { title: "Playwright Selectors", category: "Browser Automation", subcategory: "Selectors", format: "reference", content: "get_by_role, get_by_label...", tags: "browser", active: true },
+  { title: "Stripe Webhook Verify", category: "Integrations", subcategory: "Stripe", format: "snippet", content: "constructEvent(payload, sig, secret)", tags: "stripe", active: true },
+  { title: "Client Onboarding SOP", category: "Business Automation", subcategory: "Onboarding", format: "sop", content: "1. Collect KYC 2. Verify 3. Provision", tags: "sop", active: true },
+  { title: "WhatsApp Reply Style", category: "Channels", subcategory: "WhatsApp", format: "prompt", content: "Be warm, concise, bilingual.", tags: "whatsapp", active: true },
+]);
+
+// ─── Taxonomy (default category tree; user-extendable at runtime) ────────
+export const TAXONOMY = {
+  skills: {
+    "Coding": ["Python", "TypeScript", "Shell", "APIs", "Debugging", "Repo Analysis"],
+    "Browser": ["Search", "Form Automation", "Scraping", "Login Flows"],
+    "Document / OCR": ["Extraction", "Classification", "Redaction"],
+    "Messaging": ["WhatsApp", "Email", "Telegram"],
+    "Marketing": ["Content", "SEO", "Social"],
+    "Sales": ["Outreach", "Quoting", "Follow-up"],
+    "Verification": ["KYC", "AML", "Doc Verify"],
+    "Research": ["Web", "Docs", "Competitive"],
+    "File / Workspace": ["Read", "Write", "Scan"],
+    "Integration": ["Payments", "Comms", "Data"],
+    "Backend / DevOps": ["Deploy", "Monitor", "CI"],
+    "Voice / Assistant": ["STT", "TTS", "Wake"],
+    "Automation / Workflow": ["Trigger", "Router", "Notifier"],
+    "Language": ["Translation", "Rewrite"],
+    "Writing": ["Summarization", "Draft"],
+  },
+  tools: {
+    "File / Workspace": ["IO", "Search", "Diff"],
+    "Terminal": ["Shell", "Package Mgr", "Build"],
+    "Browser": ["Search", "Navigate", "Extract"],
+    "OCR / Document": ["Parse", "Convert"],
+    "Messaging": ["Email", "WhatsApp", "Telegram"],
+    "Data Extraction": ["HTML", "PDF", "Structured"],
+    "Verification": ["KYC", "Address"],
+    "Coding / Dev": ["Repo", "Lint", "Test"],
+    "Integration": ["Stripe", "Wise", "Sheets"],
+    "Marketing": ["Analytics", "Ads"],
+    "Sales": ["CRM"],
+    "Monitoring / Logging": ["Logs", "Alerts"],
+    "Scheduler / Cron": ["Cron", "Queue"],
+  },
+  knowledge: {
+    "Coding": ["Python", "TypeScript", "Shell", "APIs", "Debugging", "Deployment", "Git"],
+    "Terminal": ["Shell", "Env Setup", "Build"],
+    "Browser Automation": ["Selectors", "Login", "Scraping"],
+    "Business Automation": ["Onboarding", "Support", "Orders", "Verification"],
+    "Channels": ["WhatsApp", "Email", "Telegram"],
+    "Integrations": ["Stripe", "PayPal", "Wise", "Payoneer", "WorldFirst", "Companies House"],
+    "Internal SOPs": ["Ops", "Compliance"],
+    "Prompts": ["System", "Persona"],
+    "Templates": ["Docs", "Emails"],
+    "Agent Instructions": [],
+    "Tool Instructions": [],
+    "Workflow Instructions": [],
+  },
+} as const;
+
+// ─── System settings (execution model etc.) ────────────────────────────────
+export type ExecutionMode = "tools-first" | "workflows-first" | "ai-first";
+const SYS_KEY = "digi.system.settings";
+export interface SystemSettings {
+  executionMode: ExecutionMode;
+  allowLocalTerminal: boolean;
+  allowLocalFiles: boolean;
+  allowBrowser: boolean;
+  requireApprovalOnRisky: boolean;
+}
+const DEFAULT_SETTINGS: SystemSettings = {
+  executionMode: "tools-first",
+  allowLocalTerminal: false,
+  allowLocalFiles: false,
+  allowBrowser: true,
+  requireApprovalOnRisky: true,
+};
+export function getSystemSettings(): SystemSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+  try { const raw = localStorage.getItem(SYS_KEY); return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS; }
+  catch { return DEFAULT_SETTINGS; }
+}
+export function setSystemSettings(patch: Partial<SystemSettings>) {
+  if (typeof window === "undefined") return;
+  const next = { ...getSystemSettings(), ...patch };
+  localStorage.setItem(SYS_KEY, JSON.stringify(next));
+}
+
+
 // ─── React hook ─────────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";
 export function useRepo<T extends Entity>(repo: ReturnType<typeof createRepo<T>>) {
