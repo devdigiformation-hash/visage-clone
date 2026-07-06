@@ -173,8 +173,8 @@ const C_PAD      = 12;   // padding inside the node-map wrapper
 const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
-const C_ORB_SIZE = 340;  // visible center globe container size
-const C_GLOBE_Y_RATIO = 0.43; // slightly raised vertical axis for the globe hub
+const C_LEFT_STACK_X = 34; // optical left inset for the 4 input modules
+const C_GLOBE_Y_RATIO = 0.38; // raised vertical axis inside the top 80% zone
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
@@ -304,11 +304,10 @@ function ParticleOrb({ active }: { active: boolean }) {
 
 // ─── Connector SVG ────────────────────────────────────────────────────────────
 // Geometry constants MUST stay in sync with OperationsPanel layout.
-function ConnectorSVG({ active, W, H }: { active: boolean; W: number; H: number }) {
-  const nodeX = C_PAD + C_CARD_W;                    // right edge of card column
+function ConnectorSVG({ active, W, H, globeSize, globeCenterX }: { active: boolean; W: number; H: number; globeSize: number; globeCenterX: number }) {
+  const nodeX = C_LEFT_STACK_X + C_CARD_W;                    // right edge of card column
   // Globe is now the true center hub of the Operations Status composition.
-  const globeCenterX = Math.round(W / 2);
-  const visualPlanetR = Math.round(C_ORB_SIZE * 0.43);
+  const visualPlanetR = Math.round(globeSize * 0.43);
   const orbEdgeX = globeCenterX - visualPlanetR;
   const midX  = Math.round(nodeX + (orbEdgeX - nodeX) * 0.70);
   const midY  = Math.round(H * C_GLOBE_Y_RATIO);
