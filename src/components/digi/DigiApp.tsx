@@ -174,7 +174,7 @@ const C_CARD_W   = 34;  // width of the node-cards column
 const C_CARD_H   = 44;   // height of each node card
 const C_CARD_GAP = 12;   // gap between cards
 const C_LEFT_STACK_X = 46; // optical left inset for the 4 input modules
-const C_GLOBE_Y_RATIO = 0.38; // raised vertical axis inside the top 80% zone
+const C_GLOBE_Y_RATIO = 0.35; // raised vertical axis inside the top 80% zone
 const PLANET_R   = 700;  // physical radius of the globe (increased heavily for larger size)
 
 // ─── Particle Orb ─────────────────────────────────────────────────────────────
@@ -304,7 +304,7 @@ function ParticleOrb({ active }: { active: boolean }) {
           } else {
             // Standby bands in shades of green
             const band = Math.sin(by * 15) + Math.cos(by * 35) * 0.5;
-            if (band > 0.8) { cr=167; cg=243; cb=208; } // #A7F3D0
+            if (band > 0.8) { cr=74; cg=222; cb=170; } // restrained green highlight, not white sparkle
             else if (band > 0.2) { cr=52; cg=211; cb=153; } // #34D399
             else if (band > -0.5) { cr=16; cg=185; cb=129; } // #10B981
             else if (band > -1.2) { cr=4; cg=120; cb=87; } // #047857
