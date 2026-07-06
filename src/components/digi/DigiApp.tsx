@@ -120,10 +120,10 @@ const NODES = [
 ];
 
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6" }, // Blue
-  { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8" }, // Cyan
-  { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E" }, // Rose
-  { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B" }, // Amber
+  { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6", route: "/" },
+  { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8", route: "/command" },
+  { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E", route: "/town" },
+  { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B", route: "/brain" },
 ];
 
 const MODULES = [
