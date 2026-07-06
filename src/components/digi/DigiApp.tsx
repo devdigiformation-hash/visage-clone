@@ -15,6 +15,7 @@ import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
 import { VoiceAIPage } from "./VoiceAIPage";
+import { useNavigate } from "@tanstack/react-router";
 
 import startupVideoAsset from '@/assets/digi-startup.mp4.asset.json';
 const startupVideoUrl = startupVideoAsset.url;
@@ -119,21 +120,21 @@ const NODES = [
 ];
 
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6" }, // Blue
-  { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8" }, // Cyan
-  { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E" }, // Rose
-  { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B" }, // Amber
+  { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6", route: "/" },
+  { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8", route: "/command" },
+  { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E", route: "/town" },
+  { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B", route: "/brain" },
 ];
 
 const MODULES = [
-  { label: "Tools",        Icon: Wrench,      color: "#7DD3FC" }, // Sky
-  { label: "Skills",       Icon: Zap,         color: "#3B82F6" }, // Blue
-  { label: "Models",       Icon: Brain,       color: "#F472B6" }, // Rose
-  { label: "Channels",     Icon: MessageSquare, color: "#22C55E" }, // Green
-  { label: "Analytics",    Icon: BarChart2,   color: "#06B6D4" }, // Cyan
-  { label: "Workflows",    Icon: Workflow,    color: "#8B5CF6" }, // Violet
-  { label: "Core Jobs",    Icon: Layers,      color: "#2FE0C8" }, // Cyan
-  { label: "Integrations", Icon: Folder,      color: "#F5A623" }, // Amber
+  { label: "Tools",        Icon: Wrench,      color: "#7DD3FC", route: "/tools" },
+  { label: "Skills",       Icon: Zap,         color: "#3B82F6", route: "/skills" },
+  { label: "Models",       Icon: Brain,       color: "#F472B6", route: "/models" },
+  { label: "Channels",     Icon: MessageSquare, color: "#22C55E", route: "/channels" },
+  { label: "Analytics",    Icon: BarChart2,   color: "#06B6D4", route: "/analytics" },
+  { label: "Workflows",    Icon: Workflow,    color: "#8B5CF6", route: "/workflows" },
+  { label: "Core Jobs",    Icon: Layers,      color: "#2FE0C8", route: "/jobs" },
+  { label: "Integrations", Icon: Folder,      color: "#F5A623", route: "/integrations" },
 ];
 
 const MSGS_INIT: Msg[] = [
@@ -560,6 +561,7 @@ function UpdaterWidget() {
 
 function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: string; setActiveNav: (id: string) => void; onOpenSettings: () => void; }) {
   const [showModules, setShowModules] = useState(false);
+  const navigate = useNavigate();
   return (
     <div style={{
       width: 220, flexShrink: 0,
@@ -588,7 +590,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
           const isActive = activeNav === item.id;
           return (
             <button key={item.id} 
-              onClick={() => { playUISound('tab-click'); setActiveNav(item.id); }}
+              onClick={() => { playUISound('tab-click'); setActiveNav(item.id); if (item.route && item.route !== '/') navigate({ to: item.route }); else if (item.route === '/' && window.location.pathname !== '/') navigate({ to: '/' }); }}
               onMouseEnter={() => playUISound('hover')}
               className={`group ${isActive ? "glass-btn-active" : "glass-btn"}`}
               style={{
@@ -621,7 +623,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
           if (hideable && !showModules) return null;
           return (
           <button key={i} className="group glass-btn"
-            onClick={() => playUISound('click')}
+            onClick={() => { playUISound('click'); if (mod.route) navigate({ to: mod.route }); }}
             onMouseEnter={() => playUISound('hover')}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",

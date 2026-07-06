@@ -9,8 +9,98 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkflowsRouteImport } from './routes/workflows'
+import { Route as TownRouteImport } from './routes/town'
+import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as SoulRouteImport } from './routes/soul'
+import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ModelsRouteImport } from './routes/models'
+import { Route as MemoryRouteImport } from './routes/memory'
+import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as CommandRouteImport } from './routes/command'
+import { Route as ChannelsRouteImport } from './routes/channels'
+import { Route as BrainRouteImport } from './routes/brain'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorkflowsRoute = WorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TownRoute = TownRouteImport.update({
+  id: '/town',
+  path: '/town',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SoulRoute = SoulRouteImport.update({
+  id: '/soul',
+  path: '/soul',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SkillsRoute = SkillsRouteImport.update({
+  id: '/skills',
+  path: '/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelsRoute = ModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryRoute = MemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommandRoute = CommandRouteImport.update({
+  id: '/command',
+  path: '/command',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChannelsRoute = ChannelsRouteImport.update({
+  id: '/channels',
+  path: '/channels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrainRoute = BrainRouteImport.update({
+  id: '/brain',
+  path: '/brain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +109,242 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/analytics': typeof AnalyticsRoute
+  '/brain': typeof BrainRoute
+  '/channels': typeof ChannelsRoute
+  '/command': typeof CommandRoute
+  '/integrations': typeof IntegrationsRoute
+  '/jobs': typeof JobsRoute
+  '/memory': typeof MemoryRoute
+  '/models': typeof ModelsRoute
+  '/settings': typeof SettingsRoute
+  '/skills': typeof SkillsRoute
+  '/soul': typeof SoulRoute
+  '/tools': typeof ToolsRoute
+  '/town': typeof TownRoute
+  '/workflows': typeof WorkflowsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/analytics': typeof AnalyticsRoute
+  '/brain': typeof BrainRoute
+  '/channels': typeof ChannelsRoute
+  '/command': typeof CommandRoute
+  '/integrations': typeof IntegrationsRoute
+  '/jobs': typeof JobsRoute
+  '/memory': typeof MemoryRoute
+  '/models': typeof ModelsRoute
+  '/settings': typeof SettingsRoute
+  '/skills': typeof SkillsRoute
+  '/soul': typeof SoulRoute
+  '/tools': typeof ToolsRoute
+  '/town': typeof TownRoute
+  '/workflows': typeof WorkflowsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agents': typeof AgentsRoute
+  '/analytics': typeof AnalyticsRoute
+  '/brain': typeof BrainRoute
+  '/channels': typeof ChannelsRoute
+  '/command': typeof CommandRoute
+  '/integrations': typeof IntegrationsRoute
+  '/jobs': typeof JobsRoute
+  '/memory': typeof MemoryRoute
+  '/models': typeof ModelsRoute
+  '/settings': typeof SettingsRoute
+  '/skills': typeof SkillsRoute
+  '/soul': typeof SoulRoute
+  '/tools': typeof ToolsRoute
+  '/town': typeof TownRoute
+  '/workflows': typeof WorkflowsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/agents'
+    | '/analytics'
+    | '/brain'
+    | '/channels'
+    | '/command'
+    | '/integrations'
+    | '/jobs'
+    | '/memory'
+    | '/models'
+    | '/settings'
+    | '/skills'
+    | '/soul'
+    | '/tools'
+    | '/town'
+    | '/workflows'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/agents'
+    | '/analytics'
+    | '/brain'
+    | '/channels'
+    | '/command'
+    | '/integrations'
+    | '/jobs'
+    | '/memory'
+    | '/models'
+    | '/settings'
+    | '/skills'
+    | '/soul'
+    | '/tools'
+    | '/town'
+    | '/workflows'
+  id:
+    | '__root__'
+    | '/'
+    | '/agents'
+    | '/analytics'
+    | '/brain'
+    | '/channels'
+    | '/command'
+    | '/integrations'
+    | '/jobs'
+    | '/memory'
+    | '/models'
+    | '/settings'
+    | '/skills'
+    | '/soul'
+    | '/tools'
+    | '/town'
+    | '/workflows'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentsRoute: typeof AgentsRoute
+  AnalyticsRoute: typeof AnalyticsRoute
+  BrainRoute: typeof BrainRoute
+  ChannelsRoute: typeof ChannelsRoute
+  CommandRoute: typeof CommandRoute
+  IntegrationsRoute: typeof IntegrationsRoute
+  JobsRoute: typeof JobsRoute
+  MemoryRoute: typeof MemoryRoute
+  ModelsRoute: typeof ModelsRoute
+  SettingsRoute: typeof SettingsRoute
+  SkillsRoute: typeof SkillsRoute
+  SoulRoute: typeof SoulRoute
+  ToolsRoute: typeof ToolsRoute
+  TownRoute: typeof TownRoute
+  WorkflowsRoute: typeof WorkflowsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workflows': {
+      id: '/workflows'
+      path: '/workflows'
+      fullPath: '/workflows'
+      preLoaderRoute: typeof WorkflowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/town': {
+      id: '/town'
+      path: '/town'
+      fullPath: '/town'
+      preLoaderRoute: typeof TownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/soul': {
+      id: '/soul'
+      path: '/soul'
+      fullPath: '/soul'
+      preLoaderRoute: typeof SoulRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/skills': {
+      id: '/skills'
+      path: '/skills'
+      fullPath: '/skills'
+      preLoaderRoute: typeof SkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models': {
+      id: '/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory': {
+      id: '/memory'
+      path: '/memory'
+      fullPath: '/memory'
+      preLoaderRoute: typeof MemoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/command': {
+      id: '/command'
+      path: '/command'
+      fullPath: '/command'
+      preLoaderRoute: typeof CommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/channels': {
+      id: '/channels'
+      path: '/channels'
+      fullPath: '/channels'
+      preLoaderRoute: typeof ChannelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brain': {
+      id: '/brain'
+      path: '/brain'
+      fullPath: '/brain'
+      preLoaderRoute: typeof BrainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +357,21 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentsRoute: AgentsRoute,
+  AnalyticsRoute: AnalyticsRoute,
+  BrainRoute: BrainRoute,
+  ChannelsRoute: ChannelsRoute,
+  CommandRoute: CommandRoute,
+  IntegrationsRoute: IntegrationsRoute,
+  JobsRoute: JobsRoute,
+  MemoryRoute: MemoryRoute,
+  ModelsRoute: ModelsRoute,
+  SettingsRoute: SettingsRoute,
+  SkillsRoute: SkillsRoute,
+  SoulRoute: SoulRoute,
+  ToolsRoute: ToolsRoute,
+  TownRoute: TownRoute,
+  WorkflowsRoute: WorkflowsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
