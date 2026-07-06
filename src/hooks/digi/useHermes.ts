@@ -79,6 +79,12 @@ export function useHermes() {
     ws.onclose = () => {
       setConnected(false);
     };
+
+    ws.onerror = (event) => {
+      // Local Hermes bridge often unavailable; keep quiet noise but log once.
+      console.warn("[hermes] websocket error", event);
+      setConnected(false);
+    };
     
     wsRef.current = ws;
 
