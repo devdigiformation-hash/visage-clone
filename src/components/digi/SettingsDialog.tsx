@@ -36,14 +36,14 @@ export function SettingsDialog({ open, onOpenChange, defaultTab = "voice" }: { o
   const [autoUpdates, setAutoUpdates] = useState(true);
 
   // User Profile State
-  const [fullName, setFullName] = useState('Mr Haroon');
+  const [fullName, setFullName] = useState('');
   const [primaryLocation, setPrimaryLocation] = useState('');
   const [profession, setProfession] = useState('');
   const [bio, setBio] = useState('');
 
   // WhatsApp Link State
-  const [waAutoConnect, setWaAutoConnect] = useState(true);
-  const [waLinked, setWaLinked] = useState(true);
+  const [waAutoConnect, setWaAutoConnect] = useState(false);
+  const [waLinked, setWaLinked] = useState(false);
 
   // Load saved settings
   React.useEffect(() => {
