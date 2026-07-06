@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { jobsRepo, useRepo, type Job, type JobStatus } from "@/lib/repo";
 import { Activity, CheckCircle2, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 
@@ -10,6 +10,10 @@ const STATUS_COLOR: Record<JobStatus, string> = {
 
 export function TaskStrip() {
   const jobs = useRepo(jobsRepo);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+
 
   const s = useMemo(() => {
     const isToday = (t?: number) => !!t && Date.now() - t < 24 * 3600 * 1000;

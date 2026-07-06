@@ -121,23 +121,17 @@ const NODES = [
   { id: "settings", label: "Settings", Icon: Settings, color: "#EF4444", bg: "rgba(239,68,68,0.08)",   glow: "rgba(239,68,68,0.15)",   badge: "LOW"  },
 ];
 
-const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard",        Icon: LayoutDashboard, color: "#3B82F6", route: "/" },
-  { id: "ai",        label: "AI Command Center", Icon: Bot,             color: "#2FE0C8", route: "/command" },
-  { id: "town",      label: "Agent Town",        Icon: Users,           color: "#F43F5E", route: "/town" },
-  { id: "brain",     label: "Brain",             Icon: Brain,           color: "#F59E0B", route: "/brain" },
-];
-
-const MODULES = [
-  { label: "Tools",        Icon: Wrench,      color: "#7DD3FC", route: "/tools" },
-  { label: "Skills",       Icon: Zap,         color: "#3B82F6", route: "/skills" },
-  { label: "Models",       Icon: Brain,       color: "#F472B6", route: "/models" },
-  { label: "Channels",     Icon: MessageSquare, color: "#22C55E", route: "/channels" },
-  { label: "Analytics",    Icon: BarChart2,   color: "#06B6D4", route: "/analytics" },
-  { label: "Workflows",    Icon: Workflow,    color: "#8B5CF6", route: "/workflows" },
-  { label: "Core Jobs",    Icon: Layers,      color: "#2FE0C8", route: "/jobs" },
-  { label: "Integrations", Icon: Folder,      color: "#F5A623", route: "/integrations" },
-];
+// Single source of truth: pull nav + modules from the shared AppShell config so
+// the dashboard sidebar and the /route AppShell sidebar never diverge and
+// no module is ever listed twice.
+import { NAV as APPSHELL_NAV, MODS as APPSHELL_MODS } from "@/components/shell/AppShell";
+const NAV_ITEMS = APPSHELL_NAV.map(n => ({
+  id: n.to === "/" ? "dashboard" : n.to.replace("/", ""),
+  label: n.label, Icon: n.Icon, color: n.color, route: n.to,
+}));
+const MODULES = APPSHELL_MODS.map(m => ({
+  label: m.label, Icon: m.Icon, color: m.color, route: m.to,
+}));
 
 const MSGS_INIT: Msg[] = [
   { id: 1, role: "ai", text: "I'm analyzing the conversation style. Considering the user's 'Hello' in English, I am determining the best response. Given the context, I will decide whether to offer a warm Urdu greeting, or a transition to English. This is important to ensure a smooth interaction with the user." },
@@ -658,18 +652,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
       <div style={{ flexShrink: 0, padding: "6px 14px 0px", display: "flex", flexDirection: "column", gap: 4 }}>
         <UpdaterWidget />
       </div>
-      <div style={{ flexShrink: 0, padding: "6px 14px 10px", borderTop: "1px solid #1A1D24" }}>
-        <button className="glass-btn" 
-          onClick={() => { playUISound('click'); onOpenSettings(); }}
-          onMouseEnter={() => playUISound('hover')}
-          style={{
-            width: "100%", display: "flex", alignItems: "center", gap: 8,
-            padding: "7px 14px", borderRadius: 8, cursor: "pointer"
-          }}>
-          <Settings size={13} style={{ color: "#4A5066" }} />
-          <span style={{ fontSize: 11.5, color: "#7A8090" }}>Settings</span>
-        </button>
-      </div>
+      {/* Settings lives once, inside the unified MODULES list above — no duplicate pinned button. */}
     </div>
   );
 }
