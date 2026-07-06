@@ -123,6 +123,6 @@ export const knowledgeRepo = createRepo<KnowledgePack>("knowledge", [
 import { useEffect, useState } from "react";
 export function useRepo<T extends Entity>(repo: ReturnType<typeof createRepo<T>>) {
   const [items, setItems] = useState<T[]>(() => repo.list());
-  useEffect(() => repo.subscribe(() => setItems(repo.list())), [repo]);
+  useEffect(() => { const unsub = repo.subscribe(() => setItems(repo.list())); return () => { unsub(); }; }, [repo]);
   return items;
 }
