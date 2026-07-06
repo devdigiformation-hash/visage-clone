@@ -343,9 +343,9 @@ function ConnectorSVG({ active, W, H, globeSize, globeCenterX, rightActionX, rig
   // Right-side junction — mirror of the left junction
   const rMidX = Math.round(orbRightEdgeX + (rightActionX - orbRightEdgeX) * 0.30);
   const rMidY = midY;
-  const nodeCardsTotalH = NODES.length * C_CARD_H + (NODES.length - 1) * C_CARD_GAP;
+  const nodeCardsTotalH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP;
   const startY = midY - nodeCardsTotalH / 2;
-  const ys    = NODES.map((_, i) => startY + i * (C_CARD_H + C_CARD_GAP) + Math.round(C_CARD_H / 2));
+  const ys    = NODES.map((_, i) => startY + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
 
   return (
     <svg width="100%" height="100%"
