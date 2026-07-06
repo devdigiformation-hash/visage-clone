@@ -322,7 +322,7 @@ function ParticleOrb({ active }: { active: boolean }) {
 
         cx.beginPath();
         cx.arc(sx, sy, sz, 0, Math.PI * 2);
-        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.8})`;
+        cx.fillStyle = `rgba(${cr},${cg},${cb},${active ? op : op * 0.55})`;
         cx.fill();
         
         if (active && d > 0.82 && !isRing) {
