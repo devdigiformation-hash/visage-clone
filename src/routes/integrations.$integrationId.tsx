@@ -20,11 +20,14 @@ function IntegrationDetail() {
   const { integrationId } = Route.useParams();
   const nav = useNavigate();
 
-  const [item, setItem] = useState<Integration | undefined>(() => integrationsRepo.get(integrationId));
+  const [item, setItem] = useState<Integration | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<"config" | "webhooks" | "automation" | "logs">("config");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
 
   useEffect(() => {
+    setItem(integrationsRepo.get(integrationId));
+    setLoaded(true);
     const unsub = integrationsRepo.subscribe(() => setItem(integrationsRepo.get(integrationId)));
     return () => { unsub(); };
   }, [integrationId]);
