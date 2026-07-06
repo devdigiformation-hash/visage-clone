@@ -114,14 +114,18 @@ export const modelsRepo = createRepo<Model>("models", [
   { name: "Llama 3.1 8B", provider: "Ollama", modelId: "llama3.1:8b", baseURL: "http://localhost:11434", tags: "local,free", active: false },
 ]);
 export const skillsRepo = createRepo<Skill>("skills", [
-  { name: "Summarize Text", category: "Writing", type: "prompt", content: "You are an expert summarizer...", tags: "writing", active: true },
-  { name: "Translate to Urdu", category: "Language", type: "prompt", content: "Translate the following to fluent Urdu...", tags: "language", active: true },
-  { name: "Extract Invoice Data", category: "Finance", type: "tool", content: "Extract structured invoice fields.", tags: "finance,extract", active: true },
+  { name: "Summarize Text", category: "Writing", subcategory: "Summarization", type: "prompt", content: "You are an expert summarizer...", tags: "writing", active: true },
+  { name: "Translate to Urdu", category: "Language", subcategory: "Translation", type: "prompt", content: "Translate the following to fluent Urdu...", tags: "language", active: true },
+  { name: "Extract Invoice Data", category: "Document / OCR", subcategory: "Extraction", type: "tool", content: "Extract structured invoice fields.", tags: "finance,extract", active: true },
+  { name: "Scan Repo Structure", category: "Coding", subcategory: "Repo Analysis", type: "code", content: "Walk workspace and classify files.", tags: "code,repo", active: true },
+  { name: "Fill Web Form", category: "Browser", subcategory: "Form Automation", type: "automation", content: "Detect fields and populate.", tags: "browser", active: true },
 ]);
 export const toolsRepo = createRepo<Tool>("tools", [
-  { name: "Web Search", type: "api", provider: "Serper", endpoint: "https://api.serper.dev/search", active: true },
-  { name: "Send Email", type: "api", provider: "Resend", active: true },
-  { name: "File Reader", type: "local", active: true },
+  { name: "Web Search", category: "Browser", subcategory: "Search", type: "api", provider: "Serper", endpoint: "https://api.serper.dev/search", active: true },
+  { name: "Send Email", category: "Messaging", subcategory: "Email", type: "api", provider: "Resend", active: true },
+  { name: "File Reader", category: "File / Workspace", subcategory: "IO", type: "local", active: true },
+  { name: "Terminal Exec", category: "Terminal", subcategory: "Shell", type: "local", active: false },
+  { name: "Git Ops", category: "Coding / Dev", subcategory: "Repo", type: "local", active: false },
 ]);
 export const agentsRepo = createRepo<Agent>("agents", [
   { name: "Sales Agent", role: "Handles inbound leads and quotes", active: true },
