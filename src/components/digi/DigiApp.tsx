@@ -1066,7 +1066,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                   boxShadow: lit ? `0 0 14px ${a.glow}` : "none",
                 }}
               >
-                <a.Icon size={15} style={{ color: lit ? a.color : "#8A909E" }} />
+                <a.Icon size={20} style={{ color: lit ? a.color : "#8A909E" }} />
               </button>
               <span style={{
                 marginTop: C_LABEL_GAP,
