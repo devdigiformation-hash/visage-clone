@@ -1012,7 +1012,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                 }}
                 title={n.label}
               >
-                <n.Icon size={16} style={{ color: lit ? n.color : "#8A909E" }} />
+                <n.Icon size={20} style={{ color: lit ? n.color : "#8A909E" }} />
               </button>
               <span style={{
                 marginTop: C_LABEL_GAP,
