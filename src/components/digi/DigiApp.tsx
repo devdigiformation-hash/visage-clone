@@ -5,13 +5,10 @@ import {
   Monitor, Bot, Camera, Wrench,
 } from "lucide-react";
 
-import { SettingsDialog } from "./SettingsDialog";
 import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
 import { useNavigate } from "@tanstack/react-router";
-
-import logoUrl from '@/assets/digi-logo.png';
 
 // ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
 const G = `
