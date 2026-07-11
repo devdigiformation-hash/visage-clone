@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import {
-  Brain, Workflow, Sparkles, Zap,
+  Brain, Workflow, Clock, Zap,
   Monitor, Bot, Camera, Wrench,
   X as CloseIcon,
 } from "lucide-react";
+
 
 
 
