@@ -453,10 +453,51 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const [activeNode, setActiveNode] = useState<string | null>("soul");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
+  const cameraVideoRef = useRef<HTMLVideoElement>(null);
+  const screenVideoRef = useRef<HTMLVideoElement>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
 
-  // Frontend-only toggle handlers — purely visual, no media capture, no backend.
-  const toggleCamera = () => { playUISound('click'); setCameraOn(v => !v); };
-  const toggleScreenShare = () => { playUISound('click'); setScreenShareOn(v => !v); };
+  // Browser-only media capture — no backend, no processing. Streams stay local to <video>.
+  const toggleCamera = async () => {
+    playUISound('click');
+    if (cameraOn) {
+      cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+      cameraStreamRef.current = null;
+      setCameraOn(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      cameraStreamRef.current = stream;
+      setCameraOn(true);
+      setTimeout(() => { if (cameraVideoRef.current) cameraVideoRef.current.srcObject = stream; }, 0);
+    } catch (e) { console.warn("Camera permission denied or unavailable", e); }
+  };
+  const toggleScreenShare = async () => {
+    playUISound('click');
+    if (screenShareOn) {
+      screenStreamRef.current?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current = null;
+      setScreenShareOn(false);
+      return;
+    }
+    try {
+      const stream = await (navigator.mediaDevices as any).getDisplayMedia({ video: true, audio: false });
+      screenStreamRef.current = stream;
+      setScreenShareOn(true);
+      setTimeout(() => { if (screenVideoRef.current) screenVideoRef.current.srcObject = stream; }, 0);
+      stream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        screenStreamRef.current = null;
+        setScreenShareOn(false);
+      });
+    } catch (e) { console.warn("Screen share cancelled or unavailable", e); }
+  };
+  useEffect(() => () => {
+    cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const [dims,  setDims]  = useState({ w: 600, h: 640 });
@@ -563,7 +604,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           const onClick =
             isCam ? toggleCamera :
             isScr ? toggleScreenShare :
-            a.id === "agent" ? () => { playUISound('click'); navigate({ to: "/agents" }); } :
+            a.id === "agent" ? () => { playUISound('click'); setAgentOpen(true); } :
             a.id === "tools" ? () => { playUISound('click'); navigate({ to: "/tools" }); } :
                                () => { playUISound('click'); };
 
@@ -608,23 +649,21 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           );
         })}
 
-        {/* Visual-only camera/screen indicator (frontend template — no capture) */}
+        {/* Live browser media previews (no backend — local <video> only) */}
         {(cameraOn || screenShareOn) && (
           <div style={{
             position: "absolute",
             top: globeCenterY - Math.round(globeSize / 2) - 18,
             left: globeCenterX - Math.round(globeSize / 2) - 22,
-            display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "none"
+            display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto"
           }}>
             {cameraOn && (
-              <div style={{ width: 90, height: 68, borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "linear-gradient(135deg,#050608,#0F1620)", display: "flex", alignItems: "center", justifyContent: "center", color: "#2FE0C8", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em" }}>
-                CAM · PREVIEW
-              </div>
+              <video ref={cameraVideoRef} autoPlay playsInline muted
+                style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
             )}
             {screenShareOn && (
-              <div style={{ width: 90, height: 60, borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "linear-gradient(135deg,#050608,#0F1620)", display: "flex", alignItems: "center", justifyContent: "center", color: "#2FE0C8", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em" }}>
-                SCREEN · PREVIEW
-              </div>
+              <video ref={screenVideoRef} autoPlay playsInline muted
+                style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }} />
             )}
           </div>
         )}
@@ -706,6 +745,30 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           </button>
         </div>
       </div>
+
+      {/* Agent placeholder — no execution, no backend */}
+      {agentOpen && (
+        <div
+          onClick={() => setAgentOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ position: "relative", width: 380, padding: "32px 28px", borderRadius: 16, background: "#0A0A0A", border: "1px solid #222", color: "#E8EAF0", fontFamily: "'Inter', sans-serif", textAlign: "center" }}
+          >
+            <button
+              onClick={() => setAgentOpen(false)}
+              style={{ position: "absolute", top: 10, right: 12, background: "transparent", border: "none", color: "#666", fontSize: 18, cursor: "pointer" }}
+              aria-label="Close"
+            >×</button>
+            <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#8B5CF6", fontFamily: "'JetBrains Mono', monospace", marginBottom: 12 }}>AGENT MODULE</div>
+            <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>Coming Soon</h3>
+            <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6, margin: 0 }}>
+              No functionality connected yet. Agents, workflows, and automation will be wired in a future release.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
