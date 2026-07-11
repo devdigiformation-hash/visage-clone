@@ -3,12 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import {
   Brain, Heart, Settings, Zap,
   Monitor, Bot, Camera, Wrench,
+  X as CloseIcon,
 } from "lucide-react";
 
-import { MemoryDialog } from "./MemoryDialog";
-import { SoulDialog } from "./SoulDialog";
-import { SkillsDialog } from "./SkillsDialog";
-import { useNavigate } from "@tanstack/react-router";
 
 // ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
 const G = `
@@ -447,17 +444,15 @@ function StatusDot({ s }: { s: "active" | "standby" | "error" }) {
 
 
 // ─── Operations Panel ─────────────────────────────────────────────────────────
-function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
-  const navigate = useNavigate();
-
+function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings'|'agent'|'tools') => void; }) {
   const [activeNode, setActiveNode] = useState<string | null>("soul");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
-  const [agentOpen, setAgentOpen] = useState(false);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
   const screenVideoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
+
 
   // Browser-only media capture — no backend, no processing. Streams stay local to <video>.
   const toggleCamera = async () => {
@@ -604,9 +599,10 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           const onClick =
             isCam ? toggleCamera :
             isScr ? toggleScreenShare :
-            a.id === "agent" ? () => { playUISound('click'); setAgentOpen(true); } :
-            a.id === "tools" ? () => { playUISound('click'); navigate({ to: "/tools" }); } :
+            a.id === "agent" ? () => { playUISound('click'); onOpenModal('agent'); } :
+            a.id === "tools" ? () => { playUISound('click'); onOpenModal('tools'); } :
                                () => { playUISound('click'); };
+
 
           return (
             <div key={a.id} style={{
@@ -746,32 +742,106 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         </div>
       </div>
 
-      {/* Agent placeholder — no execution, no backend */}
-      {agentOpen && (
-        <div
-          onClick={() => setAgentOpen(false)}
-          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{ position: "relative", width: 380, padding: "32px 28px", borderRadius: 16, background: "#0A0A0A", border: "1px solid #222", color: "#E8EAF0", fontFamily: "'Inter', sans-serif", textAlign: "center" }}
-          >
-            <button
-              onClick={() => setAgentOpen(false)}
-              style={{ position: "absolute", top: 10, right: 12, background: "transparent", border: "none", color: "#666", fontSize: 18, cursor: "pointer" }}
-              aria-label="Close"
-            >×</button>
-            <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#8B5CF6", fontFamily: "'JetBrains Mono', monospace", marginBottom: 12 }}>AGENT MODULE</div>
-            <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>Coming Soon</h3>
-            <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6, margin: 0 }}>
-              No functionality connected yet. Agents, workflows, and automation will be wired in a future release.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+
+// ─── Placeholder Dialog (generic empty window used by every button) ──────────
+const MODULE_META: Record<string, { label: string; accent: string; kicker: string }> = {
+  memory:   { label: "Memory",   accent: "#8B7CF6", kicker: "MEMORY MODULE" },
+  soul:     { label: "Soul",     accent: "#2FE0C8", kicker: "SOUL MODULE" },
+  skills:   { label: "Skills",   accent: "#3B82F6", kicker: "SKILLS MODULE" },
+  settings: { label: "Settings", accent: "#EF4444", kicker: "SETTINGS MODULE" },
+  agent:    { label: "Agent",    accent: "#F472B6", kicker: "AGENT MODULE" },
+  tools:    { label: "Tools",    accent: "#7DD3FC", kicker: "TOOLS MODULE" },
+};
+
+function PlaceholderDialog({ moduleId, onClose }: { moduleId: string | null; onClose: () => void }) {
+  useEffect(() => {
+    if (!moduleId) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [moduleId, onClose]);
+
+  if (!moduleId) return null;
+  const meta = MODULE_META[moduleId];
+  if (!meta) return null;
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        animation: "fadeIn 0.18s ease-out",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative",
+          width: "min(440px, 92vw)",
+          padding: "36px 32px 32px",
+          borderRadius: 16,
+          background: "#0A0B0F",
+          border: `1px solid ${meta.accent}33`,
+          boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 40px ${meta.accent}22`,
+          color: "#E8EAF0",
+          fontFamily: "'Inter', sans-serif",
+          textAlign: "center",
+        }}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          style={{
+            position: "absolute", top: 10, right: 10,
+            width: 30, height: 30, borderRadius: 8,
+            background: "transparent", border: "1px solid #22252D",
+            color: "#8A909E", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.background = "#15171C"; e.currentTarget.style.color = "#E8EAF0"; }}
+          onMouseOut={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#8A909E"; }}
+        >
+          <CloseIcon size={15} />
+        </button>
+
+        <div style={{
+          fontSize: 10, letterSpacing: "0.28em",
+          color: meta.accent,
+          fontFamily: "'JetBrains Mono', monospace",
+          marginBottom: 14,
+        }}>{meta.kicker}</div>
+
+        <h3 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 10px", letterSpacing: "-0.01em" }}>
+          {meta.label}
+        </h3>
+
+        <p style={{ fontSize: 12.5, color: "#8A909E", lineHeight: 1.65, margin: "0 0 22px" }}>
+          This module will be implemented in the future.
+        </p>
+
+        <div style={{
+          marginTop: 8, padding: "14px 16px",
+          borderRadius: 10,
+          border: "1px dashed #22252D",
+          background: "rgba(255,255,255,0.015)",
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10.5, letterSpacing: "0.08em",
+          color: "#5C616B",
+        }}>
+          EMPTY TEMPLATE — READY FOR BUILD
+        </div>
+      </div>
+
+      <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
+    </div>
+  );
+}
+
 
 
 // ─── Sound System ─────────────────────────────────────────────────────────────
@@ -888,17 +958,7 @@ const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click'
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [aiActive, setAI] = useState(false);
-  const [isMemoryOpen, setMemoryOpen] = useState(false);
-  const [isSoulOpen, setSoulOpen] = useState(false);
-  const [isSkillsOpen, setSkillsOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const openModal = (id: string) => {
-    if (id === 'settings') navigate({ to: "/settings" });
-    else if (id === 'memory') setMemoryOpen(true);
-    else if (id === 'soul') setSoulOpen(true);
-    else if (id === 'skills') setSkillsOpen(true);
-  };
+  const [openModule, setOpenModule] = useState<string | null>(null);
 
   return (
     <>
@@ -934,15 +994,18 @@ export default function App() {
         {/* Main content */}
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-            <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
+            <OperationsPanel
+              aiActive={aiActive}
+              onToggleAI={() => setAI(v => !v)}
+              onOpenModal={(id) => setOpenModule(id)}
+            />
           </div>
 
-          <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
-          <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
-          <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
+          <PlaceholderDialog moduleId={openModule} onClose={() => setOpenModule(null)} />
         </div>
       </div>
     </>
   );
 }
+
 
