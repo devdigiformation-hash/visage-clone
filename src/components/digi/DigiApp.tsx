@@ -720,7 +720,7 @@ const MODULE_META: Record<string, { label: string; accent: string; kicker: strin
   memory:   { label: "Memory",   accent: "#8B7CF6", kicker: "MEMORY MODULE" },
   soul:     { label: "Workflows", accent: "#2FE0C8", kicker: "WORKFLOWS MODULE" },
   skills:   { label: "Skills",   accent: "#3B82F6", kicker: "SKILLS MODULE" },
-  settings: { label: "Automation", accent: "#EF4444", kicker: "AUTOMATION MODULE" },
+  settings: { label: "Cron Jobs", accent: "#EF4444", kicker: "CRON JOBS MODULE" },
   agent:    { label: "Agent",    accent: "#F472B6", kicker: "AGENT MODULE" },
   tools:    { label: "Tools",    accent: "#7DD3FC", kicker: "TOOLS MODULE" },
 };
