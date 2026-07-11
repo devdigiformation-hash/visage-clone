@@ -825,180 +825,16 @@ const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click'
   }
 };
 
-// ─── Startup Screen ────────────────────────────────────────────────────────────
-function StartupScreen({ onComplete }: { onComplete: () => void }) {
-  const [started, setStarted] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const startVideo = () => {
-    setStarted(true);
-    playUISound('tech');
-    if (videoRef.current) {
-      videoRef.current.play().catch(e => {
-        console.warn("Video play error, skipping:", e);
-        onComplete();
-      });
-    } else {
-      onComplete();
-    }
-  };
-
-  return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999, background: "#000",
-      display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer"
-    }} onClick={!started ? startVideo : undefined}>
-      
-      {!started && (
-        <div style={{
-          position: "absolute", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: 20
-        }}>
-          <img src={logoUrl} alt="DIGI" style={{ width: 80, height: 80, borderRadius: "50%", opacity: 0.8 }} className="blob-float" />
-          <h2 style={{ color: "#2FE0C8", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.2em", fontSize: 14 }} className="animate-pulse">
-            CLICK ANYWHERE TO INITIALIZE
-          </h2>
-        </div>
-      )}
-
-      <video
-        ref={videoRef}
-        src={startupVideoUrl}
-        onEnded={onComplete}
-        onError={(e) => {
-          console.warn("Video failed to load or play, skipping to next screen", e);
-          onComplete(); // fallback so it doesn't get stuck
-        }}
-        style={{ 
-          width: "100%", height: "100%", objectFit: "cover",
-          opacity: started ? 1 : 0, transition: "opacity 0.5s ease"
-        }}
-      />
-    </div>
-  );
-}
-
-// ─── Loading Screen ────────────────────────────────────────────────────────────
-function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState("INITIALIZING_CORE_SYSTEMS...");
-
-  useEffect(() => {
-    const messages = [
-      "ESTABLISHING_SECURE_CONNECTION...",
-      "LOADING_MEMORY_SHARDS...",
-      "OPTIMIZING_NEURAL_PATHWAYS...",
-      "SYNCING_WITH_HERMES_BRIDGE...",
-      "READY."
-    ];
-    
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += Math.floor(Math.random() * 5) + 1; // Random increment 1-5
-      if (currentProgress >= 100) {
-        currentProgress = 100;
-        clearInterval(interval);
-        setTimeout(onComplete, 500); // Wait a bit at 100% before transitioning
-      }
-      setProgress(currentProgress);
-      
-      // Update text based on progress
-      if (currentProgress > 85) setLoadingText(messages[4]);
-      else if (currentProgress > 60) setLoadingText(messages[3]);
-      else if (currentProgress > 40) setLoadingText(messages[2]);
-      else if (currentProgress > 20) setLoadingText(messages[1]);
-      else setLoadingText(messages[0]);
-    }, 150);
-
-    return () => clearInterval(interval);
-  }, [onComplete]);
-
-  return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9998, background: "#050608",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Inter', sans-serif", color: "#F5F6F8"
-    }}>
-      {/* Logo container with spinning ring */}
-      <div style={{ position: "relative", width: 120, height: 120, marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {/* Spinning outer ring */}
-        <div className="blob-float" style={{
-          position: "absolute", inset: -10, borderRadius: "50%",
-          border: "1px solid rgba(47, 224, 200, 0.15)",
-          borderTopColor: "#2FE0C8",
-          animation: "spin 3s linear infinite"
-        }} />
-        {/* Inner static ring */}
-        <div style={{
-          position: "absolute", inset: 0, borderRadius: "50%",
-          border: "1px solid rgba(255, 255, 255, 0.05)"
-        }} />
-        {/* Logo */}
-        <img src={logoUrl} alt="DIGI Logo" style={{ width: 64, height: 64, borderRadius: "50%", objectFit: "cover", zIndex: 2 }} />
-      </div>
-
-      {/* Title */}
-      <h1 style={{
-        fontSize: 32, letterSpacing: "0.5em", fontWeight: 300, 
-        marginLeft: "0.5em", // offset for letter spacing centering
-        marginBottom: 40, color: "#fff"
-      }}>
-        DIGI
-      </h1>
-
-      {/* Progress Bar Container */}
-      <div style={{ width: 340 }}>
-        {/* Bar */}
-        <div style={{
-          width: "100%", height: 2, background: "rgba(255, 255, 255, 0.1)", 
-          position: "relative", marginBottom: 12, overflow: "hidden"
-        }}>
-          <div style={{
-            position: "absolute", top: 0, left: 0, bottom: 0,
-            width: `${progress}%`, background: "#2FE0C8",
-            transition: "width 0.2s ease-out",
-            boxShadow: "0 0 10px rgba(47, 224, 200, 0.5)"
-          }} />
-        </div>
-        
-        {/* Text Details */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, fontFamily: "monospace", color: "#5C616B", letterSpacing: "0.1em" }}>
-          <span>{loadingText}</span>
-          <span>{progress.toString().padStart(3, '0')}%</span>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes spin {
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [aiActive, setAI] = useState(false);
-  const [activeNav] = useState("dashboard");
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isMemoryOpen, setMemoryOpen] = useState(false);
   const [isSoulOpen, setSoulOpen] = useState(false);
   const [isSkillsOpen, setSkillsOpen] = useState(false);
-  const [showStartupVideo, setShowStartupVideo] = useState(false);
-  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-
-  const handleVideoComplete = () => {
-    setShowStartupVideo(false);
-    setShowLoadingScreen(true);
-  };
-
-  const openSettings = (_tabId?: string) => {
-    // Route to the real /settings page (13-section OpenClaw-level system settings)
-    if (typeof window !== "undefined") window.location.href = "/settings";
-  };
+  const navigate = useNavigate();
 
   const openModal = (id: string) => {
-    if (id === 'settings') openSettings();
+    if (id === 'settings') navigate({ to: "/settings" });
     else if (id === 'memory') setMemoryOpen(true);
     else if (id === 'soul') setSoulOpen(true);
     else if (id === 'skills') setSkillsOpen(true);
@@ -1007,11 +843,6 @@ export default function App() {
   return (
     <>
       <style>{G}</style>
-      {showStartupVideo ? (
-        <StartupScreen onComplete={handleVideoComplete} />
-      ) : showLoadingScreen ? (
-        <LoadingScreen onComplete={() => setShowLoadingScreen(false)} />
-      ) : (
       <div style={{
         position: "fixed", inset: 0,
         display: "flex", flexDirection: "column",
@@ -1043,22 +874,15 @@ export default function App() {
         {/* Main content */}
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-            {activeNav === "voice" ? (
-              <VoiceAIPage />
-            ) : (
-              <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
-            )}
+            <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
           </div>
 
-
-          <SettingsDialog open={isSettingsOpen} onOpenChange={setSettingsOpen} />
           <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
           <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
           <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
-          
         </div>
       </div>
-      )}
     </>
   );
 }
+
