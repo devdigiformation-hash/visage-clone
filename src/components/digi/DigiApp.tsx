@@ -444,17 +444,15 @@ function StatusDot({ s }: { s: "active" | "standby" | "error" }) {
 
 
 // ─── Operations Panel ─────────────────────────────────────────────────────────
-function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings') => void; }) {
-  const navigate = useNavigate();
-
+function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: boolean; onToggleAI: () => void; onOpenModal: (type: 'memory'|'soul'|'skills'|'settings'|'agent'|'tools') => void; }) {
   const [activeNode, setActiveNode] = useState<string | null>("soul");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
-  const [agentOpen, setAgentOpen] = useState(false);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
   const screenVideoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
+
 
   // Browser-only media capture — no backend, no processing. Streams stay local to <video>.
   const toggleCamera = async () => {
