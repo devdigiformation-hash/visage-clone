@@ -611,21 +611,23 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           );
         })}
 
-        {/* Live media previews (top-left, above the globe) */}
+        {/* Visual-only camera/screen indicator (frontend template — no capture) */}
         {(cameraOn || screenShareOn) && (
           <div style={{
             position: "absolute",
             top: globeCenterY - Math.round(globeSize / 2) - 18,
             left: globeCenterX - Math.round(globeSize / 2) - 22,
-            display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "auto"
+            display: "flex", flexDirection: "column", gap: 6, zIndex: 30, pointerEvents: "none"
           }}>
             {cameraOn && (
-              <video ref={cameraVideoRef} autoPlay playsInline muted
-                style={{ width: 90, height: 68, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000", transform: "scaleX(-1)" }} />
+              <div style={{ width: 90, height: 68, borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "linear-gradient(135deg,#050608,#0F1620)", display: "flex", alignItems: "center", justifyContent: "center", color: "#2FE0C8", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em" }}>
+                CAM · PREVIEW
+              </div>
             )}
             {screenShareOn && (
-              <video ref={screenVideoRef} autoPlay playsInline muted
-                style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "#000" }} />
+              <div style={{ width: 90, height: 60, borderRadius: 6, border: "1px solid rgba(47,224,200,0.4)", background: "linear-gradient(135deg,#050608,#0F1620)", display: "flex", alignItems: "center", justifyContent: "center", color: "#2FE0C8", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em" }}>
+                SCREEN · PREVIEW
+              </div>
             )}
           </div>
         )}
