@@ -704,43 +704,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
-          {/* SYSTEM STANDBY label — hides when AI is active */}
-          <div style={{
-            height: 16,
-            marginTop: 6,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 10,
-            letterSpacing: "0.32em",
-            textTransform: "uppercase",
-            color: "#5C616B",
-            opacity: aiActive ? 0 : 1,
-            transition: "opacity 0.35s ease",
-            pointerEvents: "none",
-          }}>
-            System Standby
-          </div>
-
-          <button
-            onClick={() => { playUISound('powerup'); onToggleAI(); }}
-            onMouseEnter={() => playUISound('hover')}
-            className={aiActive ? "glass-btn" : "glass-btn-active"}
-            style={{
-              marginTop: 14,
-              padding: "8px 38px", borderRadius: 24,
-              fontSize: 13, fontWeight: 600,
-              letterSpacing: "0.15em",
-              wordSpacing: "0.8em",
-              color: aiActive ? "#FF5C5C" : "#34D399",
-              cursor: "pointer",
-              background: "rgba(10, 15, 20, 0.8)",
-              border: "1px solid rgba(52, 211, 153, 0.2)"
-            }}
-            onMouseOver={(e) => { if (!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
-            onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
-          >
-            {aiActive ? "STOP AI" : "START AI"}
-          </button>
+          {/* Standby label and Start/Stop button removed — auto-cycle handles state */}
 
         </div>
       </div>
@@ -962,6 +926,13 @@ const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click'
 export default function App() {
   const [aiActive, setAI] = useState(false);
   const [openModule, setOpenModule] = useState<string | null>(null);
+
+  // Auto-cycle: 1 min standby → 2 min active → repeat
+  useEffect(() => {
+    const nextDelay = aiActive ? 2 * 60 * 1000 : 1 * 60 * 1000;
+    const t = setTimeout(() => setAI(v => !v), nextDelay);
+    return () => clearTimeout(t);
+  }, [aiActive]);
 
   return (
     <>
