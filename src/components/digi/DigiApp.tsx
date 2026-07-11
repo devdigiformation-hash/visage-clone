@@ -2004,14 +2004,10 @@ export default function App() {
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <TitleBar />
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-            <LeftSidebar activeNav={activeNav} setActiveNav={setActiveNav} onOpenSettings={() => openSettings()} />
             {activeNav === "voice" ? (
               <VoiceAIPage />
             ) : (
-              <>
-                <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
-                <ChatPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} isOpen={isChatOpen} onToggle={() => setChatOpen(!isChatOpen)} />
-              </>
+              <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
             )}
           </div>
 
