@@ -129,7 +129,7 @@ const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // card + label
 const C_ITEM_GAP = 14;                                  // gap between full items
 const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // one full row
 const C_LEFT_STACK_X = 16;  // hug the left wall (was 40)
-const C_GLOBE_Y_RATIO = 0.30;
+const C_GLOBE_Y_RATIO = 0.50;
 
 // Right-side outgoing wires — separate palette from left input modules.
 const RIGHT_WIRES = [
@@ -538,10 +538,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
     return () => ro.disconnect();
   }, []);
 
-  // Computed height of the node-map section
+  // Computed height — fill the entire panel so the globe is truly window-centered
   const baseNodeMapH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP + C_PAD * 2;
-  const availableCompositionH = Math.max(baseNodeMapH + 220, dims.h - 36 - 32);
-  const nodeMapH = Math.max(baseNodeMapH + 220, Math.round(availableCompositionH * 0.80));
+  const nodeMapH = Math.max(baseNodeMapH + 220, dims.h);
   const globeSize = Math.min(390, Math.max(330, Math.round(Math.min(dims.w * 0.47, nodeMapH * 0.58))));
   const globeCenterY = Math.round(nodeMapH * C_GLOBE_Y_RATIO);
   const nodeCardsTotalH = NODES.length * C_ITEM_H + (NODES.length - 1) * C_ITEM_GAP;
@@ -552,13 +551,11 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const rightActionStackX = dims.w - C_LEFT_STACK_X - C_CARD_W; // mirror of (C_LEFT_STACK_X + C_CARD_W) -> wire endpoint
   const globeCenterX = Math.round(dims.w / 2);
   const cardCenterYs = [0, 1, 2, 3].map(i => nodeCardsTop + i * C_ROW_STEP + Math.round(C_CARD_H / 2));
-  const agentTownMinH = Math.max(160, Math.round(availableCompositionH * 0.20));
 
   return (
     <div ref={panelRef} style={{
       flex: 1, minWidth: 0,
       display: "flex", flexDirection: "column",
-      borderRight: "1px solid #1A1D24",
       overflow: "hidden",
     }}>
 
@@ -741,12 +738,29 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
+          {/* SYSTEM STANDBY label — hides when AI is active */}
+          <div style={{
+            height: 16,
+            marginTop: 6,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10,
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: "#5C616B",
+            opacity: aiActive ? 0 : 1,
+            transition: "opacity 0.35s ease",
+            pointerEvents: "none",
+          }}>
+            System Standby
+          </div>
 
           <button
             onClick={() => { playUISound('powerup'); onToggleAI(); }}
             onMouseEnter={() => playUISound('hover')}
             className={aiActive ? "glass-btn" : "glass-btn-active"}
             style={{
+              marginTop: 8,
               padding: "8px 38px", borderRadius: 24,
               fontSize: 13, fontWeight: 600,
               color: aiActive ? "#FF5C5C" : "#34D399",
