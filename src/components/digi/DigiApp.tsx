@@ -958,17 +958,7 @@ const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click'
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [aiActive, setAI] = useState(false);
-  const [isMemoryOpen, setMemoryOpen] = useState(false);
-  const [isSoulOpen, setSoulOpen] = useState(false);
-  const [isSkillsOpen, setSkillsOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const openModal = (id: string) => {
-    if (id === 'settings') navigate({ to: "/settings" });
-    else if (id === 'memory') setMemoryOpen(true);
-    else if (id === 'soul') setSoulOpen(true);
-    else if (id === 'skills') setSkillsOpen(true);
-  };
+  const [openModule, setOpenModule] = useState<string | null>(null);
 
   return (
     <>
@@ -1004,15 +994,18 @@ export default function App() {
         {/* Main content */}
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-            <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
+            <OperationsPanel
+              aiActive={aiActive}
+              onToggleAI={() => setAI(v => !v)}
+              onOpenModal={(id) => setOpenModule(id)}
+            />
           </div>
 
-          <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
-          <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
-          <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
+          <PlaceholderDialog moduleId={openModule} onClose={() => setOpenModule(null)} />
         </div>
       </div>
     </>
   );
 }
+
 
