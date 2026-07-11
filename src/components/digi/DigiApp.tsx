@@ -1,26 +1,16 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
-  Brain, Heart, Settings, Zap, RefreshCw, Globe,
-  MessageSquare, Layers, ArrowUp, Search, Mic, Camera,
-  ChevronDown, Monitor, LayoutDashboard, Bot, Users,
-  Wallet, RotateCcw, PanelRightClose, PanelRightOpen,
-  PanelLeftClose, PanelLeftOpen, Paperclip, Image as ImageIcon,
-  Volume2, TrendingUp, BarChart2, Folder, FileText, Copy, Check,
-  Workflow, Wrench
+  Brain, Heart, Settings, Zap,
+  Monitor, Bot, Camera, Wrench,
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
-
 import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
-import { VoiceAIPage } from "./VoiceAIPage";
-import { CommandCenterOverlay } from "@/components/orchestrator/CommandCenterOverlay";
 import { useNavigate } from "@tanstack/react-router";
 
-import startupVideoAsset from '@/assets/digi-startup.mp4.asset.json';
-const startupVideoUrl = startupVideoAsset.url;
 import logoUrl from '@/assets/digi-logo.png';
 
 // ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
