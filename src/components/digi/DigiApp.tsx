@@ -717,9 +717,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 // ─── Placeholder Dialog (generic empty window used by every button) ──────────
 const MODULE_META: Record<string, { label: string; accent: string; kicker: string }> = {
   memory:   { label: "Memory",   accent: "#8B7CF6", kicker: "MEMORY MODULE" },
-  soul:     { label: "Soul",     accent: "#2FE0C8", kicker: "SOUL MODULE" },
+  soul:     { label: "Workflows", accent: "#2FE0C8", kicker: "WORKFLOWS MODULE" },
   skills:   { label: "Skills",   accent: "#3B82F6", kicker: "SKILLS MODULE" },
-  settings: { label: "Settings", accent: "#EF4444", kicker: "SETTINGS MODULE" },
+  settings: { label: "Automation", accent: "#EF4444", kicker: "AUTOMATION MODULE" },
   agent:    { label: "Agent",    accent: "#F472B6", kicker: "AGENT MODULE" },
   tools:    { label: "Tools",    accent: "#7DD3FC", kicker: "TOOLS MODULE" },
 };
