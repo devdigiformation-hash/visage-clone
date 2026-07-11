@@ -745,6 +745,30 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           </button>
         </div>
       </div>
+
+      {/* Agent placeholder — no execution, no backend */}
+      {agentOpen && (
+        <div
+          onClick={() => setAgentOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ position: "relative", width: 380, padding: "32px 28px", borderRadius: 16, background: "#0A0A0A", border: "1px solid #222", color: "#E8EAF0", fontFamily: "'Inter', sans-serif", textAlign: "center" }}
+          >
+            <button
+              onClick={() => setAgentOpen(false)}
+              style={{ position: "absolute", top: 10, right: 12, background: "transparent", border: "none", color: "#666", fontSize: 18, cursor: "pointer" }}
+              aria-label="Close"
+            >×</button>
+            <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#8B5CF6", fontFamily: "'JetBrains Mono', monospace", marginBottom: 12 }}>AGENT MODULE</div>
+            <h3 style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>Coming Soon</h3>
+            <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6, margin: 0 }}>
+              No functionality connected yet. Agents, workflows, and automation will be wired in a future release.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
