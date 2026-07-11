@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import {
-  Brain, Heart, Settings, Zap,
+  Brain, Workflow, Sparkles, Zap,
   Monitor, Bot, Camera, Wrench,
   X as CloseIcon,
 } from "lucide-react";
+
 
 
 // ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
@@ -97,9 +98,9 @@ const G = `
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const NODES = [
   { id: "memory",   label: "Memory",   Icon: Brain,    color: "#8B7CF6", bg: "rgba(139,124,246,0.12)", glow: "rgba(139,124,246,0.22)", badge: "HIGH" },
-  { id: "soul",     label: "Soul",     Icon: Heart,    color: "#2FE0C8", bg: "rgba(47,224,200,0.12)",  glow: "rgba(47,224,200,0.22)",  badge: "HIGH" },
+  { id: "soul",     label: "Workflows", Icon: Workflow, color: "#2FE0C8", bg: "rgba(47,224,200,0.12)",  glow: "rgba(47,224,200,0.22)",  badge: "HIGH" },
   { id: "skills",   label: "Skills",   Icon: Zap,      color: "#3B82F6", bg: "rgba(59,130,246,0.12)",  glow: "rgba(59,130,246,0.22)",  badge: "MED"  },
-  { id: "settings", label: "Settings", Icon: Settings, color: "#EF4444", bg: "rgba(239,68,68,0.08)",   glow: "rgba(239,68,68,0.15)",   badge: "LOW"  },
+  { id: "settings", label: "Automation", Icon: Sparkles, color: "#EF4444", bg: "rgba(239,68,68,0.08)",   glow: "rgba(239,68,68,0.15)",   badge: "LOW"  },
 ];
 
 // ─── Layout constants (must be identical across ConnectorSVG & OperationsPanel)
@@ -716,9 +717,9 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 // ─── Placeholder Dialog (generic empty window used by every button) ──────────
 const MODULE_META: Record<string, { label: string; accent: string; kicker: string }> = {
   memory:   { label: "Memory",   accent: "#8B7CF6", kicker: "MEMORY MODULE" },
-  soul:     { label: "Soul",     accent: "#2FE0C8", kicker: "SOUL MODULE" },
+  soul:     { label: "Workflows", accent: "#2FE0C8", kicker: "WORKFLOWS MODULE" },
   skills:   { label: "Skills",   accent: "#3B82F6", kicker: "SKILLS MODULE" },
-  settings: { label: "Settings", accent: "#EF4444", kicker: "SETTINGS MODULE" },
+  settings: { label: "Automation", accent: "#EF4444", kicker: "AUTOMATION MODULE" },
   agent:    { label: "Agent",    accent: "#F472B6", kicker: "AGENT MODULE" },
   tools:    { label: "Tools",    accent: "#7DD3FC", kicker: "TOOLS MODULE" },
 };
