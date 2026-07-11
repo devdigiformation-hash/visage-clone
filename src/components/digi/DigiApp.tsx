@@ -730,7 +730,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
               padding: "8px 38px", borderRadius: 24,
               fontSize: 13, fontWeight: 600,
               letterSpacing: "0.15em",
-              wordSpacing: "0.4em",
+              wordSpacing: "0.8em",
               color: aiActive ? "#FF5C5C" : "#34D399",
               cursor: "pointer",
               background: "rgba(10, 15, 20, 0.8)",
