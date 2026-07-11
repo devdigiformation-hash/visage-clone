@@ -1143,13 +1143,6 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
-          {!aiActive && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200, marginTop: -14 }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-              <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-            </div>
-          )}
 
           <button
             onClick={async () => {
@@ -2002,7 +1995,6 @@ export default function App() {
 
         {/* Main content */}
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-          <TitleBar />
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
             {activeNav === "voice" ? (
               <VoiceAIPage />
@@ -2011,34 +2003,6 @@ export default function App() {
             )}
           </div>
 
-          {/* ─── Status Bar (Bottom) ─── */}
-          <div style={{
-            height: 26, flexShrink: 0,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "0 12px",
-            background: "#0C0D12",
-            borderTop: "1px solid #1A1D24",
-            fontSize: 10, fontFamily: "'JetBrains Mono', 'Consolas', monospace",
-            color: "#4A4F5C", letterSpacing: "0.03em",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ 
-                  width: 6, height: 6, borderRadius: "50%", 
-                  background: hermesStatus === 'online' ? "#2FE0C8" : hermesStatus === 'connecting' ? "#F5A623" : "#D0021B", 
-                  boxShadow: hermesStatus === 'online' ? "0 0 6px rgba(47,224,200,0.5)" : "none" 
-                }} />
-                {hermesStatus === 'online' ? "SYSTEM ONLINE" : hermesStatus === 'connecting' ? "CONNECTING..." : "SYSTEM OFFLINE"}
-              </span>
-              <span>v0.0.1</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ color: hermesStatus === 'online' ? "#4A4F5C" : "#D0021B" }}>
-                HERMES BRIDGE: {hermesStatus === 'online' ? (hermesPort || "...") : "DISCONNECTED"}
-              </span>
-              <span>DIGI BUSINESS OS</span>
-            </div>
-          </div>
 
           <SettingsDialog open={isSettingsOpen} onOpenChange={setSettingsOpen} defaultTab={activeTab} />
           <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
