@@ -704,7 +704,26 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
-
+          <button
+            onClick={() => { playUISound('powerup'); onToggleAI(); }}
+            onMouseEnter={() => playUISound('hover')}
+            className={aiActive ? "glass-btn" : "glass-btn-active"}
+            style={{
+              marginTop: 14,
+              padding: "8px 38px", borderRadius: 24,
+              fontSize: 13, fontWeight: 600,
+              letterSpacing: "0.15em",
+              wordSpacing: "0.4em",
+              color: aiActive ? "#FF5C5C" : "#34D399",
+              cursor: "pointer",
+              background: "rgba(10, 15, 20, 0.8)",
+              border: "1px solid rgba(52, 211, 153, 0.2)"
+            }}
+            onMouseOver={(e) => { if (!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
+            onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+          >
+            {aiActive ? "STOP AI" : "START AI"}
+          </button>
 
         </div>
       </div>
