@@ -655,9 +655,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           pointerEvents: "auto",
         }}>
           <div
-            style={{ position: "relative", width: globeSize, height: globeSize, cursor: "pointer" }}
-            onClick={() => setCommandCenterOpen(true)}
-            title="Open Task Analytics"
+            style={{ position: "relative", width: globeSize, height: globeSize }}
           >
             <div className={aiActive ? "orb-breathe" : ""}
               style={{
