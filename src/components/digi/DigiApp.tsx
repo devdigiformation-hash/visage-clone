@@ -453,10 +453,51 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
   const [activeNode, setActiveNode] = useState<string | null>("soul");
   const [cameraOn, setCameraOn] = useState(false);
   const [screenShareOn, setScreenShareOn] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
+  const cameraVideoRef = useRef<HTMLVideoElement>(null);
+  const screenVideoRef = useRef<HTMLVideoElement>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
 
-  // Frontend-only toggle handlers — purely visual, no media capture, no backend.
-  const toggleCamera = () => { playUISound('click'); setCameraOn(v => !v); };
-  const toggleScreenShare = () => { playUISound('click'); setScreenShareOn(v => !v); };
+  // Browser-only media capture — no backend, no processing. Streams stay local to <video>.
+  const toggleCamera = async () => {
+    playUISound('click');
+    if (cameraOn) {
+      cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+      cameraStreamRef.current = null;
+      setCameraOn(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      cameraStreamRef.current = stream;
+      setCameraOn(true);
+      setTimeout(() => { if (cameraVideoRef.current) cameraVideoRef.current.srcObject = stream; }, 0);
+    } catch (e) { console.warn("Camera permission denied or unavailable", e); }
+  };
+  const toggleScreenShare = async () => {
+    playUISound('click');
+    if (screenShareOn) {
+      screenStreamRef.current?.getTracks().forEach(t => t.stop());
+      screenStreamRef.current = null;
+      setScreenShareOn(false);
+      return;
+    }
+    try {
+      const stream = await (navigator.mediaDevices as any).getDisplayMedia({ video: true, audio: false });
+      screenStreamRef.current = stream;
+      setScreenShareOn(true);
+      setTimeout(() => { if (screenVideoRef.current) screenVideoRef.current.srcObject = stream; }, 0);
+      stream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        screenStreamRef.current = null;
+        setScreenShareOn(false);
+      });
+    } catch (e) { console.warn("Screen share cancelled or unavailable", e); }
+  };
+  useEffect(() => () => {
+    cameraStreamRef.current?.getTracks().forEach(t => t.stop());
+    screenStreamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const [dims,  setDims]  = useState({ w: 600, h: 640 });
