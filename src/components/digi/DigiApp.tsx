@@ -709,9 +709,6 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           </button>
         </div>
       </div>
-
-
-      <CommandCenterOverlay open={commandCenterOpen} onClose={() => setCommandCenterOpen(false)} />
     </div>
   );
 }
