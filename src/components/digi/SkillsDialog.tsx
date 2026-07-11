@@ -14,33 +14,18 @@ export function SkillsDialog({ open, onOpenChange }: { open: boolean; onOpenChan
   const [instructions, setInstructions] = useState('');
   const [skills, setSkills] = useState<any[]>([]);
 
-  const loadSkills = async () => {
-    if ((window as any).electronAPI?.loadSkills) {
-      const data = await (window as any).electronAPI.loadSkills();
-      setSkills(data || []);
-    }
-  };
-
   useEffect(() => {
-    if (open) {
-      loadSkills();
-      setView('list');
-    }
+    if (open) setView('list');
   }, [open]);
 
-  const handleSaveSkill = async () => {
+  const handleSaveSkill = () => {
     if (!skillName.trim() || !description.trim()) return;
-    const newSkill = {
+    setSkills((prev) => [{
       id: Date.now().toString(),
       name: skillName,
       description,
-      instructions
-    };
-    const updated = [newSkill, ...skills];
-    setSkills(updated);
-    if ((window as any).electronAPI?.saveSkills) {
-      await (window as any).electronAPI.saveSkills(updated);
-    }
+      instructions,
+    }, ...prev]);
     setSkillName('');
     setDescription('');
     setInstructions('');
