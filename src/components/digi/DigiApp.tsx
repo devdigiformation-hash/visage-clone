@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { SettingsDialog } from "./SettingsDialog";
-import { TaskStrip } from "@/components/analytics/TaskStrip";
+
 import { MemoryDialog } from "./MemoryDialog";
 import { SoulDialog } from "./SoulDialog";
 import { SkillsDialog } from "./SkillsDialog";
@@ -110,60 +110,12 @@ const G = `
   }
 `;
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface Msg { id: number; role: "ai" | "user"; text: string; }
-
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const NODES = [
   { id: "memory",   label: "Memory",   Icon: Brain,    color: "#8B7CF6", bg: "rgba(139,124,246,0.12)", glow: "rgba(139,124,246,0.22)", badge: "HIGH" },
   { id: "soul",     label: "Soul",     Icon: Heart,    color: "#2FE0C8", bg: "rgba(47,224,200,0.12)",  glow: "rgba(47,224,200,0.22)",  badge: "HIGH" },
   { id: "skills",   label: "Skills",   Icon: Zap,      color: "#3B82F6", bg: "rgba(59,130,246,0.12)",  glow: "rgba(59,130,246,0.22)",  badge: "MED"  },
   { id: "settings", label: "Settings", Icon: Settings, color: "#EF4444", bg: "rgba(239,68,68,0.08)",   glow: "rgba(239,68,68,0.15)",   badge: "LOW"  },
-];
-
-// Single source of truth: pull nav + modules from the shared AppShell config so
-// the dashboard sidebar and the /route AppShell sidebar never diverge and
-// no module is ever listed twice.
-import { NAV as APPSHELL_NAV, MOD_GROUPS as APPSHELL_MOD_GROUPS } from "@/components/shell/AppShell";
-const NAV_ITEMS = APPSHELL_NAV.map(n => ({
-  id: n.to === "/" ? "dashboard" : n.to.replace("/", ""),
-  label: n.label, Icon: n.Icon, color: n.color, route: n.to,
-}));
-const MODULE_GROUPS = APPSHELL_MOD_GROUPS.map(g => ({
-  id: g.id,
-  label: g.label,
-  defaultOpen: g.defaultOpen,
-  items: g.items.map(m => ({ label: m.label, Icon: m.Icon, color: m.color, route: m.to })),
-}));
-
-
-const MSGS_INIT: Msg[] = [
-  { id: 1, role: "ai", text: "I'm analyzing the conversation style. Considering the user's 'Hello' in English, I am determining the best response. Given the context, I will decide whether to offer a warm Urdu greeting, or a transition to English. This is important to ensure a smooth interaction with the user." },
-  { id: 2, role: "ai", text: "**Responding to User Input**\n\nI'm now writing a response. The system had previously transitioned to Urdu in the conversation. However, the user simply said 'Hello'. I'm now deciding on a response, I am drafting my answer, considering the user's Input of 'Hello', to determine the best approach. My initial draft response is a warm Urdu greeting, and I'm currently assessing its appropriateness in this context." },
-  { id: 3, role: "user", text: "ہیلو مسٹر باقر! کیسے مدد کر سکتا ہوں؟ آپ کی مدد کریں گے؟" },
-];
-
-const AGENTS = [
-  { label: "Sales Agent (Elite)",     dot: "#34D399" },
-  { label: "Support Agent (Active)",  dot: "#34D399" },
-  { label: "Marketing Agent (Elite)", dot: "#34D399" },
-  { label: "Finance Agent (Syncing)", dot: "#F5A623" },
-  { label: "HR Agent (Idle)",         dot: "#5C616B" },
-];
-
-const ACTIVITIES = [
-  { label: "New Order #12590",    time: "2m ago" },
-  { label: "WhatsApp Message",    time: "3m ago" },
-  { label: "AI Report Generated", time: "5m ago" },
-  { label: "User Login: Admin",   time: "7m ago" },
-  { label: "Project Updated",     time: "10m ago" },
-];
-
-const METRICS = [
-  { label: "CPU USAGE",  pct: 24, color: "#34D399" },
-  { label: "RAM USAGE",  pct: 48, color: "#34D399" },
-  { label: "NETWORK",    pct: 60, color: "#F5A623" },
-  { label: "DISK USAGE", pct: 55, color: "#F5A623" },
 ];
 
 // ─── Layout constants (must be identical across ConnectorSVG & OperationsPanel)
@@ -939,31 +891,6 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
       overflow: "hidden",
     }}>
 
-      {/* ── Operations header ── */}
-      <div style={{
-        height: 36, flexShrink: 0,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 14px",
-        borderBottom: "1px solid #1A1D24",
-        background: "rgba(10,12,18,0.5)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <StatusDot s="active" />
-          <Mono className="!text-[#9AA0AC] !text-[10.5px]">Operations Status</Mono>
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          {["ALL", "HIGH", "MED"].map((f, i) => (
-            <button key={f} 
-              onClick={() => playUISound('soft-click')}
-              onMouseEnter={() => playUISound('hover')}
-              className={i === 0 ? "glass-btn-active" : "glass-btn"} style={{
-              fontSize: 9.5, fontFamily: "'JetBrains Mono', monospace",
-              padding: "4px 8px", borderRadius: 6, textTransform: "uppercase" as const,
-              color: i === 0 ? "#F5F6F8" : "#5C616B",
-            }}>{f}</button>
-          ))}
-        </div>
-      </div>
 
       {/* ── Node map ── */}
       <div style={{
@@ -1145,19 +1072,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
 
 
           <button
-            onClick={async () => {
-              playUISound('powerup');
-              onToggleAI();
-              if ((window as any).electronAPI) {
-                if (!aiActive) {
-                  await (window as any).electronAPI.startGeminiVoiceAssistant?.();
-                  await (window as any).electronAPI.triggerGeminiLiveCall?.(true);
-                } else {
-                  await (window as any).electronAPI.triggerGeminiLiveCall?.(false);
-                  await (window as any).electronAPI.stopGeminiVoiceAssistant?.();
-                }
-              }
-            }}
+            onClick={() => { playUISound('powerup'); onToggleAI(); }}
             onMouseEnter={() => playUISound('hover')}
             className={aiActive ? "glass-btn" : "glass-btn-active"}
             style={{
@@ -1176,445 +1091,12 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
         </div>
       </div>
 
-      {/* ── Tracking Board tab bar ── */}
-      <div style={{
-        height: 34, flexShrink: 0, marginTop: 0,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 14px",
-        borderTop: "1px solid #1A1D24",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <StatusDot s="active" />
-          <Mono className="!text-[#9AA0AC]">Tracking Board</Mono>
-        </div>
-        <div style={{ display: "flex", gap: 3 }}>
-          {[{ id: "town", l: "Active" }, { id: "visual", l: "Completed" }].map(tab => (
-            <button key={tab.id}
-              onClick={() => { playUISound('tab-click'); setAgentTab(tab.id); }}
-              onMouseEnter={() => playUISound('hover')}
-              className={agentTab === tab.id ? "glass-btn-active" : "glass-btn"}
-              style={{
-                fontSize: 9.5, fontFamily: "'JetBrains Mono', monospace",
-                padding: "4px 8px", borderRadius: 5, textTransform: "uppercase" as const,
-                color: agentTab === tab.id ? "#F5F6F8"  : "#5C616B",
-              }}>{tab.l}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Tracking Board content ── */}
-      <div style={{ flex: 1, overflowY: "auto", minHeight: agentTownMinH }} className="custom-scroll">
-        <TrackingBoard filter={agentTab} />
-      </div>
-
-      {/* ── Status bar ── */}
-      <div style={{
-        height: 32, flexShrink: 0,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 14px",
-        borderTop: "1px solid #1A1D24",
-        background: "rgba(10,12,18,0.4)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <StatusDot s="active" />
-          <Mono>All Systems Normal</Mono>
-        </div>
-        <input placeholder="Add new objective..."
-          style={{ fontSize: 11, background: "transparent", outline: "none", color: "#5C616B", width: 155 }} />
-      </div>
 
       <CommandCenterOverlay open={commandCenterOpen} onClose={() => setCommandCenterOpen(false)} />
     </div>
   );
 }
 
-// ─── Chat Bubble ──────────────────────────────────────────────────────────────
-function ChatBubble({ m }: { m: any }) {
-  const isUser   = m.role === "user";
-  const hasArabic = /[\u0600-\u06FF]/.test(m.text || '');
-  const parts    = (m.text || '').split(/(\*\*[^*]+\*\*)/g);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(m.text || '');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", padding: "0 12px" }}>
-      {!isUser && (
-        <div style={{
-          width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-          marginRight: 7, marginTop: 3,
-          background: "rgba(47,224,200,0.1)", border: "1px solid rgba(47,224,200,0.2)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <Layers size={10} style={{ color: "#2FE0C8" }} />
-        </div>
-      )}
-      <div style={{
-        maxWidth: "88%", borderRadius: 12, padding: "8px 11px",
-        fontSize: 12, lineHeight: 1.7, color: "#E8EAF0",
-        background: isUser ? "rgba(47,224,200,0.07)" : "#15181E",
-        border: `1px solid ${isUser ? "rgba(47,224,200,0.18)" : "#1D2028"}`,
-        borderBottomRightRadius: isUser ? 3 : 12,
-        borderBottomLeftRadius:  isUser ? 12 : 3,
-        direction:  hasArabic ? "rtl"   : "ltr",
-        textAlign:  hasArabic ? "right" : "left",
-      }}>
-        {m.reasoning && (
-          <div style={{ fontSize: 10, color: "#9AA0AC", marginBottom: 4, fontStyle: "italic", borderBottom: "1px solid #1A1D24", paddingBottom: 4 }}>
-            {m.reasoning}
-          </div>
-        )}
-        {m.status && (
-          <div style={{ fontSize: 10, color: "#2FE0C8", marginBottom: 4 }}>
-            <span className="animate-pulse">▶</span> {m.status}
-          </div>
-        )}
-        {parts.map((part: string, i: number) => {
-          if (part.startsWith("**") && part.endsWith("**")) {
-            return <strong key={i} style={{ color: "#F5F6F8" }}>{part.slice(2, -2)}</strong>;
-          }
-          return (
-            <span key={i}>
-              {part.split("\n").map((line, j, arr) => (
-                <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
-              ))}
-            </span>
-          );
-        })}
-        {m.isStreaming && <span className="animate-pulse ml-1 text-[#2FE0C8]">▋</span>}
-      </div>
-      {!isUser && !m.isStreaming && (
-        <button 
-          onClick={handleCopy}
-          className="glass-btn"
-          style={{ 
-            marginLeft: 8, marginTop: 4, width: 24, height: 24, borderRadius: 6,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            opacity: 0.6, flexShrink: 0, alignSelf: "flex-end"
-          }}
-          title="Copy"
-        >
-          {copied ? <Check size={12} color="#34D399" /> : <Copy size={12} color="#9AA0AC" />}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ─── Chat Panel ───────────────────────────────────────────────────────────────
-import { useElectronChat } from "@/hooks/digi/useElectronChat";
-import { useSpeechRecognition } from "@/hooks/digi/useSpeechRecognition";
-import { modelsRepo, agentsRepo, useRepo } from "@/lib/repo";
-
-const ACTIVE_MODEL_KEY = "digi.chat.activeModelId";
-const ACTIVE_AGENT_KEY = "digi.chat.activeAgentId";
-
-function ChatSessionBar() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  const models = useRepo(modelsRepo);
-  const agents = useRepo(agentsRepo);
-  const [modelId, setModelId] = useState<string>("");
-  const [agentId, setAgentId] = useState<string>("");
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setModelId(localStorage.getItem(ACTIVE_MODEL_KEY) || "");
-    setAgentId(localStorage.getItem(ACTIVE_AGENT_KEY) || "");
-  }, []);
-
-  useEffect(() => {
-    if (!modelId && models.length) {
-      const def = (models as any[]).find((m) => m.isDefault) || models[0];
-      setModelId((def as any).id);
-    }
-  }, [models, modelId]);
-
-  useEffect(() => { if (modelId) localStorage.setItem(ACTIVE_MODEL_KEY, modelId); }, [modelId]);
-  useEffect(() => { if (agentId) localStorage.setItem(ACTIVE_AGENT_KEY, agentId); }, [agentId]);
-
-  const selectStyle: React.CSSProperties = {
-    flex: 1, minWidth: 0, background: "#08090C", border: "1px solid #1E2129",
-    color: "#D2D6E0", fontSize: 11, borderRadius: 6, padding: "4px 6px", outline: "none",
-    fontFamily: "'Inter', system-ui, sans-serif",
-  };
-
-  return (
-    <div style={{
-      display: "flex", gap: 6, padding: "8px 12px",
-      borderBottom: "1px solid #1A1D24", background: "rgba(10,12,18,0.5)",
-    }}>
-      {!mounted ? (<div style={{ height: 22 }} />) : (<>
-      <select value={modelId} onChange={(e) => setModelId(e.target.value)} style={selectStyle} title="Active model">
-        {models.length === 0 && <option value="">No models</option>}
-        {(models as any[]).map((m) => (
-          <option key={m.id} value={m.id}>{m.provider} · {m.name}{m.isDefault ? " ★" : ""}</option>
-        ))}
-      </select>
-      <select value={agentId} onChange={(e) => setAgentId(e.target.value)} style={selectStyle} title="Active agent">
-        <option value="">No agent</option>
-        {(agents as any[]).map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
-      </select>
-      </>)}
-    </div>
-  );
-}
-
-function ChatPanel({ aiActive, onToggleAI, isOpen, onToggle }: { aiActive: boolean; onToggleAI: () => void; isOpen: boolean; onToggle: () => void }) {
-  const [input,     setInput] = useState("");
-  const { msgs, send, connected, listening } = useElectronChat(aiActive);
-  const endRef = useRef<HTMLDivElement>(null);
-
-  const { isListening, startListening, stopListening } = useSpeechRecognition((text, isFinal) => {
-    if (isFinal) {
-      send(text);
-      setInput("");
-    } else {
-      setInput(text);
-    }
-  });
-
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
-
-  useEffect(() => {
-    if (aiActive) {
-      startListening();
-    } else {
-      stopListening();
-    }
-  }, [aiActive, startListening, stopListening]);
-
-  useEffect(() => {
-    const api = (window as any).electronAPI;
-    if (!api) return;
-
-    if (aiActive) {
-      api.startGeminiVoiceAssistant?.().catch((err: any) => {
-        console.error('Failed to start hidden Gemini voice session:', err);
-      });
-    } else {
-      api.stopGeminiVoiceAssistant?.().catch((err: any) => {
-        console.error('Failed to stop hidden Gemini voice session:', err);
-      });
-    }
-  }, [aiActive]);
-
-  useEffect(() => {
-    if ((window as any).electronAPI && (window as any).electronAPI.onWakeWord) {
-      (window as any).electronAPI.onWakeWord((command: string) => {
-        if (!aiActive) onToggleAI();
-        if (!isOpen) onToggle();
-        send(command);
-      });
-    }
-  }, [aiActive, isOpen, onToggleAI, onToggle, send]);
-
-  const handleSend = () => {
-    if (!input.trim()) return;
-    playUISound('send');
-    send(input);
-    setInput("");
-  };
-
-  return (
-    <div style={{
-      width: 270, flexShrink: 0,
-      display: "flex", flexDirection: "column",
-      borderRight: "1px solid #1A1D24",
-      background: "rgba(9,10,15,0.75)",
-    }}>
-      {/* Top Header */}
-      <div style={{
-        padding: "12px 14px 6px",
-        display: "flex", alignItems: "center", justifyContent: "flex-end",
-      }}>
-        <button className="glass-btn" 
-          onClick={() => playUISound('soft-click')}
-          onMouseEnter={() => playUISound('hover')}
-          style={{ padding: "6px", borderRadius: 8 }}>
-          <RotateCcw size={13} style={{ color: "#9AA0AC" }} />
-        </button>
-      </div>
-
-      {/* Model + Agent selectors */}
-      <ChatSessionBar />
-
-      {/* Search bar */}
-      <div style={{
-        height: 36, flexShrink: 0,
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "0 12px",
-        borderBottom: "1px solid #1A1D24",
-        background: "rgba(10,12,18,0.5)",
-      }}>
-        <Search size={13} style={{ color: "#5C616B", flexShrink: 0 }} />
-        <input placeholder="Search anything..."
-          style={{ flex: 1, background: "transparent", outline: "none", fontSize: 12, color: "#F5F6F8" }} />
-        <Monitor size={13} style={{ color: "#5C616B" }} />
-      </div>
-
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 0", display: "flex", flexDirection: "column", gap: 10 }}
-        className="no-scrollbar">
-
-        {msgs.map(m => <ChatBubble key={m.id} m={m} />)}
-
-        <div ref={endRef} />
-      </div>
-
-      {/* Chat Input like Gemini */}
-      <div style={{ padding: 12 }}>
-        <div style={{
-          background: "#08090C", border: "1px solid #1E2129",
-          borderRadius: 16, padding: "8px 10px",
-          display: "flex", flexDirection: "column", gap: 6
-        }}>
-          <textarea
-            value={input} onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-            placeholder="Message Agent Town..."
-            rows={1}
-            style={{
-              width: "100%", background: "transparent", border: "none", outline: "none", resize: "none",
-              fontSize: 13, color: "#F5F6F8", lineHeight: 1.5, maxHeight: 68, padding: "2px 4px",
-              overflow: "hidden", scrollbarWidth: "none"
-            }}
-          />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Attachment Buttons */}
-            <div style={{ display: "flex", gap: 4 }}>
-              <label className="glass-btn" 
-                onClick={() => playUISound('soft-click')}
-                onMouseEnter={() => playUISound('hover')}
-                style={{
-                width: 28, height: 28, borderRadius: 8, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }} title="Add File">
-                <input type="file" style={{ display: "none" }} />
-                <Paperclip size={14} style={{ color: "#9AA0AC" }} />
-              </label>
-              <label className="glass-btn" 
-                onClick={() => playUISound('soft-click')}
-                onMouseEnter={() => playUISound('hover')}
-                style={{
-                width: 28, height: 28, borderRadius: 8, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }} title="Upload Image">
-                <input type="file" accept="image/*" style={{ display: "none" }} />
-                <ImageIcon size={14} style={{ color: "#9AA0AC" }} />
-              </label>
-              <label className="glass-btn" 
-                onClick={() => playUISound('soft-click')}
-                onMouseEnter={() => playUISound('hover')}
-                style={{
-                width: 28, height: 28, borderRadius: 8, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }} title="Integrate Folder">
-                <input type="file" {...{ webkitdirectory: "", directory: "" } as any} style={{ display: "none" }} />
-                <Folder size={14} style={{ color: "#9AA0AC" }} />
-              </label>
-            </div>
-
-            {/* Mic + Send */}
-            <div style={{ display: "flex", gap: 4 }}>
-              <button onClick={() => { playUISound('tech'); isListening ? stopListening() : startListening(); }} 
-                onMouseEnter={() => playUISound('hover')}
-                style={{
-                width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: isListening ? "rgba(47,224,200,0.1)" : "transparent",
-                border: `1px solid ${isListening ? "#2FE0C8" : "#252830"}`,
-              }}>
-                <Mic size={11} style={{ color: isListening ? "#2FE0C8" : "#5C616B" }} />
-              </button>
-              <button onClick={handleSend} 
-                onMouseEnter={() => playUISound('hover')}
-                style={{
-                width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: input.trim() ? "#2FE0C8" : "transparent", 
-                border: `1px solid ${input.trim() ? "transparent" : "#252830"}`,
-                boxShadow: input.trim() ? "0 0 12px rgba(47,224,200,0.4)" : "none",
-                transition: "all 0.2s ease"
-              }}>
-                <ArrowUp size={11} style={{ color: input.trim() ? "#08090C" : "#5C616B" }} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Title Bar ────────────────────────────────────────────────────────────────
-
-// ─── Title Bar ────────────────────────────────────────────────────────────────
-function TitleBar() {
-  const handleWindowAction = (action: 'minimize' | 'maximize' | 'close') => {
-    // Check if electronAPI exists (meaning we are running inside Electron)
-    if (window.electronAPI && window.electronAPI[action]) {
-      window.electronAPI[action]();
-    } else {
-      console.log(`Window action triggered: ${action} (Electron not detected)`);
-    }
-  };
-
-  return (
-    <div style={{
-      height: 34, flexShrink: 0,
-      display: "flex", alignItems: "center",
-      background: "#07080C",
-      borderBottom: "1px solid #1A1D24",
-      position: "relative",
-      WebkitAppRegion: "drag", // Enable dragging for Electron window
-    } as React.CSSProperties}>
-      {/* Left balance spacer (width = left sidebar) */}
-      <div style={{ width: 220, flexShrink: 0 }} />
-
-      {/* Centered title */}
-      <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-        <span style={{
-          fontSize: 12, fontFamily: "'JetBrains Mono', monospace",
-          fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "#D2D6E0",
-        }}>DIGI BUSINESS OS</span>
-      </div>
-
-      {/* Window controls */}
-      <div style={{ 
-        width: 320, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8, gap: 6,
-        WebkitAppRegion: "no-drag" // Buttons must not be draggable
-      } as React.CSSProperties}>
-
-        {([
-          { act: 'minimize', icon: <span key="m" style={{ display: "block", width: 10, height: 1, background: "currentColor", borderRadius: 1 }} /> },
-          { act: 'maximize', icon: <span key="s" style={{ display: "block", width: 10, height: 10, borderRadius: 2, border: "1px solid currentColor" }} /> },
-          { act: 'close', icon: <svg key="x" width="9" height="9" viewBox="0 0 9 9" fill="none" style={{ display: "block" }}>
-            <line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg> },
-        ]).map((btn, i) => (
-          <button key={i} 
-          onClick={() => { playUISound('soft-click'); handleWindowAction(btn.act as 'minimize' | 'maximize' | 'close'); }}
-          style={{
-            width: 26, height: 22, borderRadius: 5, flexShrink: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#5C616B", transition: "color 150ms, background 150ms",
-            cursor: "pointer"
-          }}
-          onMouseEnter={e => { playUISound('hover'); e.currentTarget.style.color = btn.act === 'close' ? "#FF5C5C" : "#9AA0AC"; e.currentTarget.style.background = btn.act === 'close' ? "rgba(255,92,92,0.1)" : "#1E212A"; }}
-          onMouseLeave={e => { e.currentTarget.style.color = "#5C616B"; e.currentTarget.style.background = "transparent"; }}>
-            {btn.icon}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── Sound System ─────────────────────────────────────────────────────────────
 const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click' | 'tab-click' | 'send') => {
@@ -1880,65 +1362,14 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [aiActive,   setAI]       = useState(false);
-  const [activeNav,  setActiveNav] = useState("dashboard");
+  const [aiActive, setAI] = useState(false);
+  const [activeNav] = useState("dashboard");
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isMemoryOpen, setMemoryOpen] = useState(false);
   const [isSoulOpen, setSoulOpen] = useState(false);
   const [isSkillsOpen, setSkillsOpen] = useState(false);
-  const [activeTab,  setActiveTab] = useState("voice");
-  const [isChatOpen, setChatOpen] = useState(true);
   const [showStartupVideo, setShowStartupVideo] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-  const [hermesStatus, setHermesStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
-  const [hermesPort, setHermesPort] = useState<number | null>(null);
-
-  useEffect(() => {
-    if ((window as any).electronAPI && (window as any).electronAPI.getHermesPort) {
-      (window as any).electronAPI.getHermesPort().then((port: number) => {
-        setHermesPort(port);
-      });
-    } else {
-      setHermesPort(18789); // fallback
-    }
-  }, []);
-
-  // ─── Hermes Bridge Health Check ─────────────────────────────────────────────
-  useEffect(() => {
-    if (!hermesPort) return;
-    let ws: WebSocket;
-    let reconnectTimeout: ReturnType<typeof setTimeout>;
-
-    const connect = () => {
-      setHermesStatus('connecting');
-      try {
-        ws = new WebSocket(`ws://127.0.0.1:${hermesPort}`);
-
-        ws.onopen = () => {
-          setHermesStatus('online');
-        };
-
-        ws.onclose = () => {
-          setHermesStatus('offline');
-          reconnectTimeout = setTimeout(connect, 3000);
-        };
-
-        ws.onerror = () => {
-          setHermesStatus('offline');
-        };
-      } catch (err) {
-        setHermesStatus('offline');
-        reconnectTimeout = setTimeout(connect, 3000);
-      }
-    };
-
-    connect();
-
-    return () => {
-      clearTimeout(reconnectTimeout);
-      if (ws) ws.close();
-    };
-  }, [hermesPort]);
 
   const handleVideoComplete = () => {
     setShowStartupVideo(false);
