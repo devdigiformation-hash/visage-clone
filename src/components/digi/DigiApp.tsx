@@ -704,6 +704,23 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
+          {/* SYSTEM STANDBY label — hides when AI is active */}
+          <div style={{
+            height: 16,
+            marginTop: 6,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10,
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: "#5C616B",
+            opacity: aiActive ? 0 : 1,
+            transition: "opacity 0.35s ease",
+            pointerEvents: "none",
+          }}>
+            System Standby
+          </div>
+
           <button
             onClick={() => { playUISound('powerup'); onToggleAI(); }}
             onMouseEnter={() => playUISound('hover')}
