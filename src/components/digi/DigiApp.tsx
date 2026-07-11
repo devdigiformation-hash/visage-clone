@@ -1106,7 +1106,7 @@ export default function App() {
           </div>
 
 
-          <SettingsDialog open={isSettingsOpen} onOpenChange={setSettingsOpen} defaultTab={activeTab} />
+          <SettingsDialog open={isSettingsOpen} onOpenChange={setSettingsOpen} />
           <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
           <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
           <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
