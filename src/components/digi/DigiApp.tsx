@@ -927,6 +927,13 @@ export default function App() {
   const [aiActive, setAI] = useState(false);
   const [openModule, setOpenModule] = useState<string | null>(null);
 
+  // Auto-cycle: 1 min standby → 2 min active → repeat
+  useEffect(() => {
+    const nextDelay = aiActive ? 2 * 60 * 1000 : 1 * 60 * 1000;
+    const t = setTimeout(() => setAI(v => !v), nextDelay);
+    return () => clearTimeout(t);
+  }, [aiActive]);
+
   return (
     <>
       <style>{G}</style>
