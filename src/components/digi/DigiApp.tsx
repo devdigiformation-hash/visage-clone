@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import {
-  Brain, Heart, Settings, Zap,
+  Brain, Workflow, Sparkles, Zap,
   Monitor, Bot, Camera, Wrench,
   X as CloseIcon,
 } from "lucide-react";
+
 
 
 // ─── Sound System (Updated to use relative paths if needed, or keeping public/audio for standard assets) ─────────
