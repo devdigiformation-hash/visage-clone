@@ -1143,13 +1143,6 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
-          {!aiActive && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, width: 200, marginTop: -14 }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-              <Mono style={{ fontSize: 9, color: "#5C616B", letterSpacing: "0.2em" }}>· SYSTEM STANDBY ·</Mono>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-            </div>
-          )}
 
           <button
             onClick={async () => {
@@ -2004,14 +1997,10 @@ export default function App() {
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <TitleBar />
           <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
-            <LeftSidebar activeNav={activeNav} setActiveNav={setActiveNav} onOpenSettings={() => openSettings()} />
             {activeNav === "voice" ? (
               <VoiceAIPage />
             ) : (
-              <>
-                <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
-                <ChatPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} isOpen={isChatOpen} onToggle={() => setChatOpen(!isChatOpen)} />
-              </>
+              <OperationsPanel aiActive={aiActive} onToggleAI={() => setAI(v => !v)} onOpenModal={openModal} />
             )}
           </div>
 
@@ -2048,7 +2037,7 @@ export default function App() {
           <MemoryDialog open={isMemoryOpen} onOpenChange={setMemoryOpen} />
           <SoulDialog open={isSoulOpen} onOpenChange={setSoulOpen} />
           <SkillsDialog open={isSkillsOpen} onOpenChange={setSkillsOpen} />
-          {activeNav === "dashboard" && <TaskStrip />}
+          
         </div>
       </div>
       )}
