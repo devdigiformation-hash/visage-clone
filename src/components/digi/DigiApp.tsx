@@ -176,7 +176,7 @@ function ParticleOrb({ active }: { active: boolean }) {
       const cX = Math.cos(0.35), sX = Math.sin(0.35); // Fixed tilt for Saturn look
 
       if (active) {
-        const hue = (ay * 150) % 360;
+        const hue = (ay * 450) % 360;
         const g = cx.createRadialGradient(W/2, H/2, 0, W/2, H/2, PLANET_R * 0.7);
         g.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.2)`);
         g.addColorStop(0.5, `hsla(${hue}, 100%, 65%, 0.08)`);
