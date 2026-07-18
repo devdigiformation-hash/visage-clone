@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import { knowledgeItemsRepo, useRepo, TAXONOMY, type KnowledgeItem } from "@/lib/repo";
-import { BookOpen, Plus, Trash2, Search, X } from "lucide-react";
+import { BookOpen, Plus, Trash2, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/knowledge")({
@@ -192,16 +192,8 @@ function AddEntry({ defaultCategory, onClose }: { defaultCategory: string; onClo
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", width: "min(520px, calc(100vw - 2rem))", maxHeight: "calc(100dvh - 2rem)", overflow: "auto", background: "#0A0C12", border: "1px solid #1A1D24", borderRadius: 8, padding: 18 }}>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          title="Close"
-          style={{ position: "absolute", top: 10, right: 10, width: 30, height: 30, borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid #1A1D24", color: "#C4C8D0", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}
-        >
-          <X size={14} />
-        </button>
-        <div style={{ fontSize: 13, color: "#F5F6F8", fontWeight: 600, marginBottom: 10, paddingRight: 36 }}>New knowledge entry</div>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: 520, background: "#0A0C12", border: "1px solid #1A1D24", borderRadius: 8, padding: 18 }}>
+        <div style={{ fontSize: 13, color: "#F5F6F8", fontWeight: 600, marginBottom: 10 }}>New knowledge entry</div>
         <Field label="Title"><input value={title} onChange={(e) => setTitle(e.target.value)} style={inp2} /></Field>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           <Field label="Category">

@@ -168,15 +168,15 @@ const METRICS = [
 
 // ─── Layout constants (must be identical across ConnectorSVG & OperationsPanel)
 const C_PAD      = 12;
-const C_CARD_W   = 44;   // square
-const C_CARD_H   = 44;   // square
+const C_CARD_W   = 34;
+const C_CARD_H   = 44;
 const C_CARD_GAP = 12; // legacy
 const C_LABEL_H  = 14;
-const C_LABEL_GAP = 6;
-const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // card + label
-const C_ITEM_GAP = 14;                                  // gap between full items
-const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // one full row
-const C_LEFT_STACK_X = 16;  // hug the left wall (was 40)
+const C_LABEL_GAP = 4;
+const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // 62 — card + label
+const C_ITEM_GAP = 10;                                  // gap between full items
+const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // 72 — one full row
+const C_LEFT_STACK_X = 40;
 const C_GLOBE_Y_RATIO = 0.30;
 
 // Right-side outgoing wires — separate palette from left input modules.
@@ -1012,7 +1012,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                 }}
                 title={n.label}
               >
-                <n.Icon size={20} style={{ color: lit ? n.color : "#8A909E" }} />
+                <n.Icon size={16} style={{ color: lit ? n.color : "#8A909E" }} />
               </button>
               <span style={{
                 marginTop: C_LABEL_GAP,
@@ -1066,7 +1066,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
                   boxShadow: lit ? `0 0 14px ${a.glow}` : "none",
                 }}
               >
-                <a.Icon size={20} style={{ color: lit ? a.color : "#8A909E" }} />
+                <a.Icon size={15} style={{ color: lit ? a.color : "#8A909E" }} />
               </button>
               <span style={{
                 marginTop: C_LABEL_GAP,
