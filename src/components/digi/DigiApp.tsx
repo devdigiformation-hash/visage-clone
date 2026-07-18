@@ -113,7 +113,7 @@ const C_ITEM_H   = C_CARD_H + C_LABEL_GAP + C_LABEL_H; // card + label
 const C_ITEM_GAP = 14;                                  // gap between full items
 const C_ROW_STEP = C_ITEM_H + C_ITEM_GAP;               // one full row
 const C_LEFT_STACK_X = 16;  // hug the left wall (was 40)
-const C_GLOBE_Y_RATIO = 0.38;
+const C_GLOBE_Y_RATIO = 0.50;
 
 // Right-side outgoing wires — separate palette from left input modules.
 const RIGHT_WIRES = [
@@ -704,7 +704,43 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
             </div>
           </div>
 
-          {/* Standby label and Start/Stop button removed — auto-cycle handles state */}
+          {/* SYSTEM STANDBY label — hides when AI is active */}
+          <div style={{
+            height: 16,
+            marginTop: 6,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10,
+            letterSpacing: "0.32em",
+            textTransform: "uppercase",
+            color: "#5C616B",
+            opacity: aiActive ? 0 : 1,
+            transition: "opacity 0.35s ease",
+            pointerEvents: "none",
+          }}>
+            System Standby
+          </div>
+
+          <button
+            onClick={() => { playUISound('powerup'); onToggleAI(); }}
+            onMouseEnter={() => playUISound('hover')}
+            className={aiActive ? "glass-btn" : "glass-btn-active"}
+            style={{
+              marginTop: 14,
+              padding: "8px 38px", borderRadius: 24,
+              fontSize: 13, fontWeight: 600,
+              letterSpacing: "0.15em",
+              wordSpacing: "0.8em",
+              color: aiActive ? "#FF5C5C" : "#34D399",
+              cursor: "pointer",
+              background: "rgba(10, 15, 20, 0.8)",
+              border: "1px solid rgba(52, 211, 153, 0.2)"
+            }}
+            onMouseOver={(e) => { if (!aiActive) e.currentTarget.style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.2)"; }}
+            onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+          >
+            {aiActive ? "STOP AI" : "START AI"}
+          </button>
 
         </div>
       </div>
@@ -926,13 +962,6 @@ const playUISound = (type: 'hover' | 'click' | 'tech' | 'powerup' | 'soft-click'
 export default function App() {
   const [aiActive, setAI] = useState(false);
   const [openModule, setOpenModule] = useState<string | null>(null);
-
-  // Auto-cycle: 1 min standby → 2 min active → repeat
-  useEffect(() => {
-    const nextDelay = aiActive ? 2 * 60 * 1000 : 1 * 60 * 1000;
-    const t = setTimeout(() => setAI(v => !v), nextDelay);
-    return () => clearTimeout(t);
-  }, [aiActive]);
 
   return (
     <>
