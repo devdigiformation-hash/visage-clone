@@ -1,9 +1,8 @@
-import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import {
   Settings as SettingsIcon, Globe, Cpu, Bot, Wrench, Zap, Workflow,
   MessageSquare, Plug, Database, Shield, Activity, Clock, Download,
-  X, ArrowLeft,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { reportError, reportSuccess, safeJsonParse } from "@/lib/safe";
@@ -122,78 +121,24 @@ const TABS: { key: TabKey; label: string; Icon: any; color: string }[] = [
 ];
 
 function SettingsPage() {
-  const router = useRouter();
   const [data, setData] = useState<Prefs>(empty);
   const [saved, setSaved] = useState(false);
   const [tab, setTab] = useState<TabKey>("general");
-  const [narrow, setNarrow] = useState(false);
-  const [railOpen, setRailOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try { const r = localStorage.getItem(K); if (r) setData({ ...empty, ...JSON.parse(r) }); } catch {}
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 760px)");
-    const apply = () => setNarrow(mq.matches);
-    apply();
-    mq.addEventListener?.("change", apply);
-    return () => mq.removeEventListener?.("change", apply);
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const close = () => {
-    try {
-      if (typeof window !== "undefined" && window.history.length > 1) {
-        router.history.back();
-        return;
-      }
-    } catch {}
-    router.navigate({ to: "/" });
-  };
-
   const save = () => { localStorage.setItem(K, JSON.stringify(data)); setSaved(true); setTimeout(() => setSaved(false), 1600); };
   const upd = (k: keyof Prefs, v: any) => setData({ ...data, [k]: v });
 
-  const railStyle: React.CSSProperties = narrow
-    ? {
-        position: "absolute", top: 0, left: 0, bottom: 0, zIndex: 30,
-        width: 220, background: "#080A0F", borderRight: "1px solid #1A1D24",
-        overflowY: "auto", padding: "16px 10px",
-        transform: railOpen ? "translateX(0)" : "translateX(-105%)",
-        transition: "transform 180ms ease",
-        boxShadow: railOpen ? "0 12px 40px rgba(0,0,0,0.6)" : "none",
-      }
-    : {
-        width: 220, flexShrink: 0, borderRight: "1px solid #1A1D24",
-        background: "#080A0F", overflowY: "auto", padding: "16px 10px",
-      };
-
   return (
-    <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-      {/* Backdrop for mobile drawer */}
-      {narrow && railOpen && (
-        <div
-          onClick={() => setRailOpen(false)}
-          style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 25 }}
-        />
-      )}
-
-      {/* Left tab rail (drawer on narrow) */}
-      <div style={railStyle} className="custom-scroll">
+    <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      {/* Left tab rail */}
+      <div style={{ width: 220, flexShrink: 0, borderRight: "1px solid #1A1D24", background: "#080A0F", overflowY: "auto", padding: "16px 10px" }} className="custom-scroll">
         <div style={{ fontSize: 10, letterSpacing: "0.14em", color: "#5C616B", fontFamily: "'JetBrains Mono', monospace", padding: "0 8px 10px" }}>SETTINGS</div>
         {TABS.map((t) => (
-          <button key={t.key} onClick={() => { setTab(t.key); if (narrow) setRailOpen(false); }} style={{
+          <button key={t.key} onClick={() => setTab(t.key)} style={{
             display: "flex", alignItems: "center", gap: 8, width: "100%",
             padding: "7px 10px", marginBottom: 2, borderRadius: 6, cursor: "pointer",
             background: tab === t.key ? "rgba(47,224,200,0.10)" : "transparent",
@@ -207,54 +152,19 @@ function SettingsPage() {
       </div>
 
       {/* Right content */}
-      <div style={{ flex: 1, overflow: "auto", minWidth: 0 }} className="custom-scroll">
-        <div style={{
-          padding: "14px 18px", borderBottom: "1px solid #1A1D24",
-          display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between",
-          position: "sticky", top: 0, background: "#0A0C12", zIndex: 15, flexWrap: "wrap",
-        }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", minWidth: 0, flex: 1 }}>
-            {narrow && (
-              <button
-                onClick={() => setRailOpen(true)}
-                title="Open sections"
-                aria-label="Open sections"
-                style={{ width: 32, height: 32, borderRadius: 8, background: "#12151C", border: "1px solid #1A1D24", color: "#C4C8D0", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-              >☰</button>
-            )}
-            <div style={{ width: 36, height: 36, borderRadius: 9, background: "#EF444418", border: "1px solid #EF444440", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <SettingsIcon size={17} color="#EF4444" />
+      <div style={{ flex: 1, overflow: "auto" }} className="custom-scroll">
+        <div style={{ padding: "18px 24px", borderBottom: "1px solid #1A1D24", display: "flex", gap: 14, alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "#0A0C12", zIndex: 10 }}>
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, background: "#EF444418", border: "1px solid #EF444440", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <SettingsIcon size={20} color="#EF4444" />
             </div>
-            <div style={{ minWidth: 0 }}>
-              <h1 style={{ fontSize: 16, fontWeight: 600, color: "#F5F6F8", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>System Settings</h1>
-              <p style={{ fontSize: 11.5, color: "#7A8090", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                Runtime, credentials, agents, tools, security and observability.
-              </p>
+            <div>
+              <h1 style={{ fontSize: 18, fontWeight: 600, color: "#F5F6F8", margin: 0 }}>System Settings</h1>
+              <p style={{ fontSize: 12, color: "#7A8090", margin: "3px 0 0" }}>Runtime, credentials, agents, tools, security and observability.</p>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <button onClick={save} style={{ padding: "7px 14px", background: saved ? "#22C55E20" : "#EF444420", border: `1px solid ${saved ? "#22C55E60" : "#EF444460"}`, borderRadius: 6, color: saved ? "#22C55E" : "#EF4444", cursor: "pointer", fontSize: 12 }}>
-              {saved ? "✓ Saved" : "Save"}
-            </button>
-            <button
-              onClick={close}
-              title="Back"
-              aria-label="Back"
-              style={{ width: 32, height: 32, borderRadius: 8, background: "#12151C", border: "1px solid #1A1D24", color: "#C4C8D0", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
-            >
-              <ArrowLeft size={15} />
-            </button>
-            <Link
-              to="/"
-              title="Close settings"
-              aria-label="Close settings"
-              style={{ width: 32, height: 32, borderRadius: 8, background: "#12151C", border: "1px solid #1A1D24", color: "#C4C8D0", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}
-            >
-              <X size={15} />
-            </Link>
-          </div>
+          <button onClick={save} style={{ padding: "8px 18px", background: saved ? "#22C55E20" : "#EF444420", border: `1px solid ${saved ? "#22C55E60" : "#EF444460"}`, borderRadius: 6, color: saved ? "#22C55E" : "#EF4444", cursor: "pointer", fontSize: 12 }}>{saved ? "✓ Saved" : "Save Changes"}</button>
         </div>
-
 
         <div style={{ padding: 24, maxWidth: 780 }}>
           {tab === "general" && (

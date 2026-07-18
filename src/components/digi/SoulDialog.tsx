@@ -13,7 +13,7 @@ export function SoulDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] w-[calc(100vw-2rem)] max-h-[calc(100dvh-2rem)] overflow-hidden bg-[#0A0A0A] text-[#E8EAF0] border border-[#222] shadow-2xl rounded-2xl p-0 flex flex-col font-sans" style={{ borderRadius: 16 }}>
+      <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] overflow-hidden bg-[#0A0A0A] text-[#E8EAF0] border border-[#222] shadow-2xl rounded-2xl p-0 flex flex-col font-sans" style={{ borderRadius: 16 }}>
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 pb-4 border-b border-[#1A1A1A]">

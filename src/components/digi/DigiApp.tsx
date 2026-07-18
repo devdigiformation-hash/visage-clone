@@ -124,18 +124,14 @@ const NODES = [
 // Single source of truth: pull nav + modules from the shared AppShell config so
 // the dashboard sidebar and the /route AppShell sidebar never diverge and
 // no module is ever listed twice.
-import { NAV as APPSHELL_NAV, MOD_GROUPS as APPSHELL_MOD_GROUPS } from "@/components/shell/AppShell";
+import { NAV as APPSHELL_NAV, MODS as APPSHELL_MODS } from "@/components/shell/AppShell";
 const NAV_ITEMS = APPSHELL_NAV.map(n => ({
   id: n.to === "/" ? "dashboard" : n.to.replace("/", ""),
   label: n.label, Icon: n.Icon, color: n.color, route: n.to,
 }));
-const MODULE_GROUPS = APPSHELL_MOD_GROUPS.map(g => ({
-  id: g.id,
-  label: g.label,
-  defaultOpen: g.defaultOpen,
-  items: g.items.map(m => ({ label: m.label, Icon: m.Icon, color: m.color, route: m.to })),
+const MODULES = APPSHELL_MODS.map(m => ({
+  label: m.label, Icon: m.Icon, color: m.color, route: m.to,
 }));
-
 
 const MSGS_INIT: Msg[] = [
   { id: 1, role: "ai", text: "I'm analyzing the conversation style. Considering the user's 'Hello' in English, I am determining the best response. Given the context, I will decide whether to offer a warm Urdu greeting, or a transition to English. This is important to ensure a smooth interaction with the user." },
@@ -560,17 +556,8 @@ function UpdaterWidget() {
 }
 
 function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: string; setActiveNav: (id: string) => void; onOpenSettings: () => void; }) {
+  const [showModules, setShowModules] = useState(false);
   const navigate = useNavigate();
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(MODULE_GROUPS.map(g => [g.id, g.defaultOpen])),
-  );
-  const toggleGroup = (id: string) =>
-    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
-
-  const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
-  const isRouteActive = (route: string) =>
-    route === "/" ? currentPath === "/" : currentPath.startsWith(route);
-
   return (
     <div style={{
       width: 220, flexShrink: 0,
@@ -589,8 +576,8 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
         </div>
       </div>
 
-      {/* Scrollable nav area — thicker, easier-to-grab scrollbar */}
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 4 }} className="sidebar-scroll">
+      {/* Scrollable nav area */}
+      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 4 }} className="custom-scroll">
         {/* Core Apps */}
         <div style={{ padding: "3px 14px 5px" }}>
           <Mono>Core Apps</Mono>
@@ -598,7 +585,7 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
         {NAV_ITEMS.map(item => {
           const isActive = activeNav === item.id;
           return (
-            <button key={item.id}
+            <button key={item.id} 
               onClick={() => { playUISound('tab-click'); setActiveNav(item.id); if (item.route && item.route !== '/') navigate({ to: item.route }); else if (item.route === '/' && window.location.pathname !== '/') navigate({ to: '/' }); }}
               onMouseEnter={() => playUISound('hover')}
               className={`group ${isActive ? "glass-btn-active" : "glass-btn"}`}
@@ -610,9 +597,9 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
               }}>
               <div className="transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6"
                    style={{ transform: isActive ? "scale(1.15)" : "scale(1)" }}>
-                <item.Icon size={13} style={{
-                  color: item.color,
-                  opacity: isActive ? 1 : 0.65,
+                <item.Icon size={13} style={{ 
+                  color: item.color, 
+                  opacity: isActive ? 1 : 0.65, 
                   filter: isActive ? `drop-shadow(0 0 6px ${item.color}80)` : "none",
                   flexShrink: 0,
                   transition: "all 0.3s ease"
@@ -625,67 +612,41 @@ function LeftSidebar({  activeNav, setActiveNav, onOpenSettings }: { activeNav: 
           );
         })}
 
-        {/* Grouped modules — each group is collapsible; a group holding the
-            active route auto-opens so the user never scrolls to find it. */}
-        {MODULE_GROUPS.map((group) => {
-          const groupHasActive = group.items.some((m) => isRouteActive(m.route));
-          const isOpen = openGroups[group.id] || groupHasActive;
+        {/* Business Modules */}
+        <div style={{ height: 0 }} />
+        {MODULES.map((mod, i) => {
+          const hideable = i >= MODULES.length - 3;
+          if (hideable && !showModules) return null;
           return (
-            <div key={group.id} style={{ marginTop: 6 }}>
-              <button
-                type="button"
-                onClick={() => { playUISound('soft-click'); toggleGroup(group.id); }}
-                onMouseEnter={() => playUISound('hover')}
-                aria-expanded={isOpen}
-                title={isOpen ? `Collapse ${group.label}` : `Expand ${group.label}`}
-                style={{
-                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "6px 14px 4px", background: "transparent", border: "none",
-                  cursor: "pointer", textAlign: "left",
-                }}
-              >
-                <span style={{
-                  fontSize: 9.5, letterSpacing: "0.16em", color: "#5C616B",
-                  fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase",
-                }}>
-                  {group.label}
-                </span>
-                <ChevronDown
-                  size={11}
-                  style={{
-                    color: "#4A4F5C",
-                    transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
-                    transition: "transform 0.18s ease",
-                  }}
-                />
-              </button>
-              {isOpen && group.items.map((mod, i) => {
-                const active = isRouteActive(mod.route);
-                return (
-                  <button key={`${group.id}-${i}`} className="group glass-btn"
-                    onClick={() => { playUISound('click'); if (mod.route) navigate({ to: mod.route }); }}
-                    onMouseEnter={() => playUISound('hover')}
-                    style={{
-                      width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                      padding: "5px 14px", borderRadius: 8, marginBottom: 4,
-                      borderLeft: `2px solid ${active ? mod.color : "transparent"}`,
-                      background: active ? "rgba(47,224,200,0.08)" : undefined,
-                      transition: "all 0.3s ease"
-                    }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div className="transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6">
-                        <mod.Icon size={11} style={{ color: mod.color, opacity: 1, flexShrink: 0, filter: `drop-shadow(0 0 4px ${mod.color}55)`, transition: "all 0.3s ease" }} />
-                      </div>
-                      <span className="transition-colors duration-300 group-hover:text-white" style={{ fontSize: 11, color: active ? "#F5F6F8" : "#B8BEC8" }}>{mod.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
+          <button key={i} className="group glass-btn"
+            onClick={() => { playUISound('click'); if (mod.route) navigate({ to: mod.route }); }}
+            onMouseEnter={() => playUISound('hover')}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "5px 14px", borderRadius: 8, marginBottom: 4,
+              transition: "all 0.3s ease"
+            }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div className="transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6">
+                <mod.Icon size={11} style={{ color: mod.color, opacity: 1, flexShrink: 0, filter: `drop-shadow(0 0 4px ${mod.color}55)`, transition: "all 0.3s ease" }} />
+              </div>
+              <span className="transition-colors duration-300 group-hover:text-white" style={{ fontSize: 11, color: "#B8BEC8" }}>{mod.label}</span>
             </div>
+          </button>
           );
         })}
+        <button
+          onClick={() => { playUISound('soft-click'); setShowModules(!showModules); }}
+          onMouseEnter={() => playUISound('hover')}
+          className="glass-btn"
+          style={{
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            padding: "5px 14px", borderRadius: 8, marginBottom: 4, cursor: "pointer",
+          }}>
+          <ChevronDown size={11} style={{ color: "#5C616B", transform: showModules ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+          <span style={{ fontSize: 10, color: "#7A8090", letterSpacing: "0.08em" }}>{showModules ? "Show less" : "Show more"}</span>
+        </button>
       </div>
-
 
       {/* Pinned Settings - Always visible at bottom */}
       <div style={{ flexShrink: 0, padding: "6px 14px 0px", display: "flex", flexDirection: "column", gap: 4 }}>
@@ -1126,7 +1087,7 @@ function OperationsPanel({ aiActive, onToggleAI, onOpenModal }: { aiActive: bool
           <div
             style={{ position: "relative", width: globeSize, height: globeSize, cursor: "pointer" }}
             onClick={() => setCommandCenterOpen(true)}
-            title="Open Task Analytics"
+            title="Open Command Center"
           >
             <div className={aiActive ? "orb-breathe" : ""}
               style={{
