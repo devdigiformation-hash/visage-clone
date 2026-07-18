@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X, Send, Zap, ChevronRight, Sparkles } from "lucide-react";
 import {
   buildCapabilityIndex, planDelegation, savePlan, listPlans, executePlan,
@@ -14,6 +14,13 @@ export function CommandCenterOverlay({ open, onClose }: { open: boolean; onClose
   const [tick, setTick] = useState(0);
   const idx = useMemo(() => buildCapabilityIndex(), [tick, open]);
   const recent = useMemo(() => listPlans().slice(0, 6), [tick, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -41,8 +48,10 @@ export function CommandCenterOverlay({ open, onClose }: { open: boolean; onClose
       display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)",
       fontFamily: "'Inter', system-ui, sans-serif",
     }}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        width: "min(880px, 94vw)", maxHeight: "88vh", overflow: "hidden",
+      <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Command Center" style={{
+        width: "min(880px, calc(100vw - 32px))",
+        maxHeight: "calc(100dvh - 32px)",
+        overflow: "hidden",
         background: "#0A0C12", border: "1px solid #1A1D24", borderRadius: 14,
         boxShadow: `0 24px 80px rgba(0,0,0,0.7), 0 0 60px ${ACCENT}22`,
         display: "flex", flexDirection: "column",

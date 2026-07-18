@@ -128,7 +128,7 @@ export function SettingsDialog({ open, onOpenChange, defaultTab = "voice" }: { o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[850px] w-[95vw] h-[90vh] sm:h-[600px] max-h-[90vh] bg-[#0A0A0A] text-[#E8EAF0] border border-[#222] shadow-2xl rounded-2xl overflow-hidden p-0 flex flex-col font-sans" style={{ borderRadius: 16 }}>
+      <DialogContent className="sm:max-w-[850px] w-[calc(100vw-2rem)] h-[min(600px,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] bg-[#0A0A0A] text-[#E8EAF0] border border-[#222] shadow-2xl rounded-2xl overflow-hidden p-0 flex flex-col font-sans" style={{ borderRadius: 16 }}>
         
         {/* Main Content Area */}
         <div className="flex flex-1 overflow-hidden">
